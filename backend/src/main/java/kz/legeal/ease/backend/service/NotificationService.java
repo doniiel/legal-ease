@@ -1,4 +1,4 @@
 package kz.legeal.ease.backend.service;
 
-public interface EmailService {
+public interface NotificationService {
 }

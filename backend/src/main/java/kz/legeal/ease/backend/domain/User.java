@@ -38,14 +38,8 @@ public class User extends AbstractAuditingEntity {
     @Column(name = "phone", unique = true, nullable = false, length = 50)
     private String phone;
 
-    @Column(name = "password", nullable = false, length = 50)
-    private String password;
-
-    @Column(name = "first_name", nullable = false, length = 50)
-    private String firstName;
-
-    @Column(name = "middle_name", nullable = false, length = 50)
-    private String middleName;
+    @Column(name = "fio", nullable = false)
+    private String fio;
 
     @Column(name = "last_name", nullable = false, length = 50)
     private String lastName;

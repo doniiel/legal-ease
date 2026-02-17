@@ -17,4 +17,5 @@ public interface AuthService {
 
     void changePassword(ChangePasswordRequest request);
 
+    void logout(LogoutRequest request);
 }

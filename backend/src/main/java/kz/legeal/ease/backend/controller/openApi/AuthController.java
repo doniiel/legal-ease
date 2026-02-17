@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/open-api/auth")
-@Tag(name = "Authentication API", description = "Endpoints for user authentication and account management")
+@Tag(
+        name = "Authentication API",
+        description = "Endpoints for user authentication and account management"
+)
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -50,6 +53,11 @@ public class AuthController {
     public ResponseEntity<Void> register(@RequestBody @Valid RegisterRequest request) {
         authService.register(request);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/register-lawyer")
+    public ResponseEntity<String> registerLawyer(@RequestBody @Valid LawyerRegisterRequest request) {
+
     }
 
     @Operation(
@@ -91,4 +99,9 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody LogoutRequest request) {
+        authService.logout(request);
+        return ResponseEntity.ok().build();
+    }
 }
