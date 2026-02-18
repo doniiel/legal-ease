@@ -7,6 +7,9 @@ import kz.legeal.ease.backend.repository.LawyerApplicationRepository;
 import kz.legeal.ease.backend.service.LawyerApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +23,18 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     private final LawyerApplicationRepository repository;
 
     @Override
+    public LawyerApplication findById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LawyerApplication> findAll(Specification<LawyerApplication> specification, Pageable pageable) {
+        return repository.findAll(specification, pageable);
+    }
+
+    @Override
     @Transactional
     public LawyerApplication approveApplication(Long requestId, User amdinuser) {
         final var application = repository.findById(requestId)
@@ -28,7 +43,7 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
         if (!application.isPending()) throw new IllegalStateException("Request already processed");
 
         application.setStatus(Status.APPROVED);
-        application.setReviewedBy(amdinuser.getEmail());
+        application.setReviewer(amdinuser);
         application.setReviewedAt(LocalDateTime.now());
         repository.save(application);
 
@@ -44,7 +59,7 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
         if (!application.isPending()) throw new IllegalStateException("Request already processed");
 
         application.setStatus(Status.REJECTED);
-        application.setReviewedBy(amdinuser.getEmail());
+        application.setReviewer(amdinuser);
         application.setReviewedAt(LocalDateTime.now());
         repository.save(application);
 
@@ -61,7 +76,7 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
         if (application.isApproved()) throw new IllegalStateException("Cannot delete approved lawyer request");
 
         application.setStatus(Status.DELETED);
-        application.setReviewedBy(adminuser.getEmail());
+        application.setReviewer(adminuser);
         application.setReviewedAt(LocalDateTime.now());
         repository.save(application);
 

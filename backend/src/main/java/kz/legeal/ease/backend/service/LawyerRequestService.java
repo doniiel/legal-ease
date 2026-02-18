@@ -1,13 +1,13 @@
 package kz.legeal.ease.backend.service;
 
-import kz.legeal.ease.backend.request.LawyerRequestDto;
+import kz.legeal.ease.backend.dto.LawyerRequestDto;
 import kz.legeal.ease.backend.request.criteria.LawyerRequestSearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface LawyerRequestService {
 
-    Page<LawyerRequestDto> getPendingRequests(Pageable pageable, LawyerRequestSearchCriteria criteria);
+    LawyerRequestDto getById(Long id);
 
     Page<LawyerRequestDto> getRequestsHistory(Pageable pageable, LawyerRequestSearchCriteria criteria);
 

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "lawyer")
-public class LawyerApplication {
+public class LawyerApplication extends AbstractAuditingEntity {
 
     @Id
     @SequenceGenerator(
@@ -31,7 +31,7 @@ public class LawyerApplication {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "license_number", nullable = false, length = 50)
+    @Column(name = "license_number", nullable = false, length = 50, unique = true)
     private String licenseNumber;
 
     @Enumerated(EnumType.STRING)
@@ -41,14 +41,18 @@ public class LawyerApplication {
     @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt = LocalDateTime.now();
 
-    @Column(name = "reviewed_by")
-    private String reviewedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewed_by")
+    private User reviewer;
 
     @Column(name = "reviewed_at")
     private LocalDateTime reviewedAt;
 
     @Column(name = "rejection_reason")
     private String rejectionReason;
+
+    @Version
+    private Long version;
 
     @PrePersist
     public void prePersist() {

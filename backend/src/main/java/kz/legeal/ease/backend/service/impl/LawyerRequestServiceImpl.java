@@ -1,7 +1,10 @@
 package kz.legeal.ease.backend.service.impl;
 
+import kz.legeal.ease.backend.domain.LawyerApplication;
+import kz.legeal.ease.backend.dto.LawyerRequestDto;
 import kz.legeal.ease.backend.enums.Role;
-import kz.legeal.ease.backend.request.LawyerRequestDto;
+import kz.legeal.ease.backend.mapper.LawyerRequestMapper;
+import kz.legeal.ease.backend.repository.specification.GenericSpecificationBuilder;
 import kz.legeal.ease.backend.request.criteria.LawyerRequestSearchCriteria;
 import kz.legeal.ease.backend.service.LawyerApplicationService;
 import kz.legeal.ease.backend.service.LawyerRequestService;
@@ -22,20 +25,34 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class LawyerRequestServiceImpl implements LawyerRequestService {
 
+    private final LawyerRequestMapper mapper;
     private final UserService userService;
     private final UserRoleService userRoleService;
     private final LawyerApplicationService lawyerApplicationService;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<LawyerRequestDto> getPendingRequests(Pageable pageable, LawyerRequestSearchCriteria criteria) {
-        return null;
+    public LawyerRequestDto getById(Long id) {
+        final var application = lawyerApplicationService.findById(id);
+        return mapper.toDto(application);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<LawyerRequestDto> getRequestsHistory(Pageable pageable, LawyerRequestSearchCriteria criteria) {
-        return null;
+        final var specifiation = new GenericSpecificationBuilder<LawyerApplication>()
+                .eq("status", criteria.getStatus())
+                .gte("createdDate", criteria.getCreatedFrom())
+                .lte("createdDate", criteria.getCreatedTo())
+                .gte("reviewedAt", criteria.getReviewedFrom())
+                .lte("reviewedAt", criteria.getReviewedTo())
+                .like("licenseNumber", criteria.getLicenseNumber())
+                .eq("user.id", criteria.getUserId())
+                .like("reviewer.fio", criteria.getReviewerFio())
+                .build();
+
+        return lawyerApplicationService.findAll(criteria, pageable)
+                .map(mapper::toDto);
     }
 
     @Override

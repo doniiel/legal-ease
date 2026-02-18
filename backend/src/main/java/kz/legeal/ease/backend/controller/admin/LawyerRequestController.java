@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kz.legeal.ease.backend.request.LawyerRequestDto;
+import kz.legeal.ease.backend.dto.LawyerRequestDto;
 import kz.legeal.ease.backend.request.criteria.LawyerRequestSearchCriteria;
 import kz.legeal.ease.backend.service.LawyerRequestService;
 import lombok.RequiredArgsConstructor;
@@ -30,15 +30,14 @@ public class LawyerRequestController {
     private final LawyerRequestService lawyerRequestService;
 
 
-    @Operation(summary = "Get pending lawyer requests",
+    @Operation(summary = "Get pending lawyer request By Id",
             description = "Returns list of lawyer registration requests that need approval")
     @ApiResponse(responseCode = "200", description = "List of lawyer requests")
-    @GetMapping("/pending")
-    public ResponseEntity<Page<LawyerRequestDto>> getPendingLawyerRequests(
-            @ModelAttribute LawyerRequestSearchCriteria criteria,
-            @ParameterObject @PageableDefault(page = 0, size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
+    @GetMapping("/{id}")
+    public ResponseEntity<LawyerRequestDto> getPendingLawyerRequests(
+            @PathVariable Long id
     ) {
-        return ResponseEntity.ok(lawyerRequestService.getPendingRequests(pageable, criteria));
+        return ResponseEntity.ok(lawyerRequestService.getById(pageable));
     }
 
     @Operation(summary = "Get all lawyer requests",
