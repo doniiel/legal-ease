@@ -4,14 +4,19 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import kz.legeal.ease.backend.enums.Gender;
 import lombok.Getter;
 
 @Getter
 public class RegisterRequest {
 
-    @NotBlank(message = "Full name (FIO) is required")
-    @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
-    private String fio;
+    private String firstName;
+
+    private String middleName;
+
+    private String lastName;
+
+    private Gender gender;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
@@ -24,11 +29,7 @@ public class RegisterRequest {
     )
     private String phone;
 
-    @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-    private String username;
+    private String iin;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters")
     private String password;
 }

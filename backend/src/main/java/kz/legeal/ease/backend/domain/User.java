@@ -41,8 +41,8 @@ public class User extends AbstractAuditingEntity {
     @Column(name = "fio", nullable = false)
     private String fio;
 
-    @Column(name = "last_name", nullable = false, length = 50)
-    private String lastName;
+    @Column(name = "phone", unique = true, nullable = false, length = 50)
+    private String password;
 
     @Column(name = "active", nullable = false)
     private boolean active = true;

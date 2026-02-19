@@ -1,6 +1,7 @@
 package kz.legeal.ease.backend.service.impl;
 
 import kz.legeal.ease.backend.dto.AuthResponseDto;
+import kz.legeal.ease.backend.enums.Role;
 import kz.legeal.ease.backend.jwt.PersonDetails;
 import kz.legeal.ease.backend.jwt.PersonDetailsService;
 import kz.legeal.ease.backend.request.*;
@@ -56,13 +57,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void register(RegisterRequest request) {
-
+        final var user = userService.createUser(request);
+        userRoleService.assignRole(user, Role.USER.name());
+        emailService.sendVerificationCode(user.getEmail());
     }
 
     @Override
     @Transactional
     public void confirm(VerificationRequest request) {
-
+        userService.confirmAccount();
     }
 
     @Override

@@ -55,11 +55,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/register-lawyer")
-    public ResponseEntity<String> registerLawyer(@RequestBody @Valid LawyerRegisterRequest request) {
-
-    }
-
     @Operation(
             summary = "Confirm user account",
             description = "Confirm user registration with verification code"
