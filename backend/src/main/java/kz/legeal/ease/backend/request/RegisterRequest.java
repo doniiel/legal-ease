@@ -10,11 +10,18 @@ import lombok.Getter;
 @Getter
 public class RegisterRequest {
 
+    @NotBlank(message = "First name is required")
     private String firstName;
 
     private String middleName;
 
+    @NotBlank(message = "Last name is required")
     private String lastName;
+
+    @NotBlank(message = "IIN is required")
+    @Size(min = 12, max = 12, message = "IIN must be exactly 12 digits")
+    @Pattern(regexp = "\\d{12}", message = "IIN must contain only digits")
+    private String iin;
 
     private Gender gender;
 
@@ -29,7 +36,11 @@ public class RegisterRequest {
     )
     private String phone;
 
-    private String iin;
-
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
+            message = "Password must contain uppercase, lowercase and digit"
+    )
     private String password;
 }

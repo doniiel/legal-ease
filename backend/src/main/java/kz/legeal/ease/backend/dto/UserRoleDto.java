@@ -17,10 +17,6 @@ public class UserRoleDto {
 
     private Long roleId;
 
-    private Long companyId;
-
-    private Long spotId;
-
     private LocalDateTime beginDate;
 
     private LocalDateTime endDate;

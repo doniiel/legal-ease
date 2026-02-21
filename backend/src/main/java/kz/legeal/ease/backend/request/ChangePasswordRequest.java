@@ -1,6 +1,9 @@
 package kz.legeal.ease.backend.request;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
@@ -10,16 +13,15 @@ public class ChangePasswordRequest {
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotNull(message = "Reset code is required")
-    @Min(value = 100000, message = "Reset code must be at least 6 digits")
-    @Max(value = 999999, message = "Reset code must be at most 6 digits")
-    private Integer resetCode;
+    @NotBlank(message = "Code is required")
+    private String code;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, max = 64, message = "Password must be between 8 and 64 characters")
-    private String password;
-
-    @NotBlank(message = "Confirm Password is required")
-    private String confirmPassword;
+    @NotBlank(message = "New password is required")
+    @Size(min = 8, max = 100)
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$",
+            message = "Password must contain uppercase, lowercase and digit"
+    )
+    private String newPassword;
 
 }

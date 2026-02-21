@@ -3,9 +3,6 @@ package kz.legeal.ease.backend.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
-
 @Getter
 @Setter
 @Builder
@@ -16,23 +13,13 @@ import java.util.Set;
 public class Role extends AbstractAuditingEntity {
 
     @Id
-    @SequenceGenerator(
-            name = "role_seq_gen",
-            sequenceName = "role_seq_gen",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "role_seq_gen"
-    )
+    @SequenceGenerator(name = "role_seq_gen", sequenceName = "role_seq_gen", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_seq_gen")
     private Long id;
 
+    @Column(name = "code", unique = true, nullable = false, length = 50)
     private String code;
 
-    @OneToMany(mappedBy = "role")
-    private Set<UserRole> userRoles = new HashSet<>();
-
+    @Column(name = "active", nullable = false)
     private boolean active = true;
-
-    private boolean blocked = false;
 }

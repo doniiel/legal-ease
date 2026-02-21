@@ -20,6 +20,10 @@ public class RefreshToken extends AbstractAuditingEntity {
             sequenceName = "refresh_token_seq",
             allocationSize = 1
     )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "refresh_token_seq"
+    )
     private Long id;
 
     @Column(name = "token", unique = true, nullable = false)

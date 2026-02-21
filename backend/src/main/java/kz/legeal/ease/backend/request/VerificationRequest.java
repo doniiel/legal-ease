@@ -13,5 +13,5 @@ public class VerificationRequest {
     private String email;
 
     @NotNull(message = "Activation code is required")
-    private Integer activationCode;
+    private String code;
 }

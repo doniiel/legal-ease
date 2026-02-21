@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Application Update — Legal Ease</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@300;400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: #F7F9FC;
+            font-family: 'DM Sans', sans-serif;
+            color: #2E2E2E;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 32px rgba(15, 42, 68, 0.08);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0F2A44 0%, #2C2C3E 100%);
+            padding: 40px 48px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 180px; height: 180px;
+            background: rgba(77, 163, 255, 0.06);
+            border-radius: 50%;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #ffffff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo span { color: #4DA3FF; }
+
+        .header-tagline {
+            font-size: 12px;
+            color: rgba(255,255,255,0.45);
+            margin-top: 4px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* STATUS SECTION */
+        .status-section {
+            background: #FFF8F8;
+            border-bottom: 1px solid #FFE0E0;
+            padding: 32px 48px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-icon {
+            width: 56px;
+            height: 56px;
+            background: #FFE5E5;
+            border: 2px solid #FFBBBB;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .status-text-wrap {}
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #FFE5E5;
+            color: #C0392B;
+            border: 1px solid #FFBBBB;
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .status-desc {
+            font-size: 14px;
+            color: #6A4040;
+        }
+
+        .body {
+            padding: 48px 48px 40px;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #0F2A44;
+            line-height: 1.35;
+            margin-bottom: 16px;
+        }
+
+        .description {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.75;
+            margin-bottom: 32px;
+        }
+
+        /* REASON BLOCK */
+        .reason-block {
+            background: #F7F9FC;
+            border: 1.5px solid #D0D6DC;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .reason-label {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #7A8999;
+            margin-bottom: 10px;
+        }
+
+        .reason-text {
+            font-size: 15px;
+            color: #2E2E2E;
+            line-height: 1.65;
+            font-style: italic;
+        }
+
+        /* NEXT STEPS */
+        .next-steps {
+            margin-bottom: 32px;
+        }
+
+        .next-steps-title {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #7A8999;
+            margin-bottom: 16px;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #F0F2F5;
+        }
+
+        .step-item:last-child { border-bottom: none; }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            background: #0F2A44;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .step-text {
+            font-size: 14px;
+            color: #2E2E2E;
+            line-height: 1.6;
+        }
+
+        .step-sub {
+            font-size: 12px;
+            color: #7A8999;
+            margin-top: 2px;
+        }
+
+        /* SUPPORT CTA */
+        .support-block {
+            background: linear-gradient(135deg, #F3F8FF, #EEF5FF);
+            border: 1px solid #C8DEFF;
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .support-left {}
+
+        .support-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #0F2A44;
+            margin-bottom: 4px;
+        }
+
+        .support-desc {
+            font-size: 12px;
+            color: #6A80A0;
+        }
+
+        .support-link {
+            display: inline-block;
+            background: #0F2A44;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .footer {
+            background: #F7F9FC;
+            border-top: 1px solid #E8ECF0;
+            padding: 28px 48px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: #0F2A44;
+            margin-bottom: 8px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #A0A8B0;
+            line-height: 1.7;
+        }
+
+        .footer-links { margin-top: 14px; }
+
+        .footer-links a {
+            font-size: 12px;
+            color: #4DA3FF;
+            text-decoration: none;
+            margin: 0 8px;
+        }
+
+        @media (max-width: 600px) {
+            .wrapper { margin: 0; border-radius: 0; }
+            .header, .body, .footer { padding-left: 24px; padding-right: 24px; }
+            .status-section { flex-direction: column; padding: 24px; }
+            .support-block { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+
+    <div class="header">
+        <div class="logo">Legal<span>Ease</span></div>
+        <div class="header-tagline">Legal Documentation Platform</div>
+    </div>
+
+    <!-- STATUS -->
+    <div class="status-section">
+        <div class="status-icon">✕</div>
+        <div class="status-text-wrap">
+            <div class="status-badge">Application Not Approved</div>
+            <div class="status-desc">Your application requires attention before proceeding</div>
+        </div>
+    </div>
+
+    <div class="body">
+        <h1 class="title">We were unable to<br/>approve your application</h1>
+        <p class="description">
+            Thank you for your interest in joining LegalEase as a verified lawyer.
+            After reviewing your application, our team has identified some issues
+            that need to be addressed before approval.
+        </p>
+
+        <!-- REASON -->
+        <div class="reason-block">
+            <div class="reason-label">Reason for rejection</div>
+            <div class="reason-text" th:text="${reason}">
+                The provided license number could not be verified against the official registry.
+            </div>
+        </div>
+
+        <!-- NEXT STEPS -->
+        <div class="next-steps">
+            <div class="next-steps-title">What to do next</div>
+
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <div>
+                    <div class="step-text">Review the rejection reason carefully</div>
+                    <div class="step-sub">Understand exactly what needs to be corrected</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <div>
+                    <div class="step-text">Prepare the correct documentation</div>
+                    <div class="step-sub">Ensure your license number and documents are valid</div>
+                </div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">3</div>
+                <div>
+                    <div class="step-text">Submit a new application</div>
+                    <div class="step-sub">Log in to your account and reapply with updated information</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUPPORT -->
+        <div class="support-block">
+            <div class="support-left">
+                <div class="support-title">Need help?</div>
+                <div class="support-desc">Our team is here to assist you through the process</div>
+            </div>
+            <a href="#" class="support-link">Contact Support</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-logo">LegalEase</div>
+        <div class="footer-text">
+            © 2026 LegalEase. All rights reserved.<br/>
+            This is an automated message, please do not reply.
+        </div>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Support</a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

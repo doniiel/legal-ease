@@ -10,7 +10,8 @@ import java.util.Optional;
 
 public class SecurityUtils {
 
-    private SecurityUtils() { }
+    private SecurityUtils() {
+    }
 
     public static Optional<User> getCurrentUser() {
         return Optional.ofNullable(SecurityContextHolder.getContext())

@@ -1,10 +1,17 @@
 package kz.legeal.ease.backend.exception;
 
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
 public class BaseException extends RuntimeException {
 
-    private int status;
+    private final HttpStatus status;
+    private final String errorCode;
 
-    public BaseException(String message) {
+    protected BaseException(String message, HttpStatus status, String errorCode) {
         super(message);
+        this.status = status;
+        this.errorCode = errorCode;
     }
 }
