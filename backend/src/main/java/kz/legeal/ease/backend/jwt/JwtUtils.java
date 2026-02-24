@@ -35,6 +35,7 @@ public class JwtUtils {
         final var personDetails = (PersonDetails) userDetails;
         final var claims = new HashMap<String, Object>();
         claims.put("userId", personDetails.getUser().getId());
+        claims.put("role", personDetails.getUserRole().getRole().getCode());
         return generateToken(claims, Duration.ofMinutes(props.getAccessExpMin()).toMillis(), getAccessSigningKey());
     }
 
@@ -58,6 +59,10 @@ public class JwtUtils {
 
     public Long extractUserId(String token, boolean isRefreshToken) {
         return extractClaim(token, claims -> claims.get("userId", Long.class), isRefreshToken);
+    }
+
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class), false);
     }
 
     public Date extractExpiration(String token, boolean isRefreshToken) {

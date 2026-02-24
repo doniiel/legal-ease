@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-02-24-009-insert-default-admins" author="developer">
+        <comment>Seed initial admin users: Daniyal, Yegazy, Olzhas</comment>
+
+        <!--
+            Исходные пароли:
+              daniyal  → Admin@1234
+              yegazy   → Admin@1234
+              olzhas   → Admin@1234
+        -->
+
+        <!-- ===== User: Daniyal ===== -->
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="000000000001"/>
+            <column name="email" value="orynbekdanial8@gmail.com"/>
+            <column name="phone" value="+70000000001"/>
+            <column name="fio" value="Daniyal"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ===== User: Yegazy ===== -->
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="000000000002"/>
+            <column name="email" value="yergazy.abdullayev@gmail.com"/>
+            <column name="phone" value="+70000000002"/>
+            <column name="fio" value="Yegazy"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ===== User: Olzhas ===== -->
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="000000000003"/>
+            <column name="email" value="olzhasergali56@gmail.com"/>
+            <column name="phone" value="+70000000003"/>
+            <column name="fio" value="Olzhas"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ===== Assign ADMIN role to all three ===== -->
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'orynbekdanial8@gmail.com')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'ADMIN')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'yergazy.abdullayev@gmail.com')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'ADMIN')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'olzhasergali56@gmail.com')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'ADMIN')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="user_role">
+                <where>user_id IN (
+                    SELECT id FROM users
+                    WHERE email IN (
+                    'orynbekdanial8@gmail.com',
+                    'yergazy.abdullayev@gmail.com',
+                    'olzhasergali56@gmail.com'
+                    )
+                    )</where>
+            </delete>
+            <delete tableName="users">
+                <where>email IN (
+                    'orynbekdanial8@gmail.com',
+                    'yergazy.abdullayev@gmail.com',
+                    'olzhasergali56@gmail.com'
+                    )</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-02-24-004-create-user-role" author="Orynbek Daniyal">
+        <comment>Create user_role join table with active flag for role history</comment>
+
+        <createTable tableName="user_role">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="user_role_seq_gen">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_user_role"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assigned_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <!-- Audit fields -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+        </createTable>
+
+        <!-- FK: user_role → users -->
+        <addForeignKeyConstraint
+                baseTableName="user_role"
+                baseColumnNames="user_id"
+                constraintName="fk_user_role_user"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                onDelete="CASCADE"/>
+
+        <!-- FK: user_role → role -->
+        <addForeignKeyConstraint
+                baseTableName="user_role"
+                baseColumnNames="role_id"
+                constraintName="fk_user_role_role"
+                referencedTableName="role"
+                referencedColumnNames="id"/>
+
+        <!-- Unique: один user + одна role одновременно -->
+        <addUniqueConstraint
+                tableName="user_role"
+                columnNames="user_id, role_id"
+                constraintName="uq_user_role"/>
+
+        <createIndex tableName="user_role" indexName="idx_user_role_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="user_role" indexName="idx_user_role_active">
+            <column name="user_id"/>
+            <column name="active"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="user_role"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

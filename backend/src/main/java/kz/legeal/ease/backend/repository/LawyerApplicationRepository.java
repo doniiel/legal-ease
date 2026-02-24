@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,4 +19,6 @@ public interface LawyerApplicationRepository extends JpaRepository<LawyerApplica
     boolean existsByUserAndStatusIn(User user, Collection<Status> statuses);
 
     Optional<LawyerApplication> findTopByUserOrderByCreatedDateDesc(User user);
+
+    Optional<LawyerApplication> findTopByUserAndStatusInOrderByCreatedDateDesc(User user, List<Status> statuses);
 }

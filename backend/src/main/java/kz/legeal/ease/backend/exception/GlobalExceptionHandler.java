@@ -1,7 +1,6 @@
 package kz.legeal.ease.backend.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
-import kz.legeal.ease.backend.dto.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -23,7 +23,8 @@ public class GlobalExceptionHandler {
 
         log.warn("[{}] {} - {}", ex.getErrorCode(), request.getRequestURI(), ex.getMessage());
 
-        return ResponseEntity.status(ex.getStatus())
+        return ResponseEntity
+                .status(ex.getStatus())
                 .body(buildError(request, ex.getStatus().value(), ex.getErrorCode(), ex.getMessage(), null));
     }
 
@@ -40,7 +41,8 @@ public class GlobalExceptionHandler {
 
         log.warn("[VALIDATION_001] {} - {} field errors", request.getRequestURI(), fieldErrors.size());
 
-        return ResponseEntity.badRequest()
+        return ResponseEntity
+                .badRequest()
                 .body(buildError(request, 400, "VALIDATION_001", "Validation failed", fieldErrors));
     }
 
@@ -48,19 +50,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponseDto> handleAccessDenied(
             AccessDeniedException ex, HttpServletRequest request) {
 
-        log.warn("[ACCESS_DENIED] {} - {}", request.getRequestURI(), ex.getMessage());
+        log.warn("[ACCESS_001] {} - {}", request.getRequestURI(), ex.getMessage());
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
                 .body(buildError(request, 403, "ACCESS_001", "Access denied", null));
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalState(
+            IllegalStateException ex, HttpServletRequest request) {
+
+        log.warn("[CONFLICT] {} - {}", request.getRequestURI(), ex.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(buildError(request, 409, "CONFLICT_001", ex.getMessage(), null));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGeneral(
             Exception ex, HttpServletRequest request) {
 
-        log.error("[INTERNAL_ERROR] {} - ", request.getRequestURI(), ex);
+        log.error("[INTERNAL_001] {} - ", request.getRequestURI(), ex);
 
-        return ResponseEntity.internalServerError()
+        return ResponseEntity
+                .internalServerError()
                 .body(buildError(request, 500, "INTERNAL_001", "Internal server error", null));
     }
 
@@ -69,7 +84,7 @@ public class GlobalExceptionHandler {
             int status,
             String errorCode,
             String message,
-            java.util.List<ErrorResponseDto.FieldError> errors) {
+            List<ErrorResponseDto.FieldError> errors) {
 
         return ErrorResponseDto.builder()
                 .requestId(resolveRequestId(request))

@@ -31,6 +31,8 @@ public class VerificationCode extends AbstractAuditingEntity {
 
     private String code;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 30)
     private VerificationType type;
 
     private boolean used = false;

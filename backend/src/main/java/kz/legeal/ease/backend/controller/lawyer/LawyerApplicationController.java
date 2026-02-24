@@ -1,4 +1,4 @@
-package kz.legeal.ease.backend.controller;
+package kz.legeal.ease.backend.controller.lawyer;
 
 import jakarta.validation.Valid;
 import kz.legeal.ease.backend.dto.LawyerApplicationPreviewDto;
@@ -18,7 +18,7 @@ public class LawyerApplicationController {
 
     private final LawyerApplicationService lawyerApplicationService;
 
-    @PostMapping
+    @PostMapping("/submit")
     public ResponseEntity<LawyerApplicationPreviewDto> submitApplication(
             @RequestBody @Valid LawyerApplicationRequest request
     ) {

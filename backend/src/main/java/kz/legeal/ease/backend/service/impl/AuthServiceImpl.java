@@ -35,21 +35,20 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponseDto login(LoginRequest request) {
-        log.info("Attempting login for email: {}", request.getEmail());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
         } catch (BadCredentialsException e) {
-            log.warn("Invalid login attempt for username: {}", request.getEmail());
             throw new InvalidCredentialsException();
         }
 
-        final var userDetails = (PersonDetails) personDetailsService.loadUserByUsername(request.getEmail());
+        final var userDetails = (PersonDetails) personDetailsService
+                .loadUserByUsernameWithHighestRole(request.getEmail());
+
         final var accessToken = tokenService.generateAccessToken(userDetails);
         final var refreshToken = tokenService.generateRefreshToken(userDetails);
 
-        log.info("Login successful for email: {}", request.getEmail());
         return AuthResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

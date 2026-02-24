@@ -4,5 +4,5 @@ import kz.legeal.ease.backend.dto.EmailMessage;
 
 public interface EmailSenderService {
 
-    public void send(EmailMessage message);
+    void send(EmailMessage message);
 }

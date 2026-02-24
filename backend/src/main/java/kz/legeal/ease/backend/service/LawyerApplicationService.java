@@ -23,4 +23,6 @@ public interface LawyerApplicationService {
     LawyerApplication deleteApplication(Long requestId, User adminuser);
 
     LawyerApplicationPreviewDto submitApplication(LawyerApplicationRequest request);
+
+    void archiveActiveApplication(User user, User admin);
 }

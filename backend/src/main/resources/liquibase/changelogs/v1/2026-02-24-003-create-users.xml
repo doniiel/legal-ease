@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-02-24-003-create-users" author="developer">
+        <comment>Create users table with all required fields</comment>
+
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="user_seq_gen">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_users"/>
+            </column>
+            <column name="iin" type="VARCHAR(12)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_users_iin"/>
+            </column>
+            <column name="email" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_users_email"/>
+            </column>
+            <column name="phone" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_users_phone"/>
+            </column>
+            <column name="fio" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_of_birth" type="DATE"/>
+            <column name="gender" type="VARCHAR(10)"/>
+            <column name="last_password_modified_date" type="TIMESTAMP"/>
+            <!-- Audit fields -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+        </createTable>
+
+        <!-- Indexes for frequent queries -->
+        <createIndex tableName="users" indexName="idx_users_email">
+            <column name="email"/>
+        </createIndex>
+
+        <createIndex tableName="users" indexName="idx_users_iin">
+            <column name="iin"/>
+        </createIndex>
+
+        <createIndex tableName="users" indexName="idx_users_active_deleted">
+            <column name="active"/>
+            <column name="deleted"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="users"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-02-24-002-create-role" author="Orynbek Daniyal">
+        <comment>Create role table</comment>
+
+        <createTable tableName="role">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="role_seq_gen">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_role"/>
+            </column>
+            <column name="code" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_role_code"/>
+            </column>
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <!-- Audit fields -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+        </createTable>
+
+        <rollback>
+            <dropTable tableName="role"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

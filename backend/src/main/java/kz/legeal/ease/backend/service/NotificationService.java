@@ -9,4 +9,6 @@ public interface NotificationService {
     void sendLawyerApproved(String email);
 
     void sendLawyerRejected(String email, String reason);
+
+    void sendLawyerRoleRevoked(String email);
 }

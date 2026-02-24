@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.io.UnsupportedEncodingException;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,7 +29,7 @@ public class EmailSenderServiceImpl implements EmailSenderService {
             final var html = renderTemplate(message);
             sendMimeMessage(message.getTo(), message.getSubject(), html);
             log.info("Email '{}' sent to {}", message.getSubject(), message.getTo());
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send email '{}' to {}: {}", message.getSubject(), message.getTo(), e.getMessage(), e);
         }
     }
@@ -38,14 +40,14 @@ public class EmailSenderServiceImpl implements EmailSenderService {
         return templateEngine.process(message.getTemplateName(), context);
     }
 
-    private void sendMimeMessage(String to, String subject, String html) throws MessagingException {
+    private void sendMimeMessage(String to, String subject, String html) throws MessagingException, UnsupportedEncodingException {
         final var mimeMessage = mailSender.createMimeMessage();
         final var helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
 
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(html, true);
-        helper.setFrom("no-reply@legalease.kz", "LegalEase");
+        helper.setFrom("220107072stu.sdu.edu.kz", "LegalEase");
 
         mailSender.send(mimeMessage);
     }

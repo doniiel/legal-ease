@@ -4,28 +4,36 @@ server:
 spring:
   application:
     name: legal-ease-backend
+
   datasource:
     url: jdbc:postgresql://localhost:5435/legal-ease
     username: postgres
-    password: fPsdg-fergerngLNF
+    password: postgres
     driver-class-name: org.postgresql.Driver
+
   hikari:
-    maximum-pool-size: 100
-    minimum-idle: 10
+    maximum-pool-size: 20
+    minimum-idle: 5
     idle-timeout: 30000
     max-lifetime: 1800000
     connection-timeout: 20000
+
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    show-sql: true
+    show-sql: false
+
+  liquibase:
+    change-log: classpath:liquibase/master.xml
+    enabled: true
+
   mail:
     host: smtp.gmail.com
-    username: example@gmail.com
-    password: dssg nfoy sias moik
+    username: ${SPRING_MAIL_USERNAME:}
+    password: ${SPRING_MAIL_PASSWORD:}
     port: 587
     protocol: smtp
     properties:
@@ -34,22 +42,14 @@ spring:
           auth: true
           starttls:
             enable: true
-  liquibase:
-    change-log: classpath:liquibase/master.xml
-    enabled: true
-    drop-first: false
+
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
     mode: HTML
     encoding: UTF-8
     cache: false
-  jwt:
-    access-secret: 06d701201a0cec185ac8232ad254e5e52b7000828740253ba228bf3d50f6aec7
-    refresh-secret: 1f9b840af387532bd295de7df4962e11edcb619954305adb36e30ea7c20a42c7
-    issuer: att_system
-    access-exp-min: 30
-    refresh-exp-min: 1440
+
   task:
     execution:
       pool:
@@ -58,6 +58,13 @@ spring:
         queue-capacity: 100
       thread-name-prefix: email-async-
 
+  jwt:
+    access-secret: ${SPRING_JWT_ACCESS_SECRET:06d701201a0cec185ac8232ad254e5e52b7000828740253ba228bf3d50f6aec7}
+    refresh-secret: ${SPRING_JWT_REFRESH_SECRET:1f9b840af387532bd295de7df4962e11edcb619954305adb36e30ea7c20a42c7}
+    issuer: ${SPRING_JWT_ISSUER:legalease}
+    access-exp-min: ${SPRING_JWT_ACCESS_EXP_MIN:30}
+    refresh-exp-min: ${SPRING_JWT_REFRESH_EXP_MIN:1440}
+
 management:
   endpoints:
     web:
@@ -65,4 +72,3 @@ management:
         include: health,info
   health:
     show-details: always
-

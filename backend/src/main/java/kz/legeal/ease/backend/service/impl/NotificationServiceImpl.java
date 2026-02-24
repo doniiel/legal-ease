@@ -10,10 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-/**
- * Knows WHAT business event happened → builds the right EmailMessage → delegates to EmailSenderService.
- * No template logic here. No SMTP logic here. Clean separation.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -66,6 +62,17 @@ public class NotificationServiceImpl implements NotificationService {
                 .subject("Update on your LegalEase application")
                 .templateName("lawyer-rejected")
                 .variables(Map.of("reason", reason))
+                .build());
+    }
+
+    @Override
+    public void sendLawyerRoleRevoked(String email) {
+        log.info("Sending lawyer role revoked notification to {}", email);
+        emailSenderService.send(EmailMessage.builder()
+                .to(email)
+                .subject("Update on your LegalEase account")
+                .templateName("lawyer-role-revoked")
+                .variables(Map.of())
                 .build());
     }
 }

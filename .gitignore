@@ -1,54 +1,23 @@
-#####################################
-# ========= BACKEND (Spring + Gradle)
-#####################################
-
-# Gradle
-.gradle/
-build/
-!gradle/wrapper/gradle-wrapper.jar
-
-# Java
+# Backend build
+backend/build/
+backend/.gradle/
 *.class
-*.log
 
-#####################################
-# ========= FRONTEND (Node / React / Vue)
-#####################################
+# Frontend build
+frontend/node_modules/
+frontend/.next/
+frontend/out/
 
-node_modules/
-dist/
-build/
-.next/
-.env
-
-#####################################
-# ========= AI (Python)
-#####################################
-
-__pycache__/
-*.pyc
-.venv/
-venv/
-.env
-
-#####################################
-# ========= IDE
-#####################################
-
+# IDE
 .idea/
 .vscode/
 *.iml
-out/
 
-#####################################
-# ========= OS
-#####################################
-
+# OS
 .DS_Store
 Thumbs.db
 
-#####################################
-# ========= Docker
-#####################################
+.env
 
-docker-compose.override.yml
+# Logs
+*.log

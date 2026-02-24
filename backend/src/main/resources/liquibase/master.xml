@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        ПРАВИЛА:
+        1. Каждый файл = одна логическая единица изменений (одна таблица или связанная группа)
+        2. Никогда не редактировать уже применённые changeSet-ы
+        3. id = дата_порядок_описание  (например: 2026-02-24-001-create-users)
+        4. author = имя разработчика
+        5. Новые изменения добавляются снизу
+    -->
+
+    <!-- ===== v1.0.0 — Initial Schema ===== -->
+    <include file="changelogs/v1/2026-02-24-001-create-sequences.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-002-create-role.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-003-create-users.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-004-create-user-role.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-005-create-verification-code.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-006-create-refresh-tokens.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-007-create-lawyer-application.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-008-insert-default-roles.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-02-24-009-insert-default-admins.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

@@ -131,4 +131,21 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
         final var savedApplication = repository.save(application);
         return mapper.toPreviewDto(savedApplication);
     }
+
+    @Override
+    @Transactional
+    public void archiveActiveApplication(User user, User admin) {
+        repository.findTopByUserAndStatusInOrderByCreatedDateDesc(
+                user, List.of(Status.PENDING, Status.APPROVED)
+        ).ifPresentOrElse(
+                application -> {
+                    application.setStatus(Status.DELETED);
+                    application.setReviewer(admin);
+                    application.setReviewedAt(LocalDateTime.now());
+                    repository.save(application);
+                    log.info("Archived application id={} for user id={}", application.getId(), user.getId());
+                },
+                () -> log.debug("No active application found for user id={}", user.getId())
+        );
+    }
 }

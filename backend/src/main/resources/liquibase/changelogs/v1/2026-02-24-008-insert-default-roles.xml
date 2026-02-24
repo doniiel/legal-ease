@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-02-24-008-insert-default-roles" author="developer">
+        <comment>Seed initial roles: USER, LAWYER, ADMIN</comment>
+
+        <insert tableName="role">
+            <column name="id" valueSequenceNext="role_seq_gen"/>
+            <column name="code" value="USER"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="role">
+            <column name="id" valueSequenceNext="role_seq_gen"/>
+            <column name="code" value="LAWYER"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="role">
+            <column name="id" valueSequenceNext="role_seq_gen"/>
+            <column name="code" value="ADMIN"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <rollback>
+            <delete tableName="role">
+                <where>code IN ('USER', 'LAWYER', 'ADMIN')</where>
+            </delete>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

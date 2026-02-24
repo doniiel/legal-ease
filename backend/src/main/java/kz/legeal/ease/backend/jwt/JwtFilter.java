@@ -45,12 +45,13 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-
         try {
             final var userId = jwtUtils.extractUserId(jwt, false);
+            final var role = jwtUtils.extractRole(jwt);
 
             if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                final var userDetails = (PersonDetails) personDetailsService.loadUserByUserId(userId);
+                final var userDetails = (PersonDetails) personDetailsService
+                        .loadUserByUserIdAndRole(userId, role);
 
                 if (jwtUtils.isTokenValid(jwt, userDetails, false)) {
                     final var authToken = new UsernamePasswordAuthenticationToken(

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-02-24-007-create-lawyer-application" author="Orynbek Daniyal">
+        <comment>Create lawyer table for lawyer registration applications</comment>
+
+        <createTable tableName="lawyer">
+            <column name="id" type="BIGINT" defaultValueSequenceNext="lawyer_app_seq">
+                <constraints primaryKey="true" nullable="false" primaryKeyName="pk_lawyer"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="license_number" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_lawyer_license_number"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="submitted_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reviewed_by" type="BIGINT"/>
+            <column name="reviewed_at" type="TIMESTAMP"/>
+            <column name="rejection_reason" type="TEXT"/>
+            <column name="version" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <!-- Audit fields -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+        </createTable>
+
+        <!-- FK: lawyer → users (applicant) -->
+        <addForeignKeyConstraint
+                baseTableName="lawyer"
+                baseColumnNames="user_id"
+                constraintName="fk_lawyer_user"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <!-- FK: lawyer → users (reviewer/admin) -->
+        <addForeignKeyConstraint
+                baseTableName="lawyer"
+                baseColumnNames="reviewed_by"
+                constraintName="fk_lawyer_reviewer"
+                referencedTableName="users"
+                referencedColumnNames="id"/>
+
+        <!-- Status check constraint -->
+        <sql>
+            ALTER TABLE lawyer
+                ADD CONSTRAINT chk_lawyer_status
+                    CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'DELETED'));
+        </sql>
+
+        <!-- Indexes -->
+        <createIndex tableName="lawyer" indexName="idx_lawyer_user_status">
+            <column name="user_id"/>
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="lawyer" indexName="idx_lawyer_status">
+            <column name="status"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="lawyer"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>
