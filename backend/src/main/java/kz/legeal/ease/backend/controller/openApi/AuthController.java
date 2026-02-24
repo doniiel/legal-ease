@@ -61,7 +61,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Validation error")
     })
     @PostMapping("/register")
-    public ResponseEntity<Void> register(
+    public ResponseEntity<?> register(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Registration request payload",
                     required = true,
@@ -82,7 +82,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid verification code")
     })
     @PostMapping("/confirm")
-    public ResponseEntity<Void> confirm(
+    public ResponseEntity<?> confirm(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Verification request payload",
                     required = true,
@@ -124,7 +124,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid email address")
     })
     @PostMapping("/reset-password")
-    public ResponseEntity<Void> resetPassword(
+    public ResponseEntity<?> resetPassword(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Reset password request payload",
                     required = true,
@@ -145,7 +145,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid verification code or password")
     })
     @PostMapping("/change-password")
-    public ResponseEntity<Void> changePassword(
+    public ResponseEntity<?> changePassword(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Change password request payload",
                     required = true,
@@ -166,7 +166,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid logout request")
     })
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(
+    public ResponseEntity<?> logout(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Logout request payload",
                     required = true,
