@@ -47,7 +47,7 @@ public class EmailSenderServiceImpl implements EmailSenderService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(html, true);
-        helper.setFrom("220107072stu.sdu.edu.kz", "LegalEase");
+        helper.setFrom("220107072@stu.sdu.edu.kz", "LegalEase");
 
         mailSender.send(mimeMessage);
     }
