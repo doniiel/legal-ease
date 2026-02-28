@@ -1,0 +1,196 @@
+/* @custom-variant dark (&:is(.dark *)); — Tailwind v4 only, dark mode handled via tailwind.config.js */
+
+:root {
+  --font-size: 16px;
+  
+  /* Light Mode - DocuCheck Colors */
+  --background: #F7F9FC;
+  --foreground: #2E2E2E;
+  --card: #FFFFFF;
+  --card-foreground: #2E2E2E;
+  --popover: #FFFFFF;
+  --popover-foreground: #2E2E2E;
+  
+  /* Primary - Тёмно-синий (navy) */
+  --primary: #0F2A44;
+  --primary-foreground: #FFFFFF;
+  
+  /* Secondary */
+  --secondary: #F7F9FC;
+  --secondary-foreground: #2E2E2E;
+  
+  /* Muted */
+  --muted: #E6EAF0;
+  --muted-foreground: #717182;
+  
+  /* Accent - Мягкий зелёный */
+  --accent: #2FA36B;
+  --accent-foreground: #FFFFFF;
+  
+  /* Alternative accent - Спокойный голубой */
+  --accent-blue: #4DA3FF;
+  
+  /* Destructive */
+  --destructive: #d4183d;
+  --destructive-foreground: #FFFFFF;
+  
+  /* Borders */
+  --border: #D0D6DC;
+  --input: transparent;
+  --input-background: #FFFFFF;
+  --switch-background: #D0D6DC;
+  
+  /* Success */
+  --success: #2FA36B;
+  --success-foreground: #FFFFFF;
+  
+  /* Warning */
+  --warning: #F59E0B;
+  --warning-foreground: #FFFFFF;
+  
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #4DA3FF;
+  --chart-1: #0F2A44;
+  --chart-2: #4DA3FF;
+  --chart-3: #2FA36B;
+  --chart-4: #F59E0B;
+  --chart-5: #d4183d;
+  --radius: 0.625rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #2E2E2E;
+  --sidebar-primary: #0F2A44;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F7F9FC;
+  --sidebar-accent-foreground: #2E2E2E;
+  --sidebar-border: #D0D6DC;
+  --sidebar-ring: #4DA3FF;
+}
+
+.dark {
+  /* Dark Mode - DocuCheck Colors */
+  --background: #0B1C2D;
+  --foreground: #E6EAF0;
+  --card: #13293D;
+  --card-foreground: #E6EAF0;
+  --popover: #13293D;
+  --popover-foreground: #E6EAF0;
+  
+  /* Primary - Адаптация navy для тёмного режима */
+  --primary: #1F4B6E;
+  --primary-foreground: #E6EAF0;
+  
+  /* Secondary */
+  --secondary: #13293D;
+  --secondary-foreground: #E6EAF0;
+  
+  /* Muted */
+  --muted: #13293D;
+  --muted-foreground: #A9B3C1;
+  
+  /* Accent - Зелёный для тёмного режима */
+  --accent: #3BCF8E;
+  --accent-foreground: #0B1C2D;
+  
+  /* Alternative accent - Голубой для тёмного режима */
+  --accent-blue: #6BB7FF;
+  
+  /* Destructive */
+  --destructive: #EF4444;
+  --destructive-foreground: #E6EAF0;
+  
+  /* Borders */
+  --border: #22384F;
+  --input: #22384F;
+  --input-background: #13293D;
+  --switch-background: #22384F;
+  
+  /* Success */
+  --success: #3BCF8E;
+  --success-foreground: #0B1C2D;
+  
+  /* Warning */
+  --warning: #FCD34D;
+  --warning-foreground: #0B1C2D;
+  
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #6BB7FF;
+  --chart-1: #1F4B6E;
+  --chart-2: #6BB7FF;
+  --chart-3: #3BCF8E;
+  --chart-4: #FCD34D;
+  --chart-5: #EF4444;
+  --sidebar: #13293D;
+  --sidebar-foreground: #E6EAF0;
+  --sidebar-primary: #1F4B6E;
+  --sidebar-primary-foreground: #E6EAF0;
+  --sidebar-accent: #0B1C2D;
+  --sidebar-accent-foreground: #E6EAF0;
+  --sidebar-border: #22384F;
+  --sidebar-ring: #6BB7FF;
+}
+
+/* @theme inline — Tailwind v4 only, color mappings are in tailwind.config.js */
+
+@layer base {
+  * {
+    @apply border-border;
+    outline-color: rgb(from var(--ring) r g b / 0.5);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  */
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+}

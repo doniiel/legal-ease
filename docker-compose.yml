@@ -57,29 +57,24 @@ services:
       retries: 3
       start_period: 60s
 
-#  frontend:
-#    build:
-#      context: ./frontend
-#      dockerfile: Dockerfile
-#    container_name: legalease-frontend
-#    restart: unless-stopped
-#    env_file: .env
-#    depends_on:
-#      backend:
-#        condition: service_healthy
-#    environment:
-#      NEXT_PUBLIC_API_URL: http://backend:9191
-#      API_URL: http://backend:9191
-#    ports:
-#      - "${FRONTEND_PORT}:3000"
-#    networks:
-#      - legalease-network
-#    healthcheck:
-#      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 || exit 1"]
-#      interval: 30s
-#      timeout: 5s
-#      retries: 3
-#      start_period: 30s
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: legalease-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT}:80"
+    networks:
+      - legalease-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 networks:
   legalease-network:
