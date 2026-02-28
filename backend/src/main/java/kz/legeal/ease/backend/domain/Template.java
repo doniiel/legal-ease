@@ -1,10 +1,11 @@
 package kz.legeal.ease.backend.domain;
 
+
 import jakarta.persistence.*;
-import kz.legeal.ease.backend.enums.Category;
 import kz.legeal.ease.backend.enums.TemplateStatus;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -13,7 +14,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Template {
+public class Template extends AbstractAuditingEntity {
 
     @Id
     @SequenceGenerator(
@@ -27,26 +28,46 @@ public class Template {
     )
     private Long id;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "category")
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private TemplateStatus status = TemplateStatus.DRAFT;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lawyer_id", nullable = false)
     private User lawyer;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private TemplateStatus status;
-
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TemplateField> templateFields;
+    @Builder.Default
+    private List<TemplateField> templateFields = new ArrayList<>();
 
+    @Column(name = "active", nullable = false)
+    @Builder.Default
+    private boolean active = false;
 
+    public boolean isOwnedBy(Long userId) {
+        return this.lawyer != null && this.lawyer.getId().equals(userId);
+    }
+
+    public boolean isDraft() {
+        return TemplateStatus.DRAFT.equals(this.status);
+    }
+
+    public boolean isPublished() {
+        return TemplateStatus.PUBLISHED.equals(this.status);
+    }
+
+    public void publish() {
+        this.status = TemplateStatus.PUBLISHED;
+    }
 }
