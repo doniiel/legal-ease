@@ -1,6 +1,7 @@
 package kz.legeal.ease.backend.dto.template;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import kz.legeal.ease.backend.dto.CategoryDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,7 +22,7 @@ public class TemplatePreviewDto {
     private String description;
 
     @Schema(description = "Category", example = "CIVIL")
-    private Category category;
+    private CategoryDto category;
 
     @Schema(description = "Lawyer name", example = "Иванов Иван")
     private String lawyerName;

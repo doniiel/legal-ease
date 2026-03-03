@@ -17,7 +17,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     List<Category> findAllByActiveTrueOrderByNameAsc();
 
-    @Query("SELECT COUNT(t) > 0 FROM Template t WHERE t.category.id = :categoryId AND t.active = false")
+    @Query("SELECT COUNT(t) > 0 FROM Template t WHERE t.category.id = :categoryId AND t.active = true")
     boolean hasActiveTemplates(@Param("categoryId") Long categoryId);
 
 }

@@ -26,25 +26,15 @@ public interface TemplateRepository extends JpaRepository<Template, Long> {
             Pageable pageable
     );
 
-    @Query("""
-            SELECT t FROM Template t
-            WHERE t.status = :status
-              AND t.active = false
-              AND (:category IS NULL OR t.category = :category)
-            ORDER BY t.createdDate DESC
-            """)
+    @Query("SELECT t FROM Template t WHERE t.status = :status AND t.active = true " +
+            "AND (:categoryId IS NULL OR t.category.id = :categoryId)")
     Page<Template> findAllPublished(
             @Param("status") TemplateStatus status,
-            @Param("category") Category category,
+            @Param("categoryId") Long categoryId,
             Pageable pageable
     );
 
-    @Query("""
-            SELECT t FROM Template t
-            LEFT JOIN FETCH t.templateFields tf
-            LEFT JOIN FETCH t.lawyer l
-            WHERE t.id = :id AND t.active = true
-            """)
+    @Query("SELECT t FROM Template t WHERE t.id = :id AND t.active = true")
     Optional<Template> findByIdAndActive(@Param("id") Long id);
 
     @Query("""
@@ -57,4 +47,6 @@ public interface TemplateRepository extends JpaRepository<Template, Long> {
             @Param("id") Long id,
             @Param("lawyerId") Long lawyerId
     );
+
+    Page<Template> findAllByLawyerIdAndActiveTrue(Long lawyerId, Pageable pageable);
 }

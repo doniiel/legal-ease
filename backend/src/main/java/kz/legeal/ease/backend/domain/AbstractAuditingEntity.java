@@ -43,8 +43,12 @@ public abstract class AbstractAuditingEntity {
     }
 
     private String resolveCurrentUser() {
-        return SecurityUtils.getCurrentUser()
-                .map(user -> user.getEmail())
-                .orElse("system");
+        try {
+            return SecurityUtils.getCurrentUser()
+                    .map(User::getEmail)
+                    .orElse("system");
+        } catch (Exception e) {
+            return "system";
+        }
     }
 }

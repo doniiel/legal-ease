@@ -53,7 +53,7 @@ public class Template extends AbstractAuditingEntity {
 
     @Column(name = "active", nullable = false)
     @Builder.Default
-    private boolean active = false;
+    private boolean active = true;
 
     public boolean isOwnedBy(Long userId) {
         return this.lawyer != null && this.lawyer.getId().equals(userId);

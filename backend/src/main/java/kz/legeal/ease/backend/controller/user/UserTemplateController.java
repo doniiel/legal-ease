@@ -48,7 +48,7 @@ public class UserTemplateController {
             @Parameter(
                     description = "Optional category filter. If not provided, all categories are returned."
             )
-            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) Long categoryId,
             @ParameterObject
             @PageableDefault(
                     size = 10,
@@ -56,7 +56,7 @@ public class UserTemplateController {
                     direction = Sort.Direction.DESC
             ) Pageable pageable
     ) {
-        return ResponseEntity.ok(publicQueryService.getPublishedTemplates(category, pageable));
+        return ResponseEntity.ok(publicQueryService.getPublishedTemplates(categoryId, pageable));
     }
 
     @Operation(

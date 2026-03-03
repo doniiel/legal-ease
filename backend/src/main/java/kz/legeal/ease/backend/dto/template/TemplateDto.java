@@ -1,12 +1,15 @@
 package kz.legeal.ease.backend.dto.template;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import kz.legeal.ease.backend.domain.Category;
 import kz.legeal.ease.backend.dto.BaseUserDto;
+import kz.legeal.ease.backend.dto.CategoryDto;
 import kz.legeal.ease.backend.enums.TemplateStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,7 +26,7 @@ public class TemplateDto {
     private String description;
 
     @Schema(description = "Category", example = "CIVIL")
-    private Category category;
+    private CategoryDto category;
 
     @Schema(description = "Template status", example = "DRAFT")
     private TemplateStatus status;

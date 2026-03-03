@@ -25,8 +25,8 @@ public class TemplatePublicQueryServiceImpl implements TemplatePublicQueryServic
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TemplatePreviewDto> getPublishedTemplates(Category category, Pageable pageable) {
-        return templateRepository.findAllPublished(TemplateStatus.PUBLISHED, category, pageable)
+    public Page<TemplatePreviewDto> getPublishedTemplates(Long categoryId, Pageable pageable) {
+        return templateRepository.findAllPublished(TemplateStatus.PUBLISHED, categoryId, pageable)
                 .map(templateMapper::toPreviewDto);
     }
 

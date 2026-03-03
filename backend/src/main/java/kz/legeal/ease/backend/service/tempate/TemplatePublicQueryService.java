@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
  **/
 public interface TemplatePublicQueryService {
 
-    Page<TemplatePreviewDto> getPublishedTemplates(Category category, Pageable pageable);
+    Page<TemplatePreviewDto> getPublishedTemplates(Long categoryId, Pageable pageable);
 
     TemplateDto getPublishedTemplateById(Long templateId);
 }

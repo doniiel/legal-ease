@@ -2,6 +2,9 @@ package kz.legeal.ease.backend.service.impl;
 
 import kz.legeal.ease.backend.domain.Category;
 import kz.legeal.ease.backend.dto.CategoryDto;
+import kz.legeal.ease.backend.exception.category.CategoryAlreadyExistsException;
+import kz.legeal.ease.backend.exception.category.CategoryHasTemplatesException;
+import kz.legeal.ease.backend.exception.category.CategoryNotFoundException;
 import kz.legeal.ease.backend.mapper.CategoryMapper;
 import kz.legeal.ease.backend.repository.CategoryRepository;
 import kz.legeal.ease.backend.request.CategoryRequest;
@@ -67,35 +70,44 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void delete(Long id) {
+        final var currentAdmin = SecurityUtils.getCurrentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         final var category = findByIdOrThrow(id);
 
-        // Запрещено удалять если есть привязанные шаблоны
         if (categoryRepository.hasActiveTemplates(id)) {
             throw new CategoryHasTemplatesException(id);
         }
 
-        // Soft delete через деактивацию
         category.deactivate();
         categoryRepository.save(category);
 
-        log.info("Admin {} deactivated category id={}", securityUtils.getCurrentUserEmail(), id);
+        log.info("Admin {} deactivated category id={}", currentAdmin.getEmail(), id);
     }
 
+
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<CategoryDto> getAll(Pageable pageable) {
-        return null;
+        return categoryRepository.findAll(pageable)
+                .map(categoryMapper::toDto);
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public CategoryDto getById(Long id) {
-        return null;
+        return categoryMapper.toDto(findByIdOrThrow(id));
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<CategoryDto> getActiveCategories() {
-        return List.of();
+        return categoryMapper.toDtoList(
+                categoryRepository.findAllByActiveTrueOrderByNameAsc()
+        );
+    }
+
+    private Category findByIdOrThrow(Long id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id));
     }
 }
