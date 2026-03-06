@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="2026-03-06-006-create-document-field-values" author="doniiel">
+        <createTable tableName="document_field_values">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="document_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_key" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="field_value" type="TEXT"/>
+
+            <!-- Audit -->
+            <column name="created_by" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="document_field_values"
+                baseColumnNames="document_id"
+                constraintName="fk_field_value_document"
+                referencedTableName="documents"
+                referencedColumnNames="id"/>
+
+        <!-- Один fieldKey уникален в рамках одного документа -->
+        <addUniqueConstraint
+                tableName="document_field_values"
+                columnNames="document_id, field_key"
+                constraintName="uq_document_field_key"/>
+    </changeSet>
+
+</databaseChangeLog>
