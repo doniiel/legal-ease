@@ -16,18 +16,18 @@ public interface TemplateRepository extends JpaRepository<Template, Long> {
 
     @Query("""
             SELECT t FROM Template t
-            LEFT JOIN FETCH t.templateFields tf
             WHERE t.lawyer.id = :lawyerId
-              AND t.active = false
+              AND t.active = true
             ORDER BY t.createdDate DESC
             """)
-    Page<Template> findAllByLawyerId(
-            @Param("lawyerId") Long lawyerId,
-            Pageable pageable
-    );
+    Page<Template> findAllByLawyerId(@Param("lawyerId") Long lawyerId, Pageable pageable);
 
-    @Query("SELECT t FROM Template t WHERE t.status = :status AND t.active = true " +
-            "AND (:categoryId IS NULL OR t.category.id = :categoryId)")
+    @Query("""
+            SELECT t FROM Template t
+            WHERE t.status = :status
+              AND t.active = true
+              AND (:categoryId IS NULL OR t.category.id = :categoryId)
+            """)
     Page<Template> findAllPublished(
             @Param("status") TemplateStatus status,
             @Param("categoryId") Long categoryId,
@@ -41,12 +41,8 @@ public interface TemplateRepository extends JpaRepository<Template, Long> {
             SELECT t FROM Template t
             WHERE t.id = :id
               AND t.lawyer.id = :lawyerId
-              AND t.active = false
+              AND t.active = true
             """)
-    Optional<Template> findByIdAndLawyerId(
-            @Param("id") Long id,
-            @Param("lawyerId") Long lawyerId
-    );
+    Optional<Template> findByIdAndLawyerId(@Param("id") Long id, @Param("lawyerId") Long lawyerId);
 
-    Page<Template> findAllByLawyerIdAndActiveTrue(Long lawyerId, Pageable pageable);
 }
