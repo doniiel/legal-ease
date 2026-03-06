@@ -29,26 +29,15 @@ public abstract class AbstractAuditingEntity {
 
     @PrePersist
     public void prePersist() {
-        final var currentUser = resolveCurrentUser();
         this.createdDate = LocalDateTime.now();
         this.updatedDate = LocalDateTime.now();
-        this.createdBy = currentUser;
-        this.updatedBy = currentUser;
+        this.createdBy = "system";
+        this.updatedBy = "system";
     }
 
     @PreUpdate
     public void preUpdate() {
         this.updatedDate = LocalDateTime.now();
-        this.updatedBy = resolveCurrentUser();
-    }
-
-    private String resolveCurrentUser() {
-        try {
-            return SecurityUtils.getCurrentUser()
-                    .map(User::getEmail)
-                    .orElse("system");
-        } catch (Exception e) {
-            return "system";
-        }
+        this.updatedBy = "system";
     }
 }
