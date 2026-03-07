@@ -3,6 +3,15 @@ import { Button, Input, Form, Card, Alert, Select } from "antd";
 import { Mail, Phone, CreditCard, Lock } from "lucide-react";
 import { useRegisterMutation } from "../../features/auth/api/auth-api";
 
+const formatPhoneDisplay = (digits: string) => {
+  const d = digits.slice(0, 10);
+  if (d.length === 0) return "";
+  if (d.length <= 3) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  if (d.length <= 8) return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 8)}-${d.slice(8)}`;
+};
+
 type FormValues = {
   firstName: string;
   middleName: string;
@@ -32,11 +41,11 @@ export default function Register() {
       iin: values.iin,
       gender: values.gender,
       email: values.email,
-      phone: values.phone,
+      phone: `+7${values.phone.replace(/\D/g, "")}`,
       password: values.password,
     });
-    if (!("error" in result)) {
-      navigate("/dashboard");
+    if (!("errorCode" in result)) {
+      navigate("/login");
     }
   };
 
@@ -128,15 +137,25 @@ export default function Register() {
             <Form.Item
               label="Телефон"
               name="phone"
+              getValueFromEvent={(e) => {
+                const digits = e.target.value.replace(/\D/g, "");
+                return formatPhoneDisplay(digits);
+              }}
               rules={[
                 { required: true, message: "Введите телефон" },
-                { pattern: /^\+7\d{10}$/, message: "Формат: +77XXXXXXXXX" },
+                {
+                  validator(_, value) {
+                    const digits = (value || "").replace(/\D/g, "");
+                    if (digits.length === 10) return Promise.resolve();
+                    return Promise.reject(new Error("Введите полный номер (10 цифр после +7)"));
+                  },
+                },
               ]}
             >
               <Input
-                placeholder="+77870059131"
+                prefix={<span className="flex items-center gap-1 text-gray-500 pr-1"><Phone size={14} className="text-gray-400" />+7</span>}
+                placeholder="(700) 005-91-31"
                 size="large"
-                prefix={<Phone size={16} className="text-gray-400" />}
               />
             </Form.Item>
 
