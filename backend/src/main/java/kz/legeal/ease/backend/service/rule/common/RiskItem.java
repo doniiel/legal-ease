@@ -1,5 +1,6 @@
 package kz.legeal.ease.backend.service.rule.common;
 
+import kz.legeal.ease.backend.enums.RiskLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

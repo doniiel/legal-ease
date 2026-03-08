@@ -1,29 +1,30 @@
 package kz.legeal.ease.backend.service.rule.result;
 
 import kz.legeal.ease.backend.service.rule.common.*;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder
+@AllArgsConstructor
 public class RuleEngineResult {
 
-    private final List<MatchedTemplate> matchedTemplates = new ArrayList<>();
-    private final List<ValidationError> validationErrors = new ArrayList<>();
-    private final List<RiskItem> risks = new ArrayList<>();
-    private final List<String> requiredDynamicFields = new ArrayList<>();
-    private final List<RequiredDocument> requiredDocuments = new ArrayList<>();
-    private final List<FieldSuggestion> fieldSuggestions = new ArrayList<>();
+    private List<MatchedTemplate> matchedTemplates;
+    private List<ValidationError> validationErrors;
+    private List<RiskItem> risks;
+    private List<String> requiredDynamicFields;
+    private List<RequiredDocument> requiredDocuments;
+    private List<FieldSuggestion> fieldSuggestions;
 
-    private final boolean valid;
-    private final boolean aborted;
-    private final String abortReason;
+    private boolean valid;
+    private boolean aborted;
+    private String abortReason;
 
-    private final String aiSummary;
-    private final String aiRecommendation;
-    private final String aiIntentLabel;
-    private final double aiIntentConfidence;
+    private String aiSummary;
+    private String aiRecommendation;
+    private String aiIntentLabel;
+    private double aiIntentConfidence;
 }

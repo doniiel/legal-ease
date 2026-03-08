@@ -1,6 +1,8 @@
 package kz.legeal.ease.backend.domain;
 
 import jakarta.persistence.*;
+import kz.legeal.ease.backend.enums.RiskLevel;
+import kz.legeal.ease.backend.enums.RuleConditionOperator;
 import lombok.*;
 
 @Getter

@@ -33,7 +33,7 @@ import org.springframework.web.bind.annotation.*;
 )
 @Validated
 @RequiredArgsConstructor
-public class LawyerTemplateController {
+public class TemplateController {
 
     private final TemplateCommandService commandService;
     private final TemplateQueryService queryService;

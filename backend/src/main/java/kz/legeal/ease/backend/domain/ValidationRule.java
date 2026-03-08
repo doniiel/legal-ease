@@ -1,15 +1,17 @@
 package kz.legeal.ease.backend.domain;
 
 import jakarta.persistence.*;
+import kz.legeal.ease.backend.enums.RuleConditionOperator;
 import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "validation_rules")
-public class ValidationRule extends AbstractAuditingEntity{
+public class ValidationRule extends AbstractAuditingEntity {
 
     @Id
     @GeneratedValue(

@@ -13,7 +13,7 @@ public class FieldSuggestion {
 
     private String label;
 
-    private String suggestion;
+    private String suggestedValue;
 
     private String reason;
 }

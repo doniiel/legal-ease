@@ -1,10 +1,14 @@
 package kz.legeal.ease.backend.dto.document;
 
 import kz.legeal.ease.backend.enums.DocumentStatus;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Getter
+@Setter
 public class DocumentDto {
 
     private Long id;

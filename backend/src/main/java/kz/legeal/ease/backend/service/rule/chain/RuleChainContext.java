@@ -1,10 +1,10 @@
 package kz.legeal.ease.backend.service.rule.chain;
 
 import kz.legeal.ease.backend.service.rule.common.*;
+import kz.legeal.ease.backend.service.rule.context.RuleContext;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.antlr.v4.runtime.RuleContext;
-import org.springframework.boot.context.properties.bind.validation.ValidationErrors;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public class RuleChainContext {
         matchedTemplates.add(t);
     }
 
-    public void addError(ValidationErrors e) {
+    public void addError(ValidationError e) {
         validationErrors.add(e);
     }
 
@@ -81,6 +81,6 @@ public class RuleChainContext {
     public boolean hasRisks() {
         return !risks.isEmpty();
     }
-}
+
 
 }

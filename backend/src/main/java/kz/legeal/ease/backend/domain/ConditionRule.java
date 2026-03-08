@@ -1,6 +1,7 @@
 package kz.legeal.ease.backend.domain;
 
 import jakarta.persistence.*;
+import kz.legeal.ease.backend.enums.RuleConditionOperator;
 import lombok.*;
 
 @Getter
@@ -38,7 +39,7 @@ public class ConditionRule {
     @Column(name = "condition_value", nullable = false)
     private String conditionValue;
 
-    @Column(name = "target_field_key",  nullable = false)
+    @Column(name = "target_field_key", nullable = false)
     private String targetFieldKey;
 
     @Column(name = "active", nullable = false)
