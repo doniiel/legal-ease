@@ -7,8 +7,6 @@ import kz.legeal.ease.backend.dto.document.DocumentFieldValueDto;
 import kz.legeal.ease.backend.dto.document.DocumentPreviewDto;
 import kz.legeal.ease.backend.request.document.CreateDocumentRequest;
 import kz.legeal.ease.backend.service.document.DocumentService;
-import kz.legeal.ease.backend.service.rule.context.RuleContext;
-import kz.legeal.ease.backend.service.rule.engine.RuleEngine;
 import kz.legeal.ease.backend.service.rule.result.RuleEngineResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,7 +26,6 @@ import java.util.stream.Collectors;
 public class DocumentController {
 
     private final DocumentService documentService;
-    private final RuleEngine ruleEngine;
 
     @PostMapping
     public ResponseEntity<DocumentDto> createDocument(
@@ -48,11 +45,6 @@ public class DocumentController {
         return ResponseEntity.ok(documentService.getMyDocumentById(id));
     }
 
-    @PostMapping("/{id}/complete")
-    public ResponseEntity<DocumentDto> completeDocument(@PathVariable Long id) {
-        return ResponseEntity.ok(documentService.complete(id));
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
         documentService.deleteDocument(id);
@@ -62,31 +54,12 @@ public class DocumentController {
     // Получить AI подсказки для незаполненных полей
     @GetMapping("/{id}/suggestions")
     public ResponseEntity<RuleEngineResult> getSuggestions(@PathVariable Long id) {
-        final var doc = documentService.getMyDocumentById(id);
-        final var context = RuleContext.builder()
-                .templateId(doc.getTemplateId())
-                .fieldValues(transformFieldValues(doc))
-                .build();
-        return ResponseEntity.ok(ruleEngine.suggestFields(context));
+        return ResponseEntity.ok(documentService.getSuggestions(id));
     }
 
     @PostMapping("/{id}/complete")
     public ResponseEntity<CompleteDocumentResponseDto> complete(@PathVariable Long id) {
-        final var doc = documentService.getMyDocumentById(id);
-        final var context = RuleContext.builder()
-                .templateId(doc.getTemplateId())
-                .fieldValues(transformFieldValues(doc))
-                .documentText(buildDocumentText(doc))
-                .build();
-
-        final var ruleResult = ruleEngine.complete(context);
-
-        if (!ruleResult.isValid()) {
-            return ResponseEntity.ok(CompleteDocumentResponseDto.failed(ruleResult));
-        }
-
-        final var completed = documentService.complete(id);
-        return ResponseEntity.ok(CompleteDocumentResponseDto.success(completed, ruleResult));
+        return ResponseEntity.ok(documentService.complete(id));
     }
 
     private Map<String, String> transformFieldValues(DocumentDto doc) {
@@ -96,15 +69,5 @@ public class DocumentController {
                         DocumentFieldValueDto::getFieldKey,
                         DocumentFieldValueDto::getFieldValue
                 ));
-    }
-
-    private String buildDocumentText(DocumentDto doc) {
-        final var sb = new StringBuilder();
-        sb.append("Документ: ").append(doc.getTitle()).append("\n");
-        sb.append("Шаблон: ").append(doc.getTemplateTitle()).append("\n\n");
-        doc.getFieldValues().forEach(fv ->
-                sb.append(fv.getFieldKey()).append(": ").append(fv.getFieldValue()).append("\n")
-        );
-        return sb.toString();
     }
 }

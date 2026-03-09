@@ -1,9 +1,11 @@
 package kz.legeal.ease.backend.service.document;
 
+import kz.legeal.ease.backend.dto.CompleteDocumentResponseDto;
 import kz.legeal.ease.backend.dto.document.DocumentDto;
 import kz.legeal.ease.backend.dto.document.DocumentPreviewDto;
 import kz.legeal.ease.backend.request.document.CreateDocumentRequest;
 import kz.legeal.ease.backend.request.document.UpdateDocumentRequest;
+import kz.legeal.ease.backend.service.rule.result.RuleEngineResult;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,7 +19,9 @@ public interface DocumentService {
 
     DocumentDto update(Long docId, UpdateDocumentRequest req);
 
-    DocumentDto complete(Long docId);
+    CompleteDocumentResponseDto complete(Long docId);
+
+    RuleEngineResult getSuggestions(Long docId);
 
     void deleteDocument(Long docId);
 }
