@@ -29,7 +29,6 @@ public abstract class AbstractAuditingEntity {
 
     @PrePersist
     public void prePersist() {
-        final var currentUser = resolveCurrentUser();
         this.createdDate = LocalDateTime.now();
         this.updatedDate = LocalDateTime.now();
         this.createdBy = "system";
