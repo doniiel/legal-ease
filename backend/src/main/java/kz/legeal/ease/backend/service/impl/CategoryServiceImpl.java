@@ -14,10 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -32,62 +30,116 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto create(CategoryRequest request) {
-        final var curentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
 
-        if (categoryRepository.existsByNameIgnoreCase(request.getName())) {
+        log.info(
+                "Admin [{}] attempting to create category with name='{}'",
+                currentAdmin.getEmail(),
+                request.getName()
+        );
+
+        if (categoryRepository.existsByNameIgnoreCase(request.getName().trim())) {
+            log.warn(
+                    "Category creation failed: category with name='{}' already exists. RequestedBy={}",
+                    request.getName(),
+                    currentAdmin.getEmail()
+            );
             throw new CategoryAlreadyExistsException(request.getName());
         }
 
         final var category = Category.builder()
-                .name(request.getName())
+                .name(request.getName().trim())
                 .description(request.getDescription())
                 .build();
 
-        log.info("Admin {} created category: {}", curentAdmin.getEmail(), request.getName());
+        final var savedCategory = categoryRepository.save(category);
+
+        log.info(
+                "Category created successfully: id={}, name='{}', createdBy={}",
+                savedCategory.getId(),
+                savedCategory.getName(),
+                currentAdmin.getEmail()
+        );
         return categoryMapper.toDto(categoryRepository.save(category));
     }
 
     @Override
     @Transactional
     public CategoryDto update(Long id, CategoryRequest request) {
-        final var curentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
+        log.info(
+                "Admin [{}] attempting to update category id={}",
+                currentAdmin.getEmail(),
+                id
+        );
+
         final var category = findByIdOrThrow(id);
 
-        if (!category.getName().equalsIgnoreCase(request.getName())
-                && categoryRepository.existsByNameIgnoreCase(request.getName())) {
+        if (!category.getName().equalsIgnoreCase(request.getName().trim())
+                && categoryRepository.existsByNameIgnoreCase(request.getName().trim())) {
+            log.warn(
+                    "Category update failed: name '{}' already exists. categoryId={}, requestedBy={}",
+                    request.getName(),
+                    id,
+                    currentAdmin.getEmail()
+            );
             throw new CategoryAlreadyExistsException(request.getName());
         }
 
         category.setName(request.getName().trim());
         category.setDescription(request.getDescription());
 
-        log.info("Admin {} updated category id={}", curentAdmin.getEmail(), id);
+        final var updated = categoryRepository.save(category);
+
+        log.info(
+                "Category updated successfully: id={}, newName='{}', updatedBy={}",
+                updated.getId(),
+                updated.getName(),
+                currentAdmin.getEmail()
+        );
         return categoryMapper.toDto(categoryRepository.save(category));
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        final var currentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
+        log.info(
+                "Admin [{}] attempting to deactivate category id={}",
+                currentAdmin.getEmail(),
+                id
+        );
+
         final var category = findByIdOrThrow(id);
 
         if (categoryRepository.hasActiveTemplates(id)) {
+            log.warn(
+                    "Category deactivation blocked: category id={} has active templates. RequestedBy={}",
+                    id,
+                    currentAdmin.getEmail()
+            );
             throw new CategoryHasTemplatesException(id);
         }
 
         category.deactivate();
         categoryRepository.save(category);
 
-        log.info("Admin {} deactivated category id={}", currentAdmin.getEmail(), id);
+        log.info(
+                "Category deactivated successfully: id={}, deactivatedBy={}",
+                id,
+                currentAdmin.getEmail()
+        );
     }
 
 
     @Override
     @Transactional(readOnly = true)
     public Page<CategoryDto> getAll(Pageable pageable) {
+        log.debug(
+                "Fetching categories page: page={}, size={}",
+                pageable.getPageNumber(),
+                pageable.getPageSize()
+        );
         return categoryRepository.findAll(pageable)
                 .map(categoryMapper::toDto);
     }
@@ -95,12 +147,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public CategoryDto getById(Long id) {
+        log.debug("Fetching category by id={}", id);
         return categoryMapper.toDto(findByIdOrThrow(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CategoryDto> getActiveCategories() {
+        log.debug("Fetching active categories ordered by name");
         return categoryMapper.toDtoList(
                 categoryRepository.findAllByActiveTrueOrderByNameAsc()
         );

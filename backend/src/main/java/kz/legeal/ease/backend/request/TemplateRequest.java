@@ -20,7 +20,7 @@ public class TemplateRequest {
     private String description;
 
     @NotNull(message = "Category is required")
-    private Category category;
+    private Long categoryId;
 
     @Valid
     private List<TemplateFieldRequest> fields = new ArrayList<>();

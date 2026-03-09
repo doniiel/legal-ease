@@ -1,6 +1,5 @@
 package kz.legeal.ease.backend.service.impl;
 
-import kz.legeal.ease.backend.domain.User;
 import kz.legeal.ease.backend.dto.UserDto;
 import kz.legeal.ease.backend.enums.Role;
 import kz.legeal.ease.backend.exception.user.GuardException;
@@ -11,10 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Service
@@ -43,65 +40,64 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional
     public void revokeLawyerRole(Long userId) {
-        final var admin = requireCurrentAdmin();
+        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
         final var user = userService.findById(userId);
 
-        guardAgainstSelf(admin.getId(), userId);
+        guardAgainstSelf(currentAdmin.getId(), userId);
         guardAgainstAdmin(user);
 
         if (!user.hasRole(Role.LAWYER.name())) {
+            log.warn("Revoke LAWYER role failed: user id={} does not have LAWYER role. adminId={}",
+                    userId, currentAdmin.getId());
             throw new IllegalStateException("User id=" + userId + " does not have LAWYER role");
         }
 
         userRoleService.revokeRole(user, Role.LAWYER.name());
         userRoleService.ensureRoleActive(user, Role.USER.name());
 
-        lawyerApplicationService.archiveActiveApplication(user, admin);
+        lawyerApplicationService.archiveActiveApplication(user, currentAdmin);
         notificationService.sendLawyerRoleRevoked(user.getEmail());
 
-        log.info("Admin id={} revoked LAWYER role from user id={}", admin.getId(), userId);
+        log.info("LAWYER role revoked: adminId={} userId={}", currentAdmin.getId(), userId);
     }
 
 
     @Override
     @Transactional
     public void blockUser(Long userId) {
-        final var admin = requireCurrentAdmin();
+        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
         final var user = userService.findById(userId);
 
-        guardAgainstSelf(admin.getId(), userId);
+        guardAgainstSelf(currentAdmin.getId(), userId);
         guardAgainstAdmin(user);
 
         userService.blockUser(user);
-        log.info("Admin id={} blocked user id={}", admin.getId(), userId);
+        log.info("User blocked: adminId={} userId={}", currentAdmin.getId(), userId);
     }
 
     @Override
     @Transactional
     public void unblockUser(Long userId) {
-        final var admin = requireCurrentAdmin();
+        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
         final var user = userService.findById(userId);
 
-        guardAgainstSelf(admin.getId(), userId);
+        guardAgainstSelf(currentAdmin.getId(), userId);
         guardAgainstAdmin(user);
 
         userService.unblockUser(user);
-        log.info("Admin id={} unblocked user id={}", admin.getId(), userId);
-    }
-
-    private User requireCurrentAdmin() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+        log.info("User unblocked: adminId={} userId={}", currentAdmin.getId(), userId);
     }
 
     private void guardAgainstSelf(Long adminId, Long targetUserId) {
         if (adminId.equals(targetUserId)) {
+            log.warn("Operation denied: admin id={} attempted to modify own account", adminId);
             throw new GuardException("Cannot modify your own account");
         }
     }
 
     private void guardAgainstAdmin(kz.legeal.ease.backend.domain.User user) {
         if (user.hasRole(Role.ADMIN.name())) {
+            log.warn("Operation denied: attempt to modify admin account userId={}", user.getId());
             throw new GuardException("Cannot modify another admin account");
         }
     }

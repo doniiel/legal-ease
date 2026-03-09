@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("hasRole('USER')")
 @Tag(name = "User - Lawyer Applications", description = "Submit and track lawyer registration application")
 @RequiredArgsConstructor
-public class UserLawyerApplicationController {
+public class LawyerApplicationController {
 
     private final LawyerApplicationService lawyerApplicationService;
 

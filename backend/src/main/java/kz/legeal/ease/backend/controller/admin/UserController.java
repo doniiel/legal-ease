@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "Admin - User Management")
 @RequiredArgsConstructor
-public class AdminUserController {
+public class UserController {
 
     private final AdminUserService adminUserService;
 

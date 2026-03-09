@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 )
 @Validated
 @RequiredArgsConstructor
-public class AdminCategoryController {
+public class CategoryController {
 
     private final CategoryService categoryService;
 

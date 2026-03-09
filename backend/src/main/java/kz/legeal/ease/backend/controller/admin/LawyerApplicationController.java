@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Lawyer Applications", description = "Manage lawyer registration requests")
 @Validated
 @RequiredArgsConstructor
-public class AdminLawyerApplicationController {
+public class LawyerApplicationController {
 
     private final LawyerApplicationHandlerService handlerService;
 
@@ -36,7 +36,7 @@ public class AdminLawyerApplicationController {
     @ApiResponse(responseCode = "200", description = "List retrieved successfully")
     @GetMapping
     public ResponseEntity<Page<LawyerApplicationDto>> getHistory(
-            @ModelAttribute LawyerRequestSearchCriteria criteria,
+            @ParameterObject @ModelAttribute LawyerRequestSearchCriteria criteria,
             @ParameterObject @PageableDefault(
                     size = 10,
                     sort = "createdDate",
