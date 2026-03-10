@@ -54,16 +54,6 @@ public class LawyerApplication extends AbstractAuditingEntity {
     @Version
     private Long version;
 
-    @PrePersist
-    public void prePersist() {
-        if (status == null) {
-            status = Status.PENDING;
-        }
-        if (submittedAt == null) {
-            submittedAt = LocalDateTime.now();
-        }
-    }
-
     public boolean isPending() {
         return this.status == Status.PENDING;
     }

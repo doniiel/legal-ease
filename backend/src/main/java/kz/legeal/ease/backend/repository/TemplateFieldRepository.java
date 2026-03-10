@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TemplateFieldRepository extends JpaRepository<TemplateField, Long> {
+
+    void deleteByTemplateId(Long templateId);
 }

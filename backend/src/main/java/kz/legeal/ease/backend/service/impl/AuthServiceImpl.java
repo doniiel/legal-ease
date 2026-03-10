@@ -3,6 +3,7 @@ package kz.legeal.ease.backend.service.impl;
 import kz.legeal.ease.backend.dto.AuthResponseDto;
 import kz.legeal.ease.backend.enums.Role;
 import kz.legeal.ease.backend.enums.VerificationType;
+import kz.legeal.ease.backend.exception.AccountNotActivatedException;
 import kz.legeal.ease.backend.exception.auth.InvalidCredentialsException;
 import kz.legeal.ease.backend.jwt.PersonDetails;
 import kz.legeal.ease.backend.jwt.PersonDetailsService;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,8 @@ public class AuthServiceImpl implements AuthService {
             );
         } catch (BadCredentialsException e) {
             throw new InvalidCredentialsException();
+        } catch (LockedException e) {
+            throw new AccountNotActivatedException();
         }
 
         final var userDetails = (PersonDetails) personDetailsService

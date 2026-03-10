@@ -10,6 +10,7 @@ import kz.legeal.ease.backend.exception.template.TemplateForbiddenException;
 import kz.legeal.ease.backend.exception.template.TemplateNotFoundException;
 import kz.legeal.ease.backend.mapper.TemplateMapper;
 import kz.legeal.ease.backend.repository.CategoryRepository;
+import kz.legeal.ease.backend.repository.TemplateFieldRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.TemplateFieldRequest;
 import kz.legeal.ease.backend.request.TemplateRequest;
@@ -30,6 +31,7 @@ import java.util.List;
 public class TemplateCommandServiceImpl implements TemplateCommandService {
 
     private final TemplateRepository templateRepository;
+    private final TemplateFieldRepository templateFieldRepository;
     private final CategoryRepository categoryRepository;
     private final TemplateMapper templateMapper;
 
@@ -72,6 +74,7 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
 
         template.getTemplateFields().clear();
 
+        templateFieldRepository.flush();
 
         if (request.getFields() != null && !request.getFields().isEmpty()) {
             final var newFields = buildFields(request.getFields(), template, currentLawyer.getEmail());
