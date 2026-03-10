@@ -13,7 +13,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     boolean existsByNameIgnoreCase(String name);
 
-    Page<Category> findAll(Pageable pageable);
+    @Query("SELECT c FROM Category c ORDER BY c.active DESC")
+    Page<Category> findAllSorted(Pageable pageable);
 
     List<Category> findAllByActiveTrueOrderByNameAsc();
 

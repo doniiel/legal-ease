@@ -1,12 +1,15 @@
 package kz.legeal.ease.backend.service.tempate.impl;
 
+import kz.legeal.ease.backend.domain.Category;
 import kz.legeal.ease.backend.domain.Template;
 import kz.legeal.ease.backend.domain.TemplateField;
 import kz.legeal.ease.backend.dto.template.TemplateDto;
+import kz.legeal.ease.backend.exception.NotFoundException;
 import kz.legeal.ease.backend.exception.template.TemplateAlreadyPublishedException;
 import kz.legeal.ease.backend.exception.template.TemplateForbiddenException;
 import kz.legeal.ease.backend.exception.template.TemplateNotFoundException;
 import kz.legeal.ease.backend.mapper.TemplateMapper;
+import kz.legeal.ease.backend.repository.CategoryRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.TemplateFieldRequest;
 import kz.legeal.ease.backend.request.TemplateRequest;
@@ -27,6 +30,7 @@ import java.util.List;
 public class TemplateCommandServiceImpl implements TemplateCommandService {
 
     private final TemplateRepository templateRepository;
+    private final CategoryRepository categoryRepository;
     private final TemplateMapper templateMapper;
 
     @Override
@@ -35,10 +39,13 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
         final var currentLawyer = SecurityUtils.getCurrentUser()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
+        final var category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
+
         final var template = Template.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .category(request.getCategory())
+                .category(category)
                 .lawyer(currentLawyer)
                 .build();
 
@@ -56,10 +63,12 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
         final var currentLawyer = SecurityUtils.getCurrentUser()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         final var template = getOwnedDraftTemplate(templateId, currentLawyer.getId());
+        final var category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
 
         template.setTitle(request.getTitle());
         template.setDescription(request.getDescription());
-        template.setCategory(request.getCategory());
+        template.setCategory(category);
 
         template.getTemplateFields().clear();
 

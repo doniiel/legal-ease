@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user/documents")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER')")
-public class DocumentController {
+public class UserDocumentController {
 
     private final DocumentService documentService;
 

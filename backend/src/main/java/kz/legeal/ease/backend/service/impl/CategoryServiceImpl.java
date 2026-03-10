@@ -7,7 +7,8 @@ import kz.legeal.ease.backend.exception.category.CategoryHasTemplatesException;
 import kz.legeal.ease.backend.exception.category.CategoryNotFoundException;
 import kz.legeal.ease.backend.mapper.CategoryMapper;
 import kz.legeal.ease.backend.repository.CategoryRepository;
-import kz.legeal.ease.backend.request.CategoryRequest;
+import kz.legeal.ease.backend.request.category.CreateCategoryRequest;
+import kz.legeal.ease.backend.request.category.UpdateCategoryRequest;
 import kz.legeal.ease.backend.service.CategoryService;
 import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryDto create(CategoryRequest request) {
+    public CategoryDto create(CreateCategoryRequest request) {
         final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
 
         log.info(
@@ -65,7 +66,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryDto update(Long id, CategoryRequest request) {
+    public CategoryDto update(Long id, UpdateCategoryRequest request) {
         final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
         log.info(
                 "Admin [{}] attempting to update category id={}",
@@ -88,6 +89,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         category.setName(request.getName().trim());
         category.setDescription(request.getDescription());
+        category.setActive(request.isActive());
 
         final var updated = categoryRepository.save(category);
 
@@ -140,7 +142,7 @@ public class CategoryServiceImpl implements CategoryService {
                 pageable.getPageNumber(),
                 pageable.getPageSize()
         );
-        return categoryRepository.findAll(pageable)
+        return categoryRepository.findAllSorted(pageable)
                 .map(categoryMapper::toDto);
     }
 

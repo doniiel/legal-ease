@@ -8,7 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import kz.legeal.ease.backend.dto.CategoryDto;
-import kz.legeal.ease.backend.request.CategoryRequest;
+import kz.legeal.ease.backend.request.category.CreateCategoryRequest;
+import kz.legeal.ease.backend.request.category.UpdateCategoryRequest;
 import kz.legeal.ease.backend.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.*;
 )
 @Validated
 @RequiredArgsConstructor
-public class CategoryController {
+public class AdminCategoryController {
 
     private final CategoryService categoryService;
 
@@ -46,7 +47,7 @@ public class CategoryController {
     })
     @PostMapping
     public ResponseEntity<CategoryDto> create(
-            @RequestBody @Valid CategoryRequest request
+            @RequestBody @Valid CreateCategoryRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(categoryService.create(request));
@@ -107,7 +108,7 @@ public class CategoryController {
                     example = "1"
             )
             @NotNull @PathVariable Long id,
-            @RequestBody @Valid CategoryRequest request
+            @RequestBody @Valid UpdateCategoryRequest request
     ) {
         return ResponseEntity.ok(categoryService.update(id, request));
     }

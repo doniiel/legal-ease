@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Admin - Lawyer Applications", description = "Manage lawyer registration requests")
 @Validated
 @RequiredArgsConstructor
-public class LawyerApplicationController {
+public class AdminLawyerApplicationController {
 
     private final LawyerApplicationHandlerService handlerService;
 

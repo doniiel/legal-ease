@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 )
 @Validated
 @RequiredArgsConstructor
-public class TemplateController {
+public class UserTemplateController {
 
     private final TemplatePublicQueryService publicQueryService;
 
