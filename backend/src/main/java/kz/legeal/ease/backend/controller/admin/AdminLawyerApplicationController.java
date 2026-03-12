@@ -36,7 +36,7 @@ public class AdminLawyerApplicationController {
     @ApiResponse(responseCode = "200", description = "List retrieved successfully")
     @GetMapping
     public ResponseEntity<Page<LawyerApplicationDto>> getHistory(
-            @ParameterObject @ModelAttribute LawyerRequestSearchCriteria criteria,
+            @ModelAttribute LawyerRequestSearchCriteria criteria,
             @ParameterObject @PageableDefault(
                     size = 10,
                     sort = "createdDate",

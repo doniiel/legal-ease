@@ -12,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Service
@@ -58,11 +60,12 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Override
     @Transactional
     public void approveRequest(Long requestId) {
-        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
+        final var admin = SecurityUtils.getCurrentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
-        log.info("Admin id={} approving lawyer request id={}", currentAdmin.getId(), requestId);
+        log.info("Admin id={} approving lawyer request id={}", admin.getId(), requestId);
 
-        final var application = lawyerApplicationService.approveApplication(requestId, currentAdmin);
+        final var application = lawyerApplicationService.approveApplication(requestId, admin);
         final var user = application.getUser();
 
         userService.activateUser(user);
@@ -76,11 +79,12 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Override
     @Transactional
     public void rejectRequest(Long requestId, String reason) {
-        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
+        final var admin = SecurityUtils.getCurrentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
-        log.info("Admin id={} rejecting lawyer request id={}", currentAdmin.getId(), requestId);
+        log.info("Admin id={} rejecting lawyer request id={}", admin.getId(), requestId);
 
-        final var application = lawyerApplicationService.rejectApplication(requestId, currentAdmin, reason);
+        final var application = lawyerApplicationService.rejectApplication(requestId, admin, reason);
         final var user = application.getUser();
 
         notificationService.sendLawyerRejected(user.getEmail(), reason);
@@ -91,10 +95,11 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Override
     @Transactional
     public void deleteRequest(Long requestId) {
-        final var currentAdmin = SecurityUtils.getCurrentUserOrThrow();
+        final var admin = SecurityUtils.getCurrentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
-        log.warn("Admin id={} deleting lawyer request id={}", currentAdmin.getId(), requestId);
+        log.warn("Admin id={} deleting lawyer request id={}", admin.getId(), requestId);
 
-        lawyerApplicationService.deleteApplication(requestId, currentAdmin);
+        lawyerApplicationService.deleteApplication(requestId, admin);
     }
 }
