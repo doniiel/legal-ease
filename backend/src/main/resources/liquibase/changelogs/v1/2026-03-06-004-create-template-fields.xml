@@ -31,7 +31,6 @@
             <column name="active" type="BOOLEAN" defaultValueBoolean="true">
                 <constraints nullable="false"/>
             </column>
-
             <!-- Audit -->
             <column name="created_by" type="VARCHAR(100)">
                 <constraints nullable="false"/>
@@ -47,7 +46,7 @@
                 baseTableName="template_fields"
                 baseColumnNames="template_id"
                 constraintName="fk_template_field_template"
-                referencedTableName="template"
+                referencedTableName="templates"
                 referencedColumnNames="id"/>
 
         <addUniqueConstraint

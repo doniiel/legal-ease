@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 @Builder
 @Entity
+@Table(name = "templates")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Template extends AbstractAuditingEntity {

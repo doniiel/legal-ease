@@ -46,7 +46,7 @@
                 baseTableName="documents"
                 baseColumnNames="template_id"
                 constraintName="fk_document_template"
-                referencedTableName="template"
+                referencedTableName="templates"
                 referencedColumnNames="id"/>
     </changeSet>
 
