@@ -16,25 +16,18 @@ import java.time.LocalDateTime;
 public class VerificationCode extends AbstractAuditingEntity {
 
     @Id
-    @SequenceGenerator(
-            name = "verification_code_seq_gen",
-            sequenceName = "verification_code_seq_gen",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "verification_code_seq_gen"
-    )
+    @SequenceGenerator(name = "verification_code_seq_gen", sequenceName = "verification_code_seq_gen", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "verification_code_seq_gen")
     private Long id;
 
     private String email;
-
     private String code;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 30)
     private VerificationType type;
 
+    @Builder.Default
     private boolean used = false;
 
     private LocalDateTime expiredAt;

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        condition_rules — условные правила: если поле X == Y, то показать поле Z.
+        Используется в ConditionalHandler для динамического добавления полей.
+        Пример: conditionFieldKey="has_guarantor" operator="EQUALS"
+                conditionValue="true" targetFieldKey="guarantor_name"
+        Теперь наследует AbstractAuditingEntity → имеет поля аудита.
+    -->
+    <changeSet id="2026-03-13-005-create-condition-rules" author="dev">
+        <createTable tableName="condition_rules">
+
+            <!-- PK -->
+            <column name="id" type="BIGINT" defaultValueSequenceNext="condition_rule_seq">
+                <constraints primaryKey="true" primaryKeyName="pk_condition_rules" nullable="false"/>
+            </column>
+
+            <!-- FK → templates -->
+            <column name="template_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_condition_rules_template"
+                             references="templates(id)"/>
+            </column>
+
+            <!-- бизнес-поля -->
+            <column name="condition_field_key" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="operator" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="condition_value" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="target_field_key" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- аудит (добавлено после фикса extends AbstractAuditingEntity) -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <createIndex tableName="condition_rules" indexName="idx_condition_rules_template_active">
+            <column name="template_id"/>
+            <column name="active"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

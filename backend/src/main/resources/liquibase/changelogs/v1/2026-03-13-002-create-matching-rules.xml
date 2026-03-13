@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        matching_rules — правила сопоставления шаблонов с пользовательским запросом.
+        Связаны с template и category.
+        keywords — CSV строка ключевых слов ("аренда,жильё,договор").
+        base_score — базовый балл совпадения (0–100).
+    -->
+    <changeSet id="2026-03-13-002-create-matching-rules" author="dev">
+        <createTable tableName="matching_rules">
+
+            <!-- PK -->
+            <column name="id" type="BIGINT" defaultValueSequenceNext="matching_rule_seq">
+                <constraints primaryKey="true" primaryKeyName="pk_matching_rules" nullable="false"/>
+            </column>
+
+            <!-- FK → templates -->
+            <column name="template_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_matching_rules_template"
+                             references="templates(id)"/>
+            </column>
+
+            <!-- FK → categories -->
+            <column name="category_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_matching_rules_category"
+                             references="categories(id)"/>
+            </column>
+
+            <!-- бизнес-поля -->
+            <column name="keywords" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="base_score" type="INT" defaultValueNumeric="50">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- аудит (AbstractAuditingEntity) -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- индексы -->
+        <createIndex tableName="matching_rules" indexName="idx_matching_rules_template_active">
+            <column name="template_id"/>
+            <column name="active"/>
+        </createIndex>
+
+        <createIndex tableName="matching_rules" indexName="idx_matching_rules_category_active">
+            <column name="category_id"/>
+            <column name="active"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

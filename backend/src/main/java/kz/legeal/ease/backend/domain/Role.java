@@ -20,6 +20,7 @@ public class Role extends AbstractAuditingEntity {
     @Column(name = "code", unique = true, nullable = false, length = 50)
     private String code;
 
+    @Builder.Default
     @Column(name = "active", nullable = false)
     private boolean active = true;
 }

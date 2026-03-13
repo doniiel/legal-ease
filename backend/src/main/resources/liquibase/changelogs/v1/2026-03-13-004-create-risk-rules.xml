@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        risk_rules — правила обнаружения рисков в документе.
+        rule_code   — уникальный код риска (например "RENT_RISK_SHORT_TERM").
+        field_key   — NULL означает глобальный риск (не привязан к конкретному полю).
+        risk_level  — enum RiskLevel: HIGH, MEDIUM, LOW
+        Пример: fieldKey="lease_term" operator="LESS_THAN" expectedValue="6"
+                riskMessage="Краткосрочная аренда несёт риски" riskLevel="MEDIUM"
+    -->
+    <changeSet id="2026-03-13-004-create-risk-rules" author="dev">
+        <createTable tableName="risk_rules">
+
+            <!-- PK -->
+            <column name="id" type="BIGINT" defaultValueSequenceNext="risk_rule_seq">
+                <constraints primaryKey="true" primaryKeyName="pk_risk_rules" nullable="false"/>
+            </column>
+
+            <!-- FK → templates -->
+            <column name="template_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_risk_rules_template"
+                             references="templates(id)"/>
+            </column>
+
+            <!-- бизнес-поля -->
+            <column name="rule_code" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_risk_rule_code"/>
+            </column>
+
+            <!-- nullable — глобальный риск не привязан к полю -->
+            <column name="field_key" type="VARCHAR(100)"/>
+
+            <column name="operator" type="VARCHAR(30)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- nullable для IS_EMPTY / IS_NOT_EMPTY -->
+            <column name="expected_value" type="VARCHAR(500)"/>
+
+            <column name="risk_message" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- HIGH / MEDIUM / LOW -->
+            <column name="risk_level" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- аудит -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by" type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <createIndex tableName="risk_rules" indexName="idx_risk_rules_template_active">
+            <column name="template_id"/>
+            <column name="active"/>
+        </createIndex>
+
+        <!-- rule_code используется в поиске при AI enrichment -->
+        <createIndex tableName="risk_rules" indexName="idx_risk_rules_code">
+            <column name="rule_code"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

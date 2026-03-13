@@ -15,15 +15,8 @@ import java.time.LocalDateTime;
 public class RefreshToken extends AbstractAuditingEntity {
 
     @Id
-    @SequenceGenerator(
-            name = "refresh_token_seq",
-            sequenceName = "refresh_token_seq",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "refresh_token_seq"
-    )
+    @SequenceGenerator(name = "refresh_token_seq", sequenceName = "refresh_token_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "refresh_token_seq")
     private Long id;
 
     @Column(name = "token", unique = true, nullable = false)
@@ -36,6 +29,7 @@ public class RefreshToken extends AbstractAuditingEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Builder.Default
     @Column(name = "revoked", nullable = false)
     private boolean revoked = false;
 

@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Table(name = "users", indexes = {
         @Index(name = "idx_users_email", columnList = "email"),
-        @Index(name = "idx_users_iin", columnList = "iin")
+        @Index(name = "idx_users_iin",   columnList = "iin")
 })
 public class User extends AbstractAuditingEntity {
 
@@ -41,9 +41,11 @@ public class User extends AbstractAuditingEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Builder.Default
     @Column(name = "active", nullable = false)
     private boolean active = false;
 
+    @Builder.Default
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 

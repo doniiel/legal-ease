@@ -6,4 +6,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DocumentFieldValueDto {
+
+    private Long id;
+
+    private String fieldKey;
+
+    private String fieldValue;
 }

@@ -32,6 +32,7 @@ public class UserRole extends AbstractAuditingEntity {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Builder.Default
     @Column(name = "active", nullable = false)
     private boolean active = true;
 

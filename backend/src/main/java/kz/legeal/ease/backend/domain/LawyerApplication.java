@@ -16,15 +16,8 @@ import java.time.LocalDateTime;
 public class LawyerApplication extends AbstractAuditingEntity {
 
     @Id
-    @SequenceGenerator(
-            name = "lawyer_app_seq",
-            sequenceName = "lawyer_app_seq",
-            allocationSize = 1
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "lawyer_app_seq"
-    )
+    @SequenceGenerator(name = "lawyer_app_seq", sequenceName = "lawyer_app_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "lawyer_app_seq")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,10 +27,12 @@ public class LawyerApplication extends AbstractAuditingEntity {
     @Column(name = "license_number", nullable = false, length = 50, unique = true)
     private String licenseNumber;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status = Status.PENDING;
 
+    @Builder.Default
     @Column(name = "submitted_at", nullable = false)
     private LocalDateTime submittedAt = LocalDateTime.now();
 
@@ -54,16 +49,6 @@ public class LawyerApplication extends AbstractAuditingEntity {
     @Version
     private Long version;
 
-    @PrePersist
-    public void prePersist() {
-        if (status == null) {
-            status = Status.PENDING;
-        }
-        if (submittedAt == null) {
-            submittedAt = LocalDateTime.now();
-        }
-    }
-
     public boolean isPending() {
         return this.status == Status.PENDING;
     }
@@ -71,5 +56,4 @@ public class LawyerApplication extends AbstractAuditingEntity {
     public boolean isApproved() {
         return this.status == Status.APPROVED;
     }
-
 }
