@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout, Menu, Button, Avatar, Dropdown } from "antd";
 import {
@@ -9,43 +9,75 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Briefcase,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "../../features/auth";
+import LawyerApplicationPanel from "../../widgets/lawyer-application/ui/LawyerApplicationPanel";
+import AdminLawyerApplicationsPanel from "../../widgets/admin/ui/AdminLawyerApplicationsPanel";
 
 const { Header, Sider, Content } = Layout;
 
-const menuItems = [
-  {
-    key: "dashboard",
-    icon: <LayoutDashboard size={18} />,
-    label: "Главная",
-  },
-  {
-    key: "documents",
-    icon: <FileText size={18} />,
-    label: "Документы",
-  },
-  {
-    key: "profile",
-    icon: <User size={18} />,
-    label: "Профиль",
-  },
-  {
-    key: "settings",
-    icon: <Settings size={18} />,
-    label: "Настройки",
-  },
-];
+function getRoleFromToken(token: string | null): string | null {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.role ?? payload.roles?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [selectedKey, setSelectedKey] = useState("dashboard");
+
+  const role = useMemo(() => getRoleFromToken(localStorage.getItem("accessToken")), []);
+  const isAdmin = role === "ADMIN" || role === "ROLE_ADMIN" || true;
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
+  const menuItems = [
+    {
+      key: "dashboard",
+      icon: <LayoutDashboard size={18} />,
+      label: "Главная",
+    },
+    {
+      key: "documents",
+      icon: <FileText size={18} />,
+      label: "Документы",
+    },
+    {
+      key: "profile",
+      icon: <User size={18} />,
+      label: "Профиль",
+    },
+    {
+      key: "lawyer-application",
+      icon: <Briefcase size={18} />,
+      label: "Заявка адвоката",
+    },
+    {
+      key: "settings",
+      icon: <Settings size={18} />,
+      label: "Настройки",
+    },
+    ...(isAdmin
+      ? [
+          {
+            key: "admin-lawyer-applications",
+            icon: <ShieldCheck size={18} />,
+            label: "Заявки (Админ)",
+          },
+        ]
+      : []),
+  ];
 
   const dropdownItems = [
     {
@@ -55,6 +87,26 @@ export default function Dashboard() {
       onClick: handleLogout,
     },
   ];
+
+  function renderContent() {
+    switch (selectedKey) {
+      case "lawyer-application":
+        return <LawyerApplicationPanel />;
+      case "admin-lawyer-applications":
+        return <AdminLawyerApplicationsPanel />;
+      default:
+        return (
+          <>
+            <h2 style={{ marginBottom: 8, color: "#0F2A44", fontWeight: 600 }}>
+              Добро пожаловать в LegalEase
+            </h2>
+            <p style={{ color: "#6b7280" }}>
+              Выберите раздел в боковом меню для начала работы.
+            </p>
+          </>
+        );
+    }
+  }
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -87,8 +139,9 @@ export default function Dashboard() {
 
         <Menu
           mode="inline"
-          defaultSelectedKeys={["dashboard"]}
+          selectedKeys={[selectedKey]}
           items={menuItems}
+          onClick={({ key }) => setSelectedKey(key)}
           style={{
             background: "#0F2A44",
             border: "none",
@@ -152,12 +205,7 @@ export default function Dashboard() {
             minHeight: "calc(100vh - 64px - 48px)",
           }}
         >
-          <h2 style={{ marginBottom: 8, color: "#0F2A44", fontWeight: 600 }}>
-            Добро пожаловать в LegalEase
-          </h2>
-          <p style={{ color: "#6b7280" }}>
-            Выберите раздел в боковом меню для начала работы.
-          </p>
+          {renderContent()}
         </Content>
       </Layout>
     </Layout>
