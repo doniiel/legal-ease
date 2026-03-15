@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Sequence for required_doc_rules table.
+        required_doc_rules — правила "требуемых документов": юрист указывает,
+        какие дополнительные документы нужны пользователю для данного шаблона.
+        Может быть условным (conditionFieldKey) или безусловным (всегда требуется).
+    -->
+    <changeSet id="2026-03-15-001-create-required-doc-rule-sequence" author="dev">
+        <createSequence sequenceName="required_doc_rule_seq" startValue="1" incrementBy="1"/>
+    </changeSet>
+
+</databaseChangeLog>

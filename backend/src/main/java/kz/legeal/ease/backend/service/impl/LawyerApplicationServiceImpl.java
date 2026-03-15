@@ -4,10 +4,11 @@ import kz.legeal.ease.backend.domain.LawyerApplication;
 import kz.legeal.ease.backend.domain.User;
 import kz.legeal.ease.backend.dto.LawyerApplicationPreviewDto;
 import kz.legeal.ease.backend.enums.Status;
-import kz.legeal.ease.backend.exception.application.ApplicationAlreadyExistsException;
-import kz.legeal.ease.backend.exception.application.ApplicationAlreadyProcessedException;
-import kz.legeal.ease.backend.exception.application.ApplicationCannotBeDeletedException;
-import kz.legeal.ease.backend.exception.application.ApplicationNotFoundException;
+import kz.legeal.ease.backend.exception.BusinessRuleException;
+import kz.legeal.ease.backend.exception.NotFoundException;
+import kz.legeal.ease.backend.exception.UnauthorizedException;
+import org.springframework.http.HttpStatus;
+
 import kz.legeal.ease.backend.mapper.LawyerApplicationMapper;
 import kz.legeal.ease.backend.repository.LawyerApplicationRepository;
 import kz.legeal.ease.backend.request.LawyerApplicationRequest;
@@ -18,10 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,10 +37,10 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Transactional(readOnly = true)
     public LawyerApplicationPreviewDto getMyApplication() {
         final var currentUser = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
 
         final var application = repository.findTopByUserOrderByCreatedDateDesc(currentUser)
-                .orElseThrow(() -> new ApplicationNotFoundException(currentUser.getEmail()));
+                .orElseThrow(() -> new NotFoundException("LawyerApplication", currentUser.getEmail()));
 
         return mapper.toPreviewDto(application);
     }
@@ -50,7 +49,7 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Transactional(readOnly = true)
     public LawyerApplication findById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ApplicationNotFoundException(id));
+                .orElseThrow(() -> new NotFoundException("LawyerApplication", id));
     }
 
     @Override
@@ -63,9 +62,10 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Transactional
     public LawyerApplication approveApplication(Long requestId, User amdinuser) {
         final var application = repository.findById(requestId)
-                .orElseThrow(() -> new ApplicationNotFoundException(requestId));
+                .orElseThrow(() -> new NotFoundException("LawyerApplication", requestId));
 
-        if (!application.isPending()) throw new ApplicationAlreadyProcessedException(requestId);
+        if (!application.isPending()) throw new BusinessRuleException(
+                "Application id=" + requestId + " has already been processed", "APP_003");
 
         application.setStatus(Status.APPROVED);
         application.setReviewer(amdinuser);
@@ -79,9 +79,10 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Transactional
     public LawyerApplication rejectApplication(Long requestId, User amdinuser, String reason) {
         final var application = repository.findById(requestId)
-                .orElseThrow(() -> new ApplicationNotFoundException(requestId));
+                .orElseThrow(() -> new NotFoundException("LawyerApplication", requestId));
 
-        if (!application.isPending()) throw new ApplicationAlreadyProcessedException(requestId);
+        if (!application.isPending()) throw new BusinessRuleException(
+                "Application id=" + requestId + " has already been processed", "APP_003");
 
         application.setStatus(Status.REJECTED);
         application.setReviewer(amdinuser);
@@ -97,9 +98,10 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Transactional
     public LawyerApplication deleteApplication(Long requestId, User adminuser) {
         final var application = repository.findById(requestId)
-                .orElseThrow(() -> new ApplicationNotFoundException(requestId));
+                .orElseThrow(() -> new NotFoundException("LawyerApplication", requestId));
 
-        if (application.isApproved()) throw new ApplicationCannotBeDeletedException(requestId);
+        if (application.isApproved()) throw new BusinessRuleException(
+                "Cannot delete approved application id=" + requestId, "APP_004");
 
         application.setStatus(Status.DELETED);
         application.setReviewer(adminuser);
@@ -113,13 +115,14 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Transactional
     public LawyerApplicationPreviewDto submitApplication(LawyerApplicationRequest request) {
         final var currentUser = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
 
         final var alreadyExists = repository.existsByUserAndStatusIn(
                 currentUser, List.of(Status.PENDING, Status.APPROVED)
         );
 
-        if (alreadyExists) throw new ApplicationAlreadyExistsException();
+        if (alreadyExists) throw new BusinessRuleException(
+                "You already have an active or approved application", "APP_002", HttpStatus.CONFLICT);
 
         final var application = LawyerApplication.builder()
                 .user(currentUser)

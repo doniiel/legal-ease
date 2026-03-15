@@ -2,8 +2,7 @@ package kz.legeal.ease.backend.service.impl;
 
 import kz.legeal.ease.backend.domain.VerificationCode;
 import kz.legeal.ease.backend.enums.VerificationType;
-import kz.legeal.ease.backend.exception.verification.InvalidVerificationCodeException;
-import kz.legeal.ease.backend.exception.verification.VerificationCodeExpiredException;
+import kz.legeal.ease.backend.exception.ValidationException;
 import kz.legeal.ease.backend.repository.VerificationRepository;
 import kz.legeal.ease.backend.service.VerificationService;
 import kz.legeal.ease.backend.util.CodeUtils;
@@ -44,11 +43,14 @@ public class VerificationServiceImpl implements VerificationService {
     public void verify(String email, String activationCode, VerificationType type) {
         final var code = repository
                 .findTopByEmailAndTypeAndUsedFalseOrderByCreatedDateDesc(email, type)
-                .orElseThrow(VerificationCodeExpiredException::new);
+                .orElseThrow(() -> new ValidationException(
+                        "Verification code not found or already used", "VERIFY_002"));
 
-        if (code.isExpired()) throw new VerificationCodeExpiredException();
+        if (code.isExpired())
+            throw new ValidationException("Verification code has expired", "VERIFY_002");
 
-        if (!code.getCode().equals(activationCode)) throw new InvalidVerificationCodeException();
+        if (!code.getCode().equals(activationCode))
+            throw new ValidationException("Invalid verification code", "VERIFY_003");
 
         code.setUsed(true);
         repository.save(code);

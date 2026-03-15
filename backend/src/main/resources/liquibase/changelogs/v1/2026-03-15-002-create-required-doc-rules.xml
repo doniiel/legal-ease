@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        required_doc_rules — правила требуемых документов.
+
+        Используется в RequiredDocsHandler для определения списка поддерживающих
+        документов, которые пользователь должен предоставить вместе с основным документом.
+
+        Логика:
+        - Если condition_field_key IS NULL → документ требуется всегда (безусловно).
+        - Если condition_field_key NOT NULL → документ требуется только при выполнении условия:
+            fieldValues[condition_field_key] (condition_operator) condition_value
+
+        Пример:
+            required_doc_title = "Справка о доходах"
+            reason = "Необходима для подтверждения платёжеспособности"
+            condition_field_key = "rental_duration_months"
+            condition_operator = "GREATER_THAN"
+            condition_value = "12"
+            mandatory = true
+        → При аренде более 12 месяцев всегда требуется справка о доходах.
+
+        mandatory = true  → жёсткое требование (нельзя продолжить без документа)
+        mandatory = false → рекомендация (можно продолжить, но рекомендуется предоставить)
+    -->
+    <changeSet id="2026-03-15-002-create-required-doc-rules" author="dev">
+        <createTable tableName="required_doc_rules">
+
+            <!-- PK -->
+            <column name="id" type="BIGINT" defaultValueSequenceNext="required_doc_rule_seq">
+                <constraints primaryKey="true" primaryKeyName="pk_required_doc_rules" nullable="false"/>
+            </column>
+
+            <!-- FK → templates (к какому шаблону относится это правило) -->
+            <column name="template_id" type="BIGINT">
+                <constraints nullable="false"
+                             foreignKeyName="fk_required_doc_rules_template"
+                             references="templates(id)"/>
+            </column>
+
+            <!-- Название требуемого документа (отображается пользователю) -->
+            <column name="required_doc_title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Объяснение для пользователя: зачем нужен этот документ -->
+            <column name="reason" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Условие применения правила (nullable = безусловное требование) -->
+            <column name="condition_field_key" type="VARCHAR(100)"/>
+            <column name="condition_operator"  type="VARCHAR(30)"/>
+            <column name="condition_value"     type="VARCHAR(500)"/>
+
+            <!-- true = жёсткое требование; false = рекомендация -->
+            <column name="mandatory" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- аудит (AbstractAuditingEntity) -->
+            <column name="created_by" type="VARCHAR(100)" defaultValue="system">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_by"   type="VARCHAR(100)"/>
+            <column name="updated_date" type="TIMESTAMP"/>
+
+        </createTable>
+
+        <!-- Индекс для быстрой выборки по шаблону + active -->
+        <createIndex tableName="required_doc_rules"
+                     indexName="idx_required_doc_rules_template_active">
+            <column name="template_id"/>
+            <column name="active"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="required_doc_rules"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

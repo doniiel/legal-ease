@@ -4,7 +4,7 @@ package kz.legeal.ease.backend.service.tempate.impl;
 import kz.legeal.ease.backend.dto.template.TemplateDto;
 import kz.legeal.ease.backend.dto.template.TemplatePreviewDto;
 import kz.legeal.ease.backend.enums.TemplateStatus;
-import kz.legeal.ease.backend.exception.template.TemplateNotFoundException;
+import kz.legeal.ease.backend.exception.NotFoundException;
 import kz.legeal.ease.backend.mapper.TemplateMapper;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.service.tempate.TemplatePublicQueryService;
@@ -34,10 +34,10 @@ public class TemplatePublicQueryServiceImpl implements TemplatePublicQueryServic
     @Transactional(readOnly = true)
     public TemplateDto getPublishedTemplateById(Long templateId) {
         final var template = templateRepository.findByIdAndActive(templateId)
-                .orElseThrow(() -> new TemplateNotFoundException(templateId));
+                .orElseThrow(() -> new NotFoundException("Template", templateId));
 
         if (!template.isPublished()) {
-            throw new TemplateNotFoundException(templateId);
+            throw new NotFoundException("Template", templateId);
         }
 
         return templateMapper.toDto(template);

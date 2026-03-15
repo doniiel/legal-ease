@@ -1,5 +1,6 @@
 package kz.legeal.ease.backend.service.impl;
 
+import kz.legeal.ease.backend.config.CacheConfig;
 import kz.legeal.ease.backend.domain.RiskRule;
 import kz.legeal.ease.backend.domain.Template;
 import kz.legeal.ease.backend.dto.RiskRuleDto;
@@ -10,6 +11,8 @@ import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.RiskRuleRequest;
 import kz.legeal.ease.backend.service.RiskRuleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ public class RiskRuleServiceImpl implements RiskRuleService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.RISK_RULES, key = "#templateId")
     public List<RiskRuleDto> getAllByTemplate(Long templateId) {
         return repository.findAllByTemplateIdAndActiveTrue(templateId).stream()
                 .map(mapper::toDto)
@@ -33,9 +37,9 @@ public class RiskRuleServiceImpl implements RiskRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.RISK_RULES, key = "#request.templateId")
     public RiskRuleDto create(RiskRuleRequest request) {
         final var template = findTemplate(request.getTemplateId());
-
         final var rule = RiskRule.builder()
                 .template(template)
                 .ruleCode(request.getRuleCode())
@@ -46,7 +50,6 @@ public class RiskRuleServiceImpl implements RiskRuleService {
                 .riskLevel(request.getRiskLevel())
                 .active(true)
                 .build();
-
         return mapper.toDto(repository.save(rule));
     }
 
@@ -54,6 +57,7 @@ public class RiskRuleServiceImpl implements RiskRuleService {
     @Transactional
     public RiskRuleDto update(Long id, RiskRuleRequest request) {
         final var rule = findOrThrow(id);
+        evictCache(rule.getTemplate().getId());
 
         rule.setRuleCode(request.getRuleCode());
         rule.setFieldKey(request.getFieldKey());
@@ -69,17 +73,21 @@ public class RiskRuleServiceImpl implements RiskRuleService {
     @Transactional
     public void delete(Long id) {
         final var rule = findOrThrow(id);
+        evictCache(rule.getTemplate().getId());
         rule.setActive(false);
         repository.save(rule);
     }
 
+    @CacheEvict(value = CacheConfig.RISK_RULES, key = "#templateId")
+    public void evictCache(Long templateId) {}
+
     private RiskRule findOrThrow(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(RiskRule.class.getName(), id));
+                .orElseThrow(() -> new NotFoundException("RiskRule", id));
     }
 
     private Template findTemplate(Long id) {
         return templateRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(Template.class.getName(), id));
+                .orElseThrow(() -> new NotFoundException("Template", id));
     }
 }

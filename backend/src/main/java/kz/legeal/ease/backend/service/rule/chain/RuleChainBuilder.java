@@ -5,30 +5,71 @@ import kz.legeal.ease.backend.service.rule.handler.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/**
+ * Factory that assembles the three rule-engine processing chains.
+ *
+ * <p>Chains:
+ * <ol>
+ *   <li><b>Matching</b>: aiUnderstanding → matching → aiRanking</li>
+ *   <li><b>Field Suggestion</b>: conditional → requiredDocs → aiDocsExplainer → aiFieldSuggestion</li>
+ *   <li><b>Complete</b>: validation → risk → requiredDocs → aiDocsExplainer → aiRiskExplainer → aiFinalReview</li>
+ * </ol>
+ */
 @Component
 @RequiredArgsConstructor
 public class RuleChainBuilder {
 
-    private final AIUnderstandingHandler  aiUnderstandingHandler;
-    private final MatchingHandler         matchingHandler;
-    private final AiRankingHandler        aiRankingHandler;
-    private final ValidationHandler       validationHandler;
-    private final RiskHandler             riskHandler;
-    private final ConditionalHandler      conditionalHandler;
-    private final AiFieldSuggestionHandler aiFieldSuggestionHandler;
-    private final AiRiskExplainerHandler  aiRiskExplainerHandler;
-    private final AiFinalReviewHandler    aiFinalReviewHandler;
+    private final AIUnderstandingHandler   aiUnderstandingHandler;
+    private final MatchingHandler          matchingHandler;
+    private final AiRankingHandler         aiRankingHandler;
 
+    private final ValidationHandler        validationHandler;
+    private final RiskHandler              riskHandler;
+    private final ConditionalHandler       conditionalHandler;
+
+    // Required Documents pipeline — inserted into both suggestion and complete chains
+    private final RequiredDocsHandler      requiredDocsHandler;
+    private final AIDocsExplainerHandler   aiDocsExplainerHandler;
+
+    private final AiFieldSuggestionHandler aiFieldSuggestionHandler;
+    private final AiRiskExplainerHandler   aiRiskExplainerHandler;
+    private final AiFinalReviewHandler     aiFinalReviewHandler;
+
+    /**
+     * Chain for template-matching flow (POST /api/user/matching).
+     * Intent detection → keyword matching → AI score re-ranking.
+     */
     public RuleHandler buildMatchingChain() {
         return chain(aiUnderstandingHandler, matchingHandler, aiRankingHandler);
     }
 
+    /**
+     * Chain for field-suggestion flow (GET /api/user/documents/{id}/suggestions).
+     * Conditional field resolution → required documents + AI explanation → AI field suggestions.
+     */
     public RuleHandler buildFieldSuggestionChain() {
-        return chain(conditionalHandler, aiFieldSuggestionHandler);
+        return chain(
+                conditionalHandler,
+                requiredDocsHandler,
+                aiDocsExplainerHandler,
+                aiFieldSuggestionHandler
+        );
     }
 
+    /**
+     * Chain for document-completion flow (POST /api/user/documents/{id}/complete).
+     * Validation → risk detection → required documents + AI explanation
+     *           → AI risk enrichment → AI final legal review.
+     */
     public RuleHandler buildCompleteChain() {
-        return chain(validationHandler, riskHandler, aiRiskExplainerHandler, aiFinalReviewHandler);
+        return chain(
+                validationHandler,
+                riskHandler,
+                requiredDocsHandler,
+                aiDocsExplainerHandler,
+                aiRiskExplainerHandler,
+                aiFinalReviewHandler
+        );
     }
 
     private RuleHandler chain(RuleHandler first, RuleHandler... rest) {

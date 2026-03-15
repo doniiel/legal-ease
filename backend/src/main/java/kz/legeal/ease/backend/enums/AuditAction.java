@@ -1,0 +1,43 @@
+package kz.legeal.ease.backend.enums;
+
+public enum AuditAction {
+    // Document lifecycle
+    DOCUMENT_CREATED,
+    DOCUMENT_UPDATED,
+    DOCUMENT_VALIDATED,
+    DOCUMENT_COMPLETED,
+    DOCUMENT_ARCHIVED,
+    DOCUMENT_RESTORED,
+    DOCUMENT_DELETED,
+
+    // Document access
+    DOCUMENT_DOWNLOADED,
+    DOCUMENT_VERSION_DOWNLOADED,
+    DOCUMENT_SHARED,
+    DOCUMENT_SHARE_REVOKED,
+    DOCUMENT_AI_ANALYZED,
+
+    // Lawyer review
+    DOCUMENT_REVIEWED,
+
+    // User management
+    USER_BLOCKED,
+    USER_UNBLOCKED,
+    USER_ROLE_REVOKED,
+
+    // Lawyer application
+    LAWYER_APPLICATION_SUBMITTED,
+    LAWYER_APPLICATION_APPROVED,
+    LAWYER_APPLICATION_REJECTED,
+
+    // Rule engine
+    RULE_TOGGLED,
+    RULE_CREATED,
+    RULE_UPDATED,
+    RULE_DELETED,
+
+    // Clause knowledge base
+    CLAUSE_CREATED,
+    CLAUSE_UPDATED,
+    CLAUSE_DELETED
+}

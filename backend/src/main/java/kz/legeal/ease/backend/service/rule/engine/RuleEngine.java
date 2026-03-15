@@ -9,6 +9,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+/**
+ * Entry point for the rule engine — delegates to the appropriate handler chain.
+ *
+ * <h2>Three processing pipelines</h2>
+ * <ul>
+ *   <li>{@link #match} — Template matching (intent detection → keyword scoring → AI re-ranking)</li>
+ *   <li>{@link #suggestFields} — Field suggestions (conditional fields → required docs → AI hints)</li>
+ *   <li>{@link #complete} — Document completion (validation → risk → required docs → AI final review)</li>
+ * </ul>
+ *
+ * <p>Each pipeline is assembled as a Chain-of-Responsibility by {@link RuleChainBuilder}.
+ * Handlers communicate through {@link kz.legeal.ease.backend.service.rule.chain.RuleChainContext}.
+ * Results are mapped into a unified {@link RuleEngineResult}.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor

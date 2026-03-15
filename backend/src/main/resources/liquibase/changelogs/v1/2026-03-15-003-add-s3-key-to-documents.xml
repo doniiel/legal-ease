@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Add s3_object_key column to documents.
+        Stores the S3 / MinIO object key of the generated PDF file so that
+        the backend can retrieve or generate presigned download URLs.
+
+        Nullable because:
+        - DRAFT documents have no PDF yet.
+        - COMPLETED documents get the key set after successful PDF upload.
+        - If the storage backend is temporarily unavailable, the document is
+          still marked COMPLETED but s3_object_key remains null until a retry.
+    -->
+    <changeSet id="2026-03-15-003-add-s3-key-to-documents" author="dev">
+
+        <addColumn tableName="documents">
+            <column name="s3_object_key" type="VARCHAR(512)"
+                    remarks="S3/MinIO object key of the generated PDF (null until upload succeeds)"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="documents" columnName="s3_object_key"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

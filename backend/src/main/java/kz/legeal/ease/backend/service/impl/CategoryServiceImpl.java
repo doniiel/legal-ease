@@ -2,14 +2,14 @@ package kz.legeal.ease.backend.service.impl;
 
 import kz.legeal.ease.backend.domain.Category;
 import kz.legeal.ease.backend.dto.CategoryDto;
-import kz.legeal.ease.backend.exception.category.CategoryAlreadyExistsException;
-import kz.legeal.ease.backend.exception.category.CategoryHasTemplatesException;
-import kz.legeal.ease.backend.exception.category.CategoryNotFoundException;
+import kz.legeal.ease.backend.exception.BusinessRuleException;
+import kz.legeal.ease.backend.exception.NotFoundException;
 import kz.legeal.ease.backend.mapper.CategoryMapper;
 import kz.legeal.ease.backend.repository.CategoryRepository;
 import kz.legeal.ease.backend.request.category.CreateCategoryRequest;
 import kz.legeal.ease.backend.request.category.UpdateCategoryRequest;
 import kz.legeal.ease.backend.service.CategoryService;
+import kz.legeal.ease.backend.exception.UnauthorizedException;
 import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -34,10 +33,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDto create(CreateCategoryRequest request) {
         final var curentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
 
         if (categoryRepository.existsByNameIgnoreCase(request.getName())) {
-            throw new CategoryAlreadyExistsException(request.getName());
+            throw new BusinessRuleException(
+                    "Category '" + request.getName() + "' already exists", "CAT_001", HttpStatus.CONFLICT);
         }
 
         final var category = Category.builder()
@@ -53,12 +53,13 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDto update(Long id, UpdateCategoryRequest request) {
         final var curentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         final var category = findByIdOrThrow(id);
 
         if (!category.getName().equalsIgnoreCase(request.getName())
                 && categoryRepository.existsByNameIgnoreCase(request.getName())) {
-            throw new CategoryAlreadyExistsException(request.getName());
+            throw new BusinessRuleException(
+                    "Category '" + request.getName() + "' already exists", "CAT_001", HttpStatus.CONFLICT);
         }
 
         category.setName(request.getName().trim());
@@ -73,11 +74,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public void delete(Long id) {
         final var currentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         final var category = findByIdOrThrow(id);
 
         if (categoryRepository.hasActiveTemplates(id)) {
-            throw new CategoryHasTemplatesException(id);
+            throw new BusinessRuleException(
+                    "Cannot delete category id=" + id + " — it still has active templates", "CAT_002");
         }
 
         category.deactivate();
@@ -110,6 +112,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     private Category findByIdOrThrow(Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException(id));
+                .orElseThrow(() -> new NotFoundException("Category", id));
     }
 }

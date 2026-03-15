@@ -65,6 +65,32 @@ spring:
     access-exp-min: ${SPRING_JWT_ACCESS_EXP_MIN:30}
     refresh-exp-min: ${SPRING_JWT_REFRESH_EXP_MIN:1440}
 
+app:
+  share:
+    base-url: ${APP_SHARE_BASE_URL:http://localhost:9191}
+    expiry-hours: ${APP_SHARE_EXPIRY_HOURS:24}
+    # How often (ms) the share-cleanup scheduler runs. Default: 1 hour.
+    cleanup-interval-ms: ${APP_SHARE_CLEANUP_INTERVAL_MS:3600000}
+  rate-limit:
+    ai:
+      requests-per-minute: ${APP_RATE_LIMIT_AI_RPM:10}
+    complete:
+      requests-per-hour: ${APP_RATE_LIMIT_COMPLETE_RPH:20}
+
+storage:
+  s3:
+    # Internal endpoint used for upload/download operations (Docker: http://minio:9000)
+    endpoint: ${STORAGE_S3_ENDPOINT:http://localhost:9000}
+    # Public endpoint used in presigned URLs returned to clients (always localhost for local dev)
+    public-endpoint: ${STORAGE_S3_PUBLIC_ENDPOINT:http://localhost:9000}
+    access-key: ${STORAGE_S3_ACCESS_KEY:minio}
+    secret-key: ${STORAGE_S3_SECRET_KEY:minio123}
+    bucket: ${STORAGE_S3_BUCKET:documents}
+    # Presigned URL validity in minutes
+    presign-expiry-minutes: 60
+    # Maximum file upload size (default: 20 MB)
+    max-file-size-bytes: ${STORAGE_S3_MAX_FILE_SIZE:20971520}
+
 management:
   endpoints:
     web:

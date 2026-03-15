@@ -164,12 +164,22 @@ public class ClaudeRuleAIService implements RuleAiService {
 
     @Override
     public ReviewResult finalReview(String documentText, RuleChainContext context) {
+        // Include already-detected risks so the final review is contextually aware
+        final var risksSummary = context.getRisks().isEmpty()
+                ? "Риски не обнаружены."
+                : context.getRisks().stream()
+                        .map(r -> "[%s] %s".formatted(r.getLevel(), r.getMessage()))
+                        .reduce("", (a, b) -> a + "\n- " + b);
+
         final var prompt = """
                 Ты — опытный юрист. Проведи финальную проверку документа.
-                
+
                 ДОКУМЕНТ:
                 %s
-                
+
+                УЖЕ ОБНАРУЖЕННЫЕ РИСКИ (не дублируй их, учти при анализе):
+                %s
+
                 Проверь: юридическую корректность, скрытые риски, соответствие законодательству Казахстана.
                 Ответь СТРОГО в JSON без markdown:
                 {
@@ -177,7 +187,7 @@ public class ClaudeRuleAIService implements RuleAiService {
                   "summary": "Документ юридически корректен",
                   "recommendation": "Рекомендуем нотариально заверить"
                 }
-                """.formatted(documentText);
+                """.formatted(documentText, risksSummary);
 
         try {
             final var json = call(prompt);
@@ -190,6 +200,69 @@ public class ClaudeRuleAIService implements RuleAiService {
         } catch (Exception e) {
             log.warn("finalReview failed: {}", e.getMessage());
             return new ReviewResult(true, "", "");
+        }
+    }
+
+    @Override
+    public DocsExplainResult explainRequiredDocs(RuleChainContext context) {
+        final var docs = context.getRequiredDocuments().stream()
+                .map(d -> "- \"%s\" (обязателен: %s): %s"
+                        .formatted(d.getTitle(), d.isMandatory() ? "да" : "нет", d.getReason()))
+                .toList();
+
+        final var fieldKeys = context.getInput().getFieldValues() != null
+                ? context.getInput().getFieldValues().keySet().toString()
+                : "[]";
+
+        final var prompt = """
+                Ты — юридический ассистент. Пользователь заполняет юридический документ (поля: %s).
+                Для завершения необходимы следующие дополнительные документы:
+                %s
+
+                Объясни каждый документ простым языком (1-2 предложения), почему он необходим
+                по законодательству Казахстана и что будет, если его не предоставить.
+                Ответь СТРОГО в JSON без markdown:
+                {
+                  "explanations": {
+                    "Название документа 1": "Объяснение...",
+                    "Название документа 2": "Объяснение..."
+                  }
+                }
+                """.formatted(fieldKeys, String.join("\n", docs));
+
+        try {
+            final var json = call(prompt);
+            final var node = objectMapper.readTree(json);
+            final Map<String, String> explanations = objectMapper.convertValue(
+                    node.get("explanations"),
+                    new TypeReference<Map<String, String>>() {}
+            );
+            return new DocsExplainResult(explanations != null ? explanations : Map.of());
+        } catch (Exception e) {
+            log.warn("explainRequiredDocs failed: {}", e.getMessage());
+            return new DocsExplainResult(Map.of());
+        }
+    }
+
+    @Override
+    public String explainClause(String clauseText) {
+        final var prompt = """
+                Ты — юридический ассистент для Казахстана.
+                Объясни следующий пункт юридического документа простым языком для обычного человека.
+                Укажи: что он означает, какие права/обязанности он создаёт, на что обратить внимание.
+                Текст пункта: "%s"
+                Ответь СТРОГО в JSON без markdown:
+                {
+                  "explanation": "Объяснение на русском языке..."
+                }
+                """.formatted(clauseText);
+        try {
+            final var json = call(prompt);
+            final var node = objectMapper.readTree(json);
+            return node.get("explanation").asText();
+        } catch (Exception e) {
+            log.warn("explainClause failed: {}", e.getMessage());
+            return "Не удалось получить объяснение. Пожалуйста, попробуйте позже.";
         }
     }
 

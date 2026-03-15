@@ -2,7 +2,7 @@ package kz.legeal.ease.backend.service.impl;
 
 import kz.legeal.ease.backend.domain.User;
 import kz.legeal.ease.backend.domain.UserRole;
-import kz.legeal.ease.backend.exception.role.RoleNotFoundException;
+import kz.legeal.ease.backend.exception.NotFoundException;
 import kz.legeal.ease.backend.repository.RoleRepository;
 import kz.legeal.ease.backend.repository.UserRepository;
 import kz.legeal.ease.backend.service.UserRoleService;
@@ -24,7 +24,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     public void assignRole(User user, String roleCode) {
         final var role = roleRepository.findByCode(roleCode)
-                .orElseThrow(() -> new RoleNotFoundException(roleCode));
+                .orElseThrow(() -> new NotFoundException("Role", roleCode));
 
         final var alreadyAssigned = user.getUserRoles().stream()
                 .anyMatch(ur -> ur.getRole().getCode().equals(roleCode) && ur.isActive());

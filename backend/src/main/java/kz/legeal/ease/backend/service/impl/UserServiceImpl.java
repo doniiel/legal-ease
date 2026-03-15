@@ -2,8 +2,9 @@ package kz.legeal.ease.backend.service.impl;
 
 import kz.legeal.ease.backend.domain.User;
 import kz.legeal.ease.backend.enums.VerificationType;
-import kz.legeal.ease.backend.exception.user.EmailAlreadyExistsException;
-import kz.legeal.ease.backend.exception.user.UserNotFoundException;
+import kz.legeal.ease.backend.exception.BusinessRuleException;
+import kz.legeal.ease.backend.exception.NotFoundException;
+import org.springframework.http.HttpStatus;
 import kz.legeal.ease.backend.repository.UserRepository;
 import kz.legeal.ease.backend.request.RegisterRequest;
 import kz.legeal.ease.backend.service.UserService;
@@ -39,7 +40,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) throw new EmailAlreadyExistsException(request.getEmail());
+        if (userRepository.existsByEmail(request.getEmail()))
+            throw new BusinessRuleException(
+                    "Email '" + request.getEmail() + "' is already registered", "USER_002", HttpStatus.CONFLICT);
 
         final var fio = buildFio(request);
 
@@ -63,7 +66,7 @@ public class UserServiceImpl implements UserService {
     public void confirmAccount(String email, String code) {
         verificationService.verify(email, code, VerificationType.REGISTER);
         final var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+                .orElseThrow(() -> new NotFoundException("User", email));
 
         user.setActive(true);
         userRepository.save(user);
@@ -75,7 +78,7 @@ public class UserServiceImpl implements UserService {
         verificationService.verify(email, code, VerificationType.RESET_PASSWORD);
 
         final var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+                .orElseThrow(() -> new NotFoundException("User", email));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setLastPasswordModifiedDate(LocalDateTime.now());
@@ -106,7 +109,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User findById(Long id) {
         return userRepository.findByIdWithRoles(id)
-                .orElseThrow(() -> new UserNotFoundException(id));
+                .orElseThrow(() -> new NotFoundException("User", id));
     }
 
     @Override

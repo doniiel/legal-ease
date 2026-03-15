@@ -1,104 +1,261 @@
-# ⚖️ LegalEase
+# LegalEase
 
-> AI-powered legal document platform — helping users understand, create and validate legal documents in Kazakhstan.
+> AI-powered legal document platform for Kazakhstan — helping users create, validate, and understand legal documents with lawyer-authored templates and a multi-stage rule engine.
 
 [![Java](https://img.shields.io/badge/Java-21-orange?logo=openjdk)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-brightgreen?logo=springboot)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)](https://www.docker.com/)
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#overview)
-- [Architecture](#architecture)
+- [Project Overview](#project-overview)
+- [Features](#features)
 - [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
+- [System Architecture](#system-architecture)
+- [Document Lifecycle](#document-lifecycle)
+- [Rule Engine Pipeline](#rule-engine-pipeline)
+- [AI Integration](#ai-integration)
+- [S3 / MinIO Storage](#s3--minio-storage)
 - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Local Development](#local-development)
-    - [Full Docker Setup](#full-docker-setup)
+  - [Prerequisites](#prerequisites)
+  - [Local Development](#local-development)
+  - [Full Docker Setup](#full-docker-setup)
 - [Environment Variables](#environment-variables)
 - [API Documentation](#api-documentation)
 - [Database Migrations](#database-migrations)
-- [Contributing](#contributing)
+- [Team](#team)
 
 ---
 
-## Overview
+## Project Overview
 
-LegalEase is a platform that bridges the gap between complex legal documents and everyday users. Lawyers create and validate document templates; users generate, analyze and understand their legal documents through an AI-powered interface.
+LegalEase connects three groups of users:
 
-**Key roles:**
-| Role | Capabilities |
+| Role | What they do |
 |------|-------------|
-| `USER` | Create documents, view analysis, submit lawyer application |
-| `LAWYER` | Create templates, define validation & risk rules |
-| `ADMIN` | Approve lawyer applications, manage users |
+| `ROLE_USER` | Browse published templates, create documents, run rule-engine validation, download PDFs |
+| `ROLE_LAWYER` | Create and publish templates with fields and rules; manage validation, risk, matching, conditional, and required-document rules |
+| `ROLE_ADMIN` | Approve/reject lawyer applications, manage users and categories, toggle rules globally |
+
+Users who want to become lawyers submit a `LawyerApplication` which an admin reviews. Once approved, the user gains `ROLE_LAWYER`.
 
 ---
 
-## Architecture
+## Features
 
-```
-┌─────────────┐     HTTP      ┌─────────────────┐     JDBC      ┌──────────────┐
-│   Frontend  │ ────────────▶ │     Backend      │ ────────────▶ │  PostgreSQL  │
-│  (Next.js)  │               │  (Spring Boot)   │               │              │
-└─────────────┘               └─────────────────┘               └──────────────┘
-       │                               │
-       │                               │ SMTP
-       │                        ┌──────▼──────┐
-       │                        │  Gmail SMTP  │
-       └────────────────────────│   (Email)    │
-                          legalease-network
-```
-
-All services communicate over a shared Docker bridge network `legalease-network`.
+- **Template management** — Lawyers define reusable document skeletons with typed fields (`TEXT`, `DATE`, `NUMBER`, etc.)
+- **5-type rule engine** — Validation, risk detection, template matching, conditional field requirements, required supporting documents
+- **AI layer** — Anthropic Claude powers intent detection, template re-ranking, field suggestions, risk explanation, clause explanation, and final legal review
+- **Document versioning** — Every completion creates an immutable PDF version in S3/MinIO
+- **Document sharing** — Time-limited public share links using cryptographically secure tokens
+- **Audit logging** — Async audit trail for all document lifecycle events
+- **JWT auth** — Stateless; 30-min access token, 24-hr refresh token
+- **Email verification** — Account activation and password reset via SMTP
 
 ---
 
 ## Tech Stack
 
-**Backend**
-- Java 21 + Spring Boot 3
-- Spring Security + JWT (stateless)
-- Spring Data JPA + Hibernate
-- Liquibase (database migrations)
-- Thymeleaf (email templates)
-- MapStruct (DTO mapping)
-- Lombok
+### Backend
+| Concern | Technology |
+|---------|-----------|
+| Runtime | Java 21 |
+| Framework | Spring Boot 3.5.5 |
+| Security | Spring Security (JWT / stateless) |
+| Persistence | Spring Data JPA + Hibernate |
+| Migrations | Liquibase (`ddl-auto: validate`) |
+| DTO mapping | MapStruct |
+| Boilerplate | Lombok |
+| API docs | SpringDoc OpenAPI 2.8.5 (Swagger UI) |
+| PDF generation | Apache PDFBox 3.x |
+| Object storage | AWS SDK v2 (MinIO / S3-compatible) |
+| AI | Anthropic Claude API (via REST) |
+| Build | Gradle 9 |
 
-**Frontend**
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
+### Frontend
+| Concern | Technology |
+|---------|-----------|
+| Framework | React 19 |
+| Language | TypeScript |
+| Build tool | Vite |
+| State management | Redux Toolkit |
+| Routing | React Router v7 |
+| UI library | Ant Design + Tailwind CSS |
+| HTTP | Axios with JWT interceptors |
 
-**Infrastructure**
-- PostgreSQL 16
-- Docker + Docker Compose
-- GitHub Actions (CI/CD)
+### Infrastructure
+| Concern | Technology |
+|---------|-----------|
+| Database | PostgreSQL 16 |
+| Object storage | MinIO (S3-compatible) |
+| Containerization | Docker + Docker Compose |
 
 ---
 
-## Project Structure
+## System Architecture
 
 ```
-legal-ease/
-├── backend/
-│   ├── src/
-│   ├── build.gradle
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│   └── Dockerfile
-├── data/               ← Docker volumes (git-ignored)
-│   └── postgres/
-├── docker-compose.yml
-├── .env                ← единый env файл
-└── README.md
+┌──────────────────────────────────────────────────────────────────┐
+│                         Docker Network                           │
+│                                                                  │
+│  ┌─────────────┐   HTTP    ┌──────────────────┐   JDBC          │
+│  │   Frontend   │ ────────▶│     Backend       │──────────┐      │
+│  │  (React 19) │           │  (Spring Boot)    │          │      │
+│  │  :3000      │           │  :9191            │          ▼      │
+│  └─────────────┘           └──────────────────┘   ┌────────────┐│
+│                                    │               │ PostgreSQL ││
+│                                    │ S3 API        │    :5432   ││
+│                                    ▼               └────────────┘│
+│                             ┌────────────┐                       │
+│                             │   MinIO    │                       │
+│                             │ (S3 store) │                       │
+│                             │  :9000     │                       │
+│                             └────────────┘                       │
+└──────────────────────────────────────────────────────────────────┘
+         │                          │
+         │ SMTP               Anthropic API
+         ▼                          ▼
+   Gmail / SMTP              Claude (remote)
 ```
+
+### Backend Package Structure (`kz.legeal.ease.backend`)
+
+```
+controller/
+  openApi/      — Public/auth endpoints (no auth required)
+  user/         — ROLE_USER endpoints
+  lawyer/       — ROLE_LAWYER endpoints
+  admin/        — ROLE_ADMIN endpoints
+
+service/
+  impl/         — Business logic implementations
+  rule/
+    engine/     — RuleEngine entry point (3 pipelines)
+    chain/      — Chain-of-Responsibility: RuleChainBuilder, ChainLink
+    handler/    — 11 handlers (Validation, Risk, Matching, Conditional, RequiredDocs, AI*)
+    evaluator/  — Low-level condition evaluators (EQUALS, GT, LT, REGEX, …)
+    ai/         — Anthropic API integration (RuleAiService)
+    context/    — RuleContext (input) + RuleChainContext (mutable state)
+    result/     — RuleEngineResult (unified output)
+  document/     — Document lifecycle + PDF generation + S3 upload
+  audit/        — Async audit logging
+
+domain/         — JPA entities
+dto/            — Response DTOs (MapStruct mapped)
+request/        — Request DTOs (Jakarta validation)
+exception/      — BaseException hierarchy (NotFoundException, BusinessRuleException, …)
+mapper/         — MapStruct interfaces
+repository/     — Spring Data JPA repositories + Specifications
+config/         — Security, S3, Swagger, Async, Mail config
+jwt/            — JWT filter, token utilities, PersonDetails
+```
+
+---
+
+## Document Lifecycle
+
+```
+POST /api/user/documents              → status = DRAFT
+         │
+         ▼
+PUT  /api/user/documents/{id}         → update fields (DRAFT only)
+         │
+         ▼
+GET  /api/user/documents/{id}/suggestions
+         │   runs: ConditionalHandler → RequiredDocsHandler
+         │         → AIDocsExplainerHandler → AIFieldSuggestionHandler
+         ▼
+POST /api/user/documents/{id}/complete
+         │   runs: ValidationHandler → RiskHandler → RequiredDocsHandler
+         │         → AIDocsExplainerHandler → AIRiskExplainerHandler → AIFinalReviewHandler
+         │   if valid:
+         │     - status = COMPLETED
+         │     - PDF generated (PDFBox)
+         │     - uploaded to S3 as documents/{userId}/{docId}/v{version}.pdf
+         │     - DocumentVersion record created
+         ▼
+GET  /api/user/documents/{id}/download      → stream PDF bytes
+GET  /api/user/documents/{id}/url           → presigned URL (default 60 min)
+POST /api/user/documents/{id}/share         → public token (default 48 hr)
+GET  /api/user/documents/{id}/versions      → list all immutable versions
+GET  /api/user/documents/{id}/versions/{v}/download
+```
+
+---
+
+## Rule Engine Pipeline
+
+The rule engine uses Chain-of-Responsibility. Three named pipelines are assembled by `RuleChainBuilder`:
+
+### 1. Matching Chain (`POST /api/user/matching`)
+```
+AIUnderstandingHandler   ← detects legal intent + extracts entities
+       ↓
+MatchingHandler          ← scores templates by keyword overlap + conditional boosts
+       ↓
+AiRankingHandler         ← re-ranks top candidates using Claude
+```
+
+### 2. Field Suggestion Chain (`GET /api/user/documents/{id}/suggestions`)
+```
+ConditionalHandler       ← resolves which fields become required based on current values
+       ↓
+RequiredDocsHandler      ← identifies mandatory supporting documents
+       ↓
+AIDocsExplainerHandler   ← generates plain-language explanations for each required doc
+       ↓
+AIFieldSuggestionHandler ← suggests values for empty fields based on context
+```
+
+### 3. Complete Chain (`POST /api/user/documents/{id}/complete`)
+```
+ValidationHandler        ← enforces all ValidationRules; aborts if any fail
+       ↓
+RiskHandler              ← evaluates RiskRules; flags warnings (non-blocking)
+       ↓
+RequiredDocsHandler      ← checks required supporting documents
+       ↓
+AIDocsExplainerHandler   ← explains required document rationale
+       ↓
+AIRiskExplainerHandler   ← enriches risk flags with legal context
+       ↓
+AIFinalReviewHandler     ← overall AI legal review summary
+```
+
+---
+
+## AI Integration
+
+All AI calls use the Anthropic Claude API via `RuleAiService`:
+
+| Feature | Endpoint triggered | Claude task |
+|---------|-------------------|-------------|
+| Intent detection | `POST /api/user/matching` | Classify legal intent, extract entities |
+| Template re-ranking | `POST /api/user/matching` | Re-score templates using legal reasoning |
+| Field suggestions | `GET /api/user/documents/{id}/suggestions` | Suggest sensible field values |
+| Required doc explanation | Both suggestion + complete | Plain-language rationale for each doc |
+| Risk explanation | `POST /api/user/documents/{id}/complete` | Elaborate on detected risks |
+| Final legal review | `POST /api/user/documents/{id}/complete` | Summary + recommendation |
+| Clause explanation | `POST /api/ai/explain-clause` | Explain any legal text in plain language |
+
+---
+
+## S3 / MinIO Storage
+
+PDF files are stored in MinIO (S3-compatible) with the key pattern:
+
+```
+documents/{userId}/{documentId}/v{version}.pdf
+```
+
+- Each `complete()` call increments `currentVersion` and stores a new immutable object.
+- `StorageService` enforces a 20 MB file size limit and PDF-only content type.
+- Presigned URLs are generated for direct browser download (default TTL: 60 minutes).
+- Share tokens resolve to PDF bytes without requiring authentication.
 
 ---
 
@@ -106,110 +263,62 @@ legal-ease/
 
 ### Prerequisites
 
-| Tool | Version | Install |
-|------|---------|---------|
-| Docker | 24+ | [docs.docker.com](https://docs.docker.com/get-docker/) |
-| Docker Compose | 2.20+ | Included with Docker Desktop |
-| Java | 21+ | [adoptium.net](https://adoptium.net/) (local dev only) |
-| Node.js | 20+ | [nodejs.org](https://nodejs.org/) (local dev only) |
-
----
+| Tool | Version |
+|------|---------|
+| Docker | 24+ |
+| Docker Compose | 2.20+ |
+| Java | 21+ (local dev only) |
+| Node.js | 20+ (local dev only) |
 
 ### Local Development
 
-> Best for active development — hot reload for both backend and frontend.
-> Only PostgreSQL runs in Docker.
+Start only PostgreSQL and MinIO in Docker, run backend and frontend locally.
 
-**1. Clone the repository**
 ```bash
+# 1. Clone
 git clone https://github.com/your-org/legal-ease.git
 cd legal-ease
-```
 
-**2. Start only the database**
-```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up postgres -d
-```
+# 2. Copy and edit environment
+cp .env.example .env
 
-PostgreSQL will be available at `localhost:5435`.
+# 3. Start DB + MinIO only
+docker compose up postgres minio -d
 
-**3. Run the backend**
-```bash
+# 4. Run backend (hot reload via Spring DevTools)
 cd backend
-./mvnw spring-boot:run
-```
+./gradlew bootRun
 
-Backend starts at `http://localhost:9191`
-Swagger UI: `http://localhost:9191/swagger-ui/index.html`
-
-**4. Run the frontend**
-```bash
-cd frontend
+# 5. Run frontend (hot reload via Vite)
+cd ../frontend
 npm install
 npm run dev
 ```
-
-Frontend starts at `http://localhost:3000`
-
----
-
-### Full Docker Setup
-
-> Runs everything in Docker — closest to production.
-
-**1. Clone and configure**
-```bash
-git clone https://github.com/your-org/legal-ease.git
-cd legal-ease
-```
-
-**2. Build and start all services**
-```bash
-docker compose up --build -d
-```
-
-**3. Check services are healthy**
-```bash
-docker compose ps
-```
-
-Expected output:
-```
-NAME                   STATUS
-legalease-postgres     healthy
-legalease-backend      healthy
-legalease-frontend     healthy
-```
-
-**5. Access the application**
 
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:9191 |
 | Swagger UI | http://localhost:9191/swagger-ui/index.html |
+| MinIO console | http://localhost:9001 |
 
----
-
-### Useful Commands
+### Full Docker Setup
 
 ```bash
-# View logs
-docker compose logs -f backend
-docker compose logs -f frontend
-docker compose logs -f postgres
+# Build and start all services
+docker compose up --build -d
 
-# Restart a single service
-docker compose restart backend
+# Verify all services are healthy
+docker compose ps
+
+# Tail backend logs
+docker compose logs -f backend
 
 # Stop everything
 docker compose down
 
 # Stop and remove volumes (WARNING: deletes all data)
 docker compose down -v
-
-# Rebuild after code changes
-docker compose up --build backend -d
 
 # Open PostgreSQL shell
 docker compose exec postgres psql -U postgres -d legal-ease
@@ -219,106 +328,129 @@ docker compose exec postgres psql -U postgres -d legal-ease
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in your values.
+Create a `.env` file at the repo root (loaded automatically by Docker Compose):
 
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `POSTGRES_DB` | Database name | `legal-ease` |
-| `POSTGRES_USER` | Database user | `postgres` |
-| `POSTGRES_PASSWORD` | Database password | `strong_password` |
+| `POSTGRES_USER` | DB user | `postgres` |
+| `POSTGRES_PASSWORD` | DB password | `strong_password` |
 | `POSTGRES_PORT` | Exposed DB port | `5435` |
-| `JWT_ACCESS_SECRET` | JWT signing key (min 32 chars) | `openssl rand -hex 32` |
-| `JWT_REFRESH_SECRET` | JWT refresh key (min 32 chars) | `openssl rand -hex 32` |
-| `JWT_ACCESS_EXP_MIN` | Access token TTL in minutes | `30` |
-| `JWT_REFRESH_EXP_MIN` | Refresh token TTL in minutes | `1440` |
-| `MAIL_USERNAME` | Gmail address | `app@gmail.com` |
+| `JWT_ACCESS_SECRET` | JWT signing secret (≥32 chars) | `openssl rand -hex 32` |
+| `JWT_REFRESH_SECRET` | JWT refresh secret (≥32 chars) | `openssl rand -hex 32` |
+| `JWT_ACCESS_EXP_MIN` | Access token TTL (minutes) | `30` |
+| `JWT_REFRESH_EXP_MIN` | Refresh token TTL (minutes) | `1440` |
+| `MAIL_USERNAME` | SMTP address | `app@gmail.com` |
 | `MAIL_PASSWORD` | Gmail App Password | `xxxx xxxx xxxx xxxx` |
-| `BACKEND_PORT` | Backend exposed port | `9191` |
-| `FRONTEND_PORT` | Frontend exposed port | `3000` |
+| `BACKEND_PORT` | Backend port | `9191` |
+| `FRONTEND_PORT` | Frontend port | `3000` |
+| `S3_ENDPOINT` | MinIO/S3 endpoint | `http://minio:9000` |
+| `S3_ACCESS_KEY` | MinIO access key | `minioadmin` |
+| `S3_SECRET_KEY` | MinIO secret key | `minioadmin` |
+| `S3_BUCKET` | Bucket name | `legal-ease-docs` |
+| `ANTHROPIC_API_KEY` | Claude API key | `sk-ant-...` |
 
-> **Gmail App Password:** Go to Google Account → Security → 2-Step Verification → App passwords
+> **Gmail App Password:** Google Account → Security → 2-Step Verification → App passwords
 
 ---
 
 ## API Documentation
 
-Swagger UI is available when the backend is running:
-
+Swagger UI is served at:
 ```
 http://localhost:9191/swagger-ui/index.html
 ```
 
-### Authentication flow
+### API Groups
 
-```
-POST /open-api/auth/register        # Register new user
-POST /open-api/auth/confirm         # Confirm email with code
-POST /open-api/auth/login           # Login → get access + refresh tokens
-POST /open-api/auth/refresh         # Refresh access token
-POST /open-api/auth/reset-password  # Send reset code
-POST /open-api/auth/change-password # Change password with code
-POST /open-api/auth/logout          # Revoke refresh token
-```
+| Tag | Base Path | Role |
+|-----|-----------|------|
+| Authentication API | `/open-api/auth/*` | Public |
+| Public - Categories | `/open-api/categories` | Public |
+| Public - Document Sharing | `/api/public/share/*` | Public |
+| User - Document Management | `/api/user/documents/*` | USER |
+| User - Public Templates | `/api/user/templates/*` | USER |
+| User - Template Matching | `/api/user/matching` | USER |
+| User - Lawyer Applications | `/api/user/lawyer-applications/*` | USER |
+| AI - Legal Assistance | `/api/ai/*` | Authenticated |
+| Lawyer - Template Management | `/api/lawyer/templates/*` | LAWYER |
+| Lawyer - Validation Rules | `/api/lawyer/validation-rules/*` | LAWYER |
+| Lawyer - Risk Rules | `/api/lawyer/risk-rules/*` | LAWYER |
+| Lawyer - Matching Rules | `/api/lawyer/matching-rules/*` | LAWYER |
+| Lawyer - Conditional Rules | `/api/lawyer/conditional-rules/*` | LAWYER |
+| Lawyer - Required Document Rules | `/api/lawyer/required-doc-rules/*` | LAWYER |
+| Admin - Category Management | `/api/admin/categories/*` | ADMIN |
+| Admin - Lawyer Applications | `/api/admin/lawyer-applications/*` | ADMIN |
+| Admin - User Management | `/api/admin/users/*` | ADMIN |
+| Admin - Rule Engine Management | `/api/admin/rules/*` | ADMIN |
 
-All protected endpoints require:
-```
+### Auth Flow
+
+```bash
+# 1. Register
+POST /open-api/auth/register
+
+# 2. Confirm email
+POST /open-api/auth/confirm
+
+# 3. Login → receive access_token + refresh_token
+POST /open-api/auth/login
+
+# 4. Use token on all protected endpoints
 Authorization: Bearer <access_token>
+
+# 5. Refresh when access token expires
+POST /open-api/auth/refresh
+
+# 6. Logout (invalidates refresh token)
+POST /open-api/auth/logout
 ```
 
 ---
 
 ## Database Migrations
 
-Migrations are managed by **Liquibase** and run automatically on startup.
+Migrations are managed by **Liquibase** and run automatically on application startup. The schema is declared `ddl-auto: validate` — never `create` or `update`.
 
 ```
-resources/liquibase/
-├── master.xml
-└── changelogs/
-    └── v1/
-        ├── 001-create-sequences.xml
-        ├── 002-create-role.xml
-        ├── 003-create-users.xml
-        ├── 004-create-user-role.xml
-        ├── 005-create-verification-code.xml
-        ├── 006-create-refresh-tokens.xml
-        ├── 007-create-lawyer-application.xml
-        ├── 008-insert-default-roles.xml      # Seeds: USER, LAWYER, ADMIN roles
-        └── 009-insert-default-admins.xml     # Seeds: default admin accounts
+resources/liquibase/changelogs/v1/
+├── 001-create-sequences.xml
+├── 002-create-role.xml
+├── 003-create-users.xml
+├── 004-create-user-role.xml
+├── 005-create-verification-code.xml
+├── 006-create-refresh-tokens.xml
+├── 007-create-lawyer-application.xml
+├── 008-insert-default-roles.xml        ← seeds: USER, LAWYER, ADMIN
+├── 009-insert-default-admins.xml       ← seeds: default admin accounts
+├── 010-create-category.xml
+├── 011-create-template.xml
+├── 012-create-template-field.xml
+├── 013-create-document.xml
+├── 014-create-document-field-value.xml
+├── 015-create-validation-rule.xml
+├── 016-create-risk-rule.xml
+├── 017-create-matching-rule.xml
+├── 018-create-conditional-rule.xml
+├── 019-create-required-doc-rule.xml
+├── 020-create-document-versions.xml
+├── 021-add-current-version-to-document.xml
+├── 022-create-document-shares.xml
+└── 023-create-audit-logs.xml
 ```
 
-**Rules for adding migrations:**
+**Rules:**
 - Never modify existing changesets
-- New file naming: `YYYY-MM-DD-NNN-description.xml`
-- Always include a `<rollback>` block
+- New files: `NNN-description.xml` (increment N)
+- Include a `<rollback>` block for every change
 - One logical change per file
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'feat: add your feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
-
-**Commit message convention:** [Conventional Commits](https://www.conventionalcommits.org/)
-```
-feat:     new feature
-fix:      bug fix
-docs:     documentation only
-refactor: code refactoring
-test:     adding tests
-chore:    build / config changes
-```
 
 ---
 
 ## Team
 
 | Name | Role | Contact |
-|------|------|--|
+|------|------|---------|
 | Daniyal | Backend Developer | orynbekdanial8@gmail.com |
 | Yegazy | Backend Developer | yergazy.abdullayev@gmail.com |
 | Olzhas | Backend Developer | olzhasergali56@gmail.com |
@@ -326,5 +458,5 @@ chore:    build / config changes
 ---
 
 <div align="center">
-  <sub>Built with ❤️ for legal accessibility in Kazakhstan</sub>
+  Built for legal accessibility in Kazakhstan
 </div>

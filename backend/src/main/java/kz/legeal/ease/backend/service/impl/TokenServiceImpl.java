@@ -3,7 +3,7 @@ package kz.legeal.ease.backend.service.impl;
 import kz.legeal.ease.backend.config.JwtProperties;
 import kz.legeal.ease.backend.domain.RefreshToken;
 import kz.legeal.ease.backend.domain.User;
-import kz.legeal.ease.backend.exception.InvalidRefreshTokenException;
+import kz.legeal.ease.backend.exception.UnauthorizedException;
 import kz.legeal.ease.backend.jwt.JwtUtils;
 import kz.legeal.ease.backend.jwt.PersonDetails;
 import kz.legeal.ease.backend.repository.RefreshTokenRepository;
@@ -48,11 +48,11 @@ public class TokenServiceImpl implements TokenService {
     @Transactional
     public RefreshToken findValidStoredToken(String refreshToken) {
         final var storedToken = repository.findByTokenAndRevokedFalse(refreshToken)
-                .orElseThrow(InvalidRefreshTokenException::new);
+                .orElseThrow(() -> new UnauthorizedException("Invalid or revoked refresh token", "AUTH_006"));
 
         if (storedToken.isExpired()) {
             markAsRevoked(storedToken);
-            throw new InvalidRefreshTokenException("Refresh token has expired");
+            throw new UnauthorizedException("Refresh token has expired", "AUTH_004");
         }
         return storedToken;
     }

@@ -4,10 +4,10 @@ import kz.legeal.ease.backend.domain.Category;
 import kz.legeal.ease.backend.domain.Template;
 import kz.legeal.ease.backend.domain.TemplateField;
 import kz.legeal.ease.backend.dto.template.TemplateDto;
+import kz.legeal.ease.backend.exception.BusinessRuleException;
+import kz.legeal.ease.backend.exception.ForbiddenException;
 import kz.legeal.ease.backend.exception.NotFoundException;
-import kz.legeal.ease.backend.exception.template.TemplateAlreadyPublishedException;
-import kz.legeal.ease.backend.exception.template.TemplateForbiddenException;
-import kz.legeal.ease.backend.exception.template.TemplateNotFoundException;
+import kz.legeal.ease.backend.exception.UnauthorizedException;
 import kz.legeal.ease.backend.mapper.TemplateMapper;
 import kz.legeal.ease.backend.repository.CategoryRepository;
 import kz.legeal.ease.backend.repository.TemplateFieldRepository;
@@ -18,10 +18,8 @@ import kz.legeal.ease.backend.service.tempate.TemplateCommandService;
 import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -39,7 +37,7 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Transactional
     public TemplateDto create(TemplateRequest request) {
         final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
 
         final var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
@@ -63,7 +61,7 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Transactional
     public TemplateDto update(Long templateId, TemplateRequest request) {
         final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         final var template = getOwnedDraftTemplate(templateId, currentLawyer.getId());
         final var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
@@ -87,11 +85,12 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Transactional
     public TemplateDto publish(Long templateId) {
         final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         final var template = getOwnedTemplate(templateId, currentLawyer.getId());
 
         if (template.isPublished()) {
-            throw new TemplateAlreadyPublishedException(templateId);
+            throw new BusinessRuleException(
+                    "Template id=" + templateId + " is already published", "TPL_001");
         }
 
         template.publish();
@@ -102,7 +101,7 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Transactional
     public void delete(Long templateId) {
         final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         final var template = getOwnedDraftTemplate(templateId, currentLawyer.getId());
         template.setActive(false);
         templateRepository.save(template);
@@ -113,16 +112,17 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
                 .orElseThrow(() -> {
 
                     if (!templateRepository.existsById(templateId)) {
-                        return new TemplateNotFoundException(templateId);
+                        return new NotFoundException("Template", templateId);
                     }
-                    return new TemplateForbiddenException();
+                    return new ForbiddenException("You do not have permission to modify this template");
                 });
     }
 
     private Template getOwnedDraftTemplate(Long templateId, Long lawyerId) {
         final Template template = getOwnedTemplate(templateId, lawyerId);
         if (template.isPublished()) {
-            throw new TemplateAlreadyPublishedException(templateId);
+            throw new BusinessRuleException(
+                    "Template id=" + templateId + " is already published", "TPL_001");
         }
         return template;
     }

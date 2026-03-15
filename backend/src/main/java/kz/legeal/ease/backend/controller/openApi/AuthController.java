@@ -47,7 +47,7 @@ public class AuthController {
                     required = true,
                     content = @Content(schema = @Schema(implementation = LoginRequest.class))
             )
-            @RequestBody LoginRequest request
+            @Valid @RequestBody LoginRequest request
     ) {
         return ResponseEntity.ok(authService.login(request));
     }
@@ -67,7 +67,7 @@ public class AuthController {
                     required = true,
                     content = @Content(schema = @Schema(implementation = RegisterRequest.class))
             )
-            @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request
     ) {
         authService.register(request);
         return ResponseEntity.ok().build();
@@ -110,7 +110,7 @@ public class AuthController {
                     required = true,
                     content = @Content(schema = @Schema(implementation = RefreshTokenRequest.class))
             )
-            @RequestBody RefreshTokenRequest request
+            @Valid @RequestBody RefreshTokenRequest request
     ) {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
@@ -130,7 +130,7 @@ public class AuthController {
                     required = true,
                     content = @Content(schema = @Schema(implementation = ResetPasswordRequest.class))
             )
-            @RequestBody ResetPasswordRequest request
+            @Valid @RequestBody ResetPasswordRequest request
     ) {
         authService.sendResetPasswordCode(request);
         return ResponseEntity.ok().build();

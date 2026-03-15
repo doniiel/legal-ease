@@ -3,8 +3,7 @@ package kz.legeal.ease.backend.service.impl;
 import kz.legeal.ease.backend.dto.AuthResponseDto;
 import kz.legeal.ease.backend.enums.Role;
 import kz.legeal.ease.backend.enums.VerificationType;
-import kz.legeal.ease.backend.exception.AccountNotActivatedException;
-import kz.legeal.ease.backend.exception.auth.InvalidCredentialsException;
+import kz.legeal.ease.backend.exception.UnauthorizedException;
 import kz.legeal.ease.backend.jwt.PersonDetails;
 import kz.legeal.ease.backend.jwt.PersonDetailsService;
 import kz.legeal.ease.backend.request.*;
@@ -42,9 +41,9 @@ public class AuthServiceImpl implements AuthService {
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
         } catch (BadCredentialsException e) {
-            throw new InvalidCredentialsException();
+            throw new UnauthorizedException("Invalid email or password", "AUTH_001");
         } catch (LockedException e) {
-            throw new AccountNotActivatedException();
+            throw new UnauthorizedException("Account is not activated. Please verify your email.", "NOT_CONFIRMED");
         }
 
         final var userDetails = (PersonDetails) personDetailsService

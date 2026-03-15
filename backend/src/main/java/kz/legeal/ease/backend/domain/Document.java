@@ -49,5 +49,17 @@ public class Document extends AbstractAuditingEntity {
     @Builder.Default
     private boolean deleted = false;
 
+    /**
+     * S3 / MinIO object key of the most recent PDF version (e.g. {@code "documents/7/42/v2.pdf"}).
+     * {@code null} for DRAFT documents or when PDF upload has not yet succeeded.
+     */
+    @Column(name = "s3_object_key", length = 512)
+    private String s3ObjectKey;
+
+    /** Monotonically increasing version counter. 0 = never completed. */
+    @Column(name = "current_version", nullable = false)
+    @Builder.Default
+    private int currentVersion = 0;
+
 }
 

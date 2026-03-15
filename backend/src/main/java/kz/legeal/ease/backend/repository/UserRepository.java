@@ -36,4 +36,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     Page<User> findAllByDeletedFalse(Pageable pageable);
+
+    long countByDeletedFalse();
+
+    @Query("""
+            SELECT COUNT(DISTINCT ur.user.id) FROM UserRole ur
+            WHERE ur.role.code = :roleCode
+              AND ur.user.deleted = false
+              AND ur.active = true
+            """)
+    long countActiveByRoleCode(@Param("roleCode") String roleCode);
 }

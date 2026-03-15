@@ -1,17 +1,32 @@
-    package kz.legeal.ease.backend.service.rule.ai;
+package kz.legeal.ease.backend.service.rule.ai;
 
-    import kz.legeal.ease.backend.service.rule.chain.RuleChainContext;
-    import kz.legeal.ease.backend.service.rule.result.*;
+import kz.legeal.ease.backend.service.rule.chain.RuleChainContext;
+import kz.legeal.ease.backend.service.rule.result.*;
 
-    public interface RuleAiService {
+public interface RuleAiService {
 
-        IntentResult detectIntent(String inputText);
+    IntentResult detectIntent(String inputText);
 
-        RankingResult rankTemplates(RuleChainContext context);
+    RankingResult rankTemplates(RuleChainContext context);
 
-        EnrichResult enrichResult(RuleChainContext context);
+    EnrichResult enrichResult(RuleChainContext context);
 
-        SuggestResult suggestFields(RuleChainContext context);
+    SuggestResult suggestFields(RuleChainContext context);
 
-        ReviewResult finalReview(String documentText, RuleChainContext context);
-    }
+    ReviewResult finalReview(String documentText, RuleChainContext context);
+
+    /**
+     * Generate user-friendly explanations for each required supporting document.
+     * Called by {@link kz.legeal.ease.backend.service.rule.handler.AIDocsExplainerHandler}
+     * to enrich the documents list with Kazakhstan-law-aware descriptions.
+     */
+    DocsExplainResult explainRequiredDocs(RuleChainContext context);
+
+    /**
+     * Explain a single legal clause in plain language for a non-lawyer user.
+     *
+     * @param clauseText raw text of the clause from a contract or legal document
+     * @return human-readable explanation in Russian
+     */
+    String explainClause(String clauseText);
+}

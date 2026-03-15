@@ -38,4 +38,27 @@
     <include file="changelogs/v1/2026-03-13-004-create-risk-rules.xml"             relativeToChangelogFile="true"/>
     <include file="changelogs/v1/2026-03-13-005-create-condition-rules.xml"        relativeToChangelogFile="true"/>
 
+    <!-- v1.3.0 — Required Documents Rule Engine -->
+    <include file="changelogs/v1/2026-03-15-001-create-required-doc-rule-sequence.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-03-15-002-create-required-doc-rules.xml"         relativeToChangelogFile="true"/>
+
+    <!-- v1.4.0 — MinIO / S3 document storage -->
+    <include file="changelogs/v1/2026-03-15-003-add-s3-key-to-documents.xml"           relativeToChangelogFile="true"/>
+
+    <!-- v1.5.0 — Document Versioning -->
+    <include file="changelogs/v1/2026-03-15-004-create-document-versions.xml"          relativeToChangelogFile="true"/>
+    <include file="changelogs/v1/2026-03-15-005-add-current-version-to-documents.xml"  relativeToChangelogFile="true"/>
+
+    <!-- v1.6.0 — Document Sharing -->
+    <include file="changelogs/v1/2026-03-15-006-create-document-shares.xml"            relativeToChangelogFile="true"/>
+
+    <!-- v1.7.0 — Audit Logging -->
+    <include file="changelogs/v1/2026-03-15-007-create-audit-logs.xml"                 relativeToChangelogFile="true"/>
+
+    <!-- v1.8.0 — Lawyer Document Reviews -->
+    <include file="changelogs/v1/2026-03-15-008-create-document-reviews.xml"           relativeToChangelogFile="true"/>
+
+    <!-- v1.9.0 — Lawyer Legal Clause Knowledge Base -->
+    <include file="changelogs/v1/2026-03-15-009-create-legal-clauses.xml"              relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

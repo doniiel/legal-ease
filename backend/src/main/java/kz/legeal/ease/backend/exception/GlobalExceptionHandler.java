@@ -13,20 +13,47 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Central exception handler for the entire API surface.
+ *
+ * <p>Maps every exception type to an {@link ErrorResponseDto} with a consistent shape
+ * so clients always receive the same JSON structure regardless of the error type.
+ *
+ * <p>Handler priority (most specific first):
+ * <ol>
+ *   <li>{@link StorageException} → 503 Service Unavailable</li>
+ *   <li>{@link BaseException} subclasses (NotFoundException, ValidationException, …) → dynamic status</li>
+ *   <li>Jakarta {@link MethodArgumentNotValidException} → 400 with per-field details</li>
+ *   <li>Spring Security {@link AccessDeniedException} → 403</li>
+ *   <li>{@link IllegalStateException} → 409 Conflict</li>
+ *   <li>Catch-all {@link Exception} → 500</li>
+ * </ol>
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // ── S3 / MinIO ────────────────────────────────────────────────────────────
+
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<ErrorResponseDto> handleStorage(
+            StorageException ex, HttpServletRequest request) {
+
+        log.error("[{}] {} — {}", ex.getCode(), request.getRequestURI(), ex.getMessage(), ex);
+        return build(request, HttpStatus.SERVICE_UNAVAILABLE, ex.getCode(), ex.getMessage(), null);
+    }
+
+    // ── Domain / Business exceptions ──────────────────────────────────────────
+
     @ExceptionHandler(BaseException.class)
-    public ResponseEntity<ErrorResponseDto> handleBaseException(
+    public ResponseEntity<ErrorResponseDto> handleBase(
             BaseException ex, HttpServletRequest request) {
 
-        log.warn("[{}] {} - {}", ex.getErrorCode(), request.getRequestURI(), ex.getMessage());
-
-        return ResponseEntity
-                .status(ex.getStatus())
-                .body(buildError(request, ex.getStatus().value(), ex.getErrorCode(), ex.getMessage(), null));
+        log.warn("[{}] {} — {}", ex.getErrorCode(), request.getRequestURI(), ex.getMessage());
+        return build(request, ex.getStatus(), ex.getErrorCode(), ex.getMessage(), null);
     }
+
+    // ── Jakarta Bean Validation ───────────────────────────────────────────────
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDto> handleValidation(
@@ -39,62 +66,61 @@ public class GlobalExceptionHandler {
                         .build())
                 .toList();
 
-        log.warn("[VALIDATION_001] {} - {} field errors", request.getRequestURI(), fieldErrors.size());
-
-        return ResponseEntity
-                .badRequest()
-                .body(buildError(request, 400, "VALIDATION_001", "Validation failed", fieldErrors));
+        log.warn("[VALIDATION_001] {} — {} field error(s)", request.getRequestURI(), fieldErrors.size());
+        return build(request, HttpStatus.BAD_REQUEST, "VALIDATION_001", "Validation failed", fieldErrors);
     }
+
+    // ── Spring Security ───────────────────────────────────────────────────────
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponseDto> handleAccessDenied(
             AccessDeniedException ex, HttpServletRequest request) {
 
-        log.warn("[ACCESS_001] {} - {}", request.getRequestURI(), ex.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(buildError(request, 403, "ACCESS_001", "Access denied", null));
+        log.warn("[ACCESS_DENIED] {} — {}", request.getRequestURI(), ex.getMessage());
+        return build(request, HttpStatus.FORBIDDEN, "ACCESS_DENIED", "Access denied", null);
     }
+
+    // ── Java runtime ──────────────────────────────────────────────────────────
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorResponseDto> handleIllegalState(
             IllegalStateException ex, HttpServletRequest request) {
 
-        log.warn("[CONFLICT] {} - {}", request.getRequestURI(), ex.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(buildError(request, 409, "CONFLICT_001", ex.getMessage(), null));
+        log.warn("[CONFLICT] {} — {}", request.getRequestURI(), ex.getMessage());
+        return build(request, HttpStatus.CONFLICT, "CONFLICT", ex.getMessage(), null);
     }
+
+    // ── Catch-all ─────────────────────────────────────────────────────────────
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGeneral(
             Exception ex, HttpServletRequest request) {
 
-        log.error("[INTERNAL_001] {} - ", request.getRequestURI(), ex);
-
-        return ResponseEntity
-                .internalServerError()
-                .body(buildError(request, 500, "INTERNAL_001", "Internal server error", null));
+        log.error("[INTERNAL_ERROR] {} — ", request.getRequestURI(), ex);
+        return build(request, HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
+                "An unexpected error occurred. Please try again later.", null);
     }
 
-    private ErrorResponseDto buildError(
+    // ── Builder helper ────────────────────────────────────────────────────────
+
+    private ResponseEntity<ErrorResponseDto> build(
             HttpServletRequest request,
-            int status,
+            HttpStatus status,
             String errorCode,
             String message,
-            List<ErrorResponseDto.FieldError> errors) {
+            List<ErrorResponseDto.FieldError> fieldErrors) {
 
-        return ErrorResponseDto.builder()
-                .requestId(resolveRequestId(request))
-                .status(status)
-                .errorCode(errorCode)
-                .message(message)
-                .errors(errors)
+        final var body = ErrorResponseDto.builder()
                 .timestamp(LocalDateTime.now())
+                .status(status.value())
+                .error(errorCode)
+                .message(message)
                 .path(request.getRequestURI())
+                .requestId(resolveRequestId(request))
+                .fieldErrors(fieldErrors)
                 .build();
+
+        return ResponseEntity.status(status).body(body);
     }
 
     private String resolveRequestId(HttpServletRequest request) {

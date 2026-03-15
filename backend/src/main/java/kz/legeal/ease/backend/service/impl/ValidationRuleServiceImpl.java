@@ -1,5 +1,6 @@
 package kz.legeal.ease.backend.service.impl;
 
+import kz.legeal.ease.backend.config.CacheConfig;
 import kz.legeal.ease.backend.domain.Template;
 import kz.legeal.ease.backend.domain.ValidationRule;
 import kz.legeal.ease.backend.dto.ValidationRuleDto;
@@ -10,6 +11,8 @@ import kz.legeal.ease.backend.repository.ValidationRuleRepository;
 import kz.legeal.ease.backend.request.ValidationRuleRequest;
 import kz.legeal.ease.backend.service.ValidationRuleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +23,12 @@ import java.util.List;
 public class ValidationRuleServiceImpl implements ValidationRuleService {
 
     private final ValidationRuleRepository repository;
-    private final TemplateRepository templateRepository;
-    private final ValidationMapper mapper;
+    private final TemplateRepository       templateRepository;
+    private final ValidationMapper         mapper;
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheConfig.VALIDATION_RULES, key = "#templateId")
     public List<ValidationRuleDto> getAllByTemplate(Long templateId) {
         return repository.findAllByTemplateIdAndActiveTrue(templateId).stream()
                 .map(mapper::toDto)
@@ -33,9 +37,9 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.VALIDATION_RULES, key = "#request.templateId")
     public ValidationRuleDto create(ValidationRuleRequest request) {
         final var template = findTemplate(request.getTemplateId());
-
         final var rule = ValidationRule.builder()
                 .template(template)
                 .fieldKey(request.getFieldKey())
@@ -45,7 +49,6 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
                 .errorMessage(request.getErrorMessage())
                 .active(true)
                 .build();
-
         return mapper.toDto(repository.save(rule));
     }
 
@@ -53,6 +56,7 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
     @Transactional
     public ValidationRuleDto update(Long id, ValidationRuleRequest request) {
         final var rule = findOrThrow(id);
+        evictCache(rule.getTemplate().getId());
 
         rule.setFieldKey(request.getFieldKey());
         rule.setFieldLabel(request.getFieldLabel());
@@ -67,17 +71,21 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
     @Transactional
     public void delete(Long id) {
         final var rule = findOrThrow(id);
+        evictCache(rule.getTemplate().getId());
         rule.setActive(false);
         repository.save(rule);
     }
 
+    @CacheEvict(value = CacheConfig.VALIDATION_RULES, key = "#templateId")
+    public void evictCache(Long templateId) {}
+
     private ValidationRule findOrThrow(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ValidationRule.class.getName(), id));
+                .orElseThrow(() -> new NotFoundException("ValidationRule", id));
     }
 
     private Template findTemplate(Long id) {
         return templateRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(Template.class.getName(), id));
+                .orElseThrow(() -> new NotFoundException("Template", id));
     }
 }
