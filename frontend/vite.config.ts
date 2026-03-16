@@ -8,7 +8,17 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', 'react-redux'],
   },
   server: {
-    port: 3000,      
+    port: 3000,
     strictPort: true,
+    proxy: {
+      "/api": {
+        target: "http://localhost:9191",
+        changeOrigin: true,
+      },
+      "/open-api": {
+        target: "http://localhost:9191",
+        changeOrigin: true,
+      },
+    },
   },
 })

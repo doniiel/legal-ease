@@ -5,12 +5,25 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  role: string | null;
 }
 
+const decodeRole = (token: string | null): string | null => {
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split(".")[1])).role ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const storedToken = localStorage.getItem("accessToken");
+
 const initialState: AuthState = {
-  accessToken: localStorage.getItem("accessToken"),
+  accessToken: storedToken,
   refreshToken: localStorage.getItem("refreshToken"),
-  isAuthenticated: !!localStorage.getItem("accessToken"),
+  isAuthenticated: !!storedToken,
+  role: decodeRole(storedToken),
 };
 
 const authSlice = createSlice({
@@ -21,6 +34,7 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.refreshToken = null;
       state.isAuthenticated = false;
+      state.role = null;
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
     },
@@ -31,13 +45,7 @@ const authSlice = createSlice({
         state.accessToken = payload.accessToken;
         state.refreshToken = payload.refreshToken;
         state.isAuthenticated = true;
-        localStorage.setItem("accessToken", payload.accessToken);
-        localStorage.setItem("refreshToken", payload.refreshToken);
-      })
-      .addMatcher(authApi.endpoints.register.matchFulfilled, (state, { payload }) => {
-        state.accessToken = payload.accessToken;
-        state.refreshToken = payload.refreshToken;
-        state.isAuthenticated = true;
+        state.role = decodeRole(payload.accessToken);
         localStorage.setItem("accessToken", payload.accessToken);
         localStorage.setItem("refreshToken", payload.refreshToken);
       })

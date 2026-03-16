@@ -21,3 +21,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Docker volumes / PostgreSQL data
+data/

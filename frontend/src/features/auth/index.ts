@@ -10,5 +10,6 @@ export {
   useSendResetCodeMutation,
   useVerifyResetCodeMutation,
   useResetPasswordMutation,
+  useConfirmAccountMutation,
 } from "./api/auth-api";
 export type { AuthResponse } from "./api/auth-api";

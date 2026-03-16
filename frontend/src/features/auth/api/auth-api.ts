@@ -1,5 +1,5 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQuery } from "../../../shared/api";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { BASE_URL } from "../../../shared/api";
 
 export interface AuthResponse {
   accessToken: string;
@@ -10,7 +10,7 @@ export interface AuthResponse {
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery,
+  baseQuery: fetchBaseQuery({ baseUrl: BASE_URL }),
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, { email: string; password: string }>({
       query: (body) => ({
@@ -20,7 +20,7 @@ export const authApi = createApi({
       }),
     }),
 
-    register: builder.mutation<AuthResponse, {
+    register: builder.mutation<void, {
       firstName: string;
       middleName: string;
       lastName: string;
@@ -67,6 +67,14 @@ export const authApi = createApi({
         body,
       }),
     }),
+
+    confirmAccount: builder.mutation<void, { email: string; code: string }>({
+      query: (body) => ({
+        url: "/auth/confirm",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -77,4 +85,5 @@ export const {
   useSendResetCodeMutation,
   useVerifyResetCodeMutation,
   useResetPasswordMutation,
+  useConfirmAccountMutation,
 } = authApi;

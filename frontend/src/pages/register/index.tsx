@@ -1,4 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
+import { ROUTES } from "../../app/router/router";
 import { Button, Input, Form, Card, Alert, Select } from "antd";
 import { Mail, Phone, CreditCard, Lock } from "lucide-react";
 import { useRegisterMutation } from "../../features/auth/api/auth-api";
@@ -34,18 +35,20 @@ export default function Register() {
   const [registerMutation, { isLoading, error }] = useRegisterMutation();
 
   const handleSubmit = async (values: FormValues) => {
-    const result = await registerMutation({
-      firstName: values.firstName,
-      middleName: values.middleName,
-      lastName: values.lastName,
-      iin: values.iin,
-      gender: values.gender,
-      email: values.email,
-      phone: `+7${values.phone.replace(/\D/g, "")}`,
-      password: values.password,
-    });
-    if (!("errorCode" in result)) {
-      navigate("/login");
+    try {
+      await registerMutation({
+        firstName: values.firstName,
+        middleName: values.middleName,
+        lastName: values.lastName,
+        iin: values.iin,
+        gender: values.gender,
+        email: values.email,
+        phone: `+7${values.phone.replace(/\D/g, "")}`,
+        password: values.password,
+      }).unwrap();
+      navigate(ROUTES.CONFIRM, { state: { email: values.email } });
+    } catch {
+      // error is shown via the `error` state from useRegisterMutation
     }
   };
 

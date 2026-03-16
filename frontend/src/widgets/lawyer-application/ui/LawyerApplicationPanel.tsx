@@ -148,7 +148,7 @@ export default function LawyerApplicationPanel() {
         <div style={{ flexShrink: 0, minWidth: 280 }}>
           <Steps
             size="small"
-            current={hasApplication && !showForm ? cfg!.step : 0}
+            current={cfg?.step ?? 0}
             status={application?.status === "REJECTED" && !showForm ? "error" : undefined}
             style={{ "--ant-steps-finish-color": "#fff" } as React.CSSProperties}
             items={[

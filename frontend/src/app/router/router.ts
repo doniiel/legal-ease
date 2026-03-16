@@ -1,6 +1,16 @@
 export const ROUTES = {
   LOGIN: "/login",
   FORGOT: "/forgot-password",
-  DASHBOARD: "/dashboard",
   REGISTER: "/register",
+  CONFIRM: "/confirm",
+  HOME: "/dashboard",
+  DOCUMENTS: "/documents",
+  PROFILE: "/profile",
+  LAWYER_APPLICATION: "/lawyer-application",
+  SETTINGS: "/settings",
+  ADMIN_APPLICATIONS: "/admin-applications",
+  ADMIN_USERS: "/admin-users",
+  ADMIN_CATEGORIES: "/admin-categories",
+  LAWYER_TEMPLATES: "/lawyer-templates",
+  LAWYER_MATCHING_RULES: "/lawyer-matching-rules",
 };
