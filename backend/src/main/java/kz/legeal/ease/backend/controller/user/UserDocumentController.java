@@ -211,7 +211,7 @@ public class UserDocumentController {
             @ApiResponse(responseCode = "200", description = "PDF returned"),
             @ApiResponse(responseCode = "404", description = "Document not found or not completed yet")
     })
-    @GetMapping(value = "/{id}/download", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping("/{id}/download")
     public ResponseEntity<byte[]> download(
             @Parameter(description = "Document ID", required = true) @PathVariable Long id
     ) {
@@ -268,7 +268,7 @@ public class UserDocumentController {
             @ApiResponse(responseCode = "200", description = "Version PDF returned"),
             @ApiResponse(responseCode = "404", description = "Document or version not found")
     })
-    @GetMapping(value = "/{id}/versions/{version}/download", produces = MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping("/{id}/versions/{version}/download")
     public ResponseEntity<byte[]> downloadVersion(
             @Parameter(description = "Document ID", required = true) @PathVariable Long id,
             @Parameter(description = "Version number (1-based)", required = true) @PathVariable int version

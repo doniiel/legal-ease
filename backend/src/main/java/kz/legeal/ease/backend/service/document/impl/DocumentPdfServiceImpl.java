@@ -191,11 +191,24 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     /**
      * Replace characters that are illegal in PDF strings or that the fallback
      * Helvetica font cannot encode (non-Latin). For production, use a Unicode font.
+     *
+     * <p>Helvetica uses WinAnsiEncoding (Latin-1 / code points 0x00–0xFF).
+     * Any character outside that range (Cyrillic, Kazakh extensions, etc.) will
+     * cause PDFBox to throw at render time, so we replace them with '?' here.
+     * Bundle FreeSans.ttf / FreeSansBold.ttf in src/main/resources/fonts/ to
+     * enable full Unicode output without this fallback substitution.
      */
     private String sanitize(String text) {
         if (text == null) return "";
-        // Remove non-printable control chars; keep printable ASCII + Latin-1 supplement
-        return text.replaceAll("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]", "");
+        final StringBuilder sb = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            final char c = text.charAt(i);
+            if (c >= 0x00 && c <= 0x08) continue;          // non-printable control chars
+            if (c == 0x0B || c == 0x0C) continue;           // VT, FF
+            if (c >= 0x0E && c <= 0x1F) continue;           // non-printable control chars
+            sb.append(c <= 0xFF ? c : '?');                  // replace non-Latin-1 with '?'
+        }
+        return sb.toString();
     }
 
     private String truncate(String text, int maxLen) {

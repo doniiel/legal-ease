@@ -54,9 +54,9 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.VALIDATION_RULES, allEntries = true)
     public ValidationRuleDto update(Long id, ValidationRuleRequest request) {
         final var rule = findOrThrow(id);
-        evictCache(rule.getTemplate().getId());
 
         rule.setFieldKey(request.getFieldKey());
         rule.setFieldLabel(request.getFieldLabel());
@@ -69,15 +69,12 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.VALIDATION_RULES, allEntries = true)
     public void delete(Long id) {
         final var rule = findOrThrow(id);
-        evictCache(rule.getTemplate().getId());
         rule.setActive(false);
         repository.save(rule);
     }
-
-    @CacheEvict(value = CacheConfig.VALIDATION_RULES, key = "#templateId")
-    public void evictCache(Long templateId) {}
 
     private ValidationRule findOrThrow(Long id) {
         return repository.findById(id)
