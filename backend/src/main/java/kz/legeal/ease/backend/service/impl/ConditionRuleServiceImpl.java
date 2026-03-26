@@ -53,10 +53,10 @@ public class ConditionRuleServiceImpl implements ConditionalRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.CONDITIONAL_RULES, allEntries = true)
     public ConditionalRuleDto update(Long id, ConditionalRuleRequest request) {
         final var rule     = findOrThrow(id);
         final var template = findTemplate(request.getTemplateId());
-        evictCache(rule.getTemplate().getId());
 
         rule.setTemplate(template);
         rule.setConditionFieldKey(request.getConditionFieldKey());
@@ -69,15 +69,12 @@ public class ConditionRuleServiceImpl implements ConditionalRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.CONDITIONAL_RULES, allEntries = true)
     public void delete(Long id) {
         final var rule = findOrThrow(id);
-        evictCache(rule.getTemplate().getId());
         rule.setActive(false);
         repository.save(rule);
     }
-
-    @CacheEvict(value = CacheConfig.CONDITIONAL_RULES, key = "#templateId")
-    public void evictCache(Long templateId) {}
 
     private ConditionRule findOrThrow(Long id) {
         return repository.findById(id)

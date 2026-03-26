@@ -55,9 +55,9 @@ public class RiskRuleServiceImpl implements RiskRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.RISK_RULES, allEntries = true)
     public RiskRuleDto update(Long id, RiskRuleRequest request) {
         final var rule = findOrThrow(id);
-        evictCache(rule.getTemplate().getId());
 
         rule.setRuleCode(request.getRuleCode());
         rule.setFieldKey(request.getFieldKey());
@@ -71,15 +71,12 @@ public class RiskRuleServiceImpl implements RiskRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.RISK_RULES, allEntries = true)
     public void delete(Long id) {
         final var rule = findOrThrow(id);
-        evictCache(rule.getTemplate().getId());
         rule.setActive(false);
         repository.save(rule);
     }
-
-    @CacheEvict(value = CacheConfig.RISK_RULES, key = "#templateId")
-    public void evictCache(Long templateId) {}
 
     private RiskRule findOrThrow(Long id) {
         return repository.findById(id)

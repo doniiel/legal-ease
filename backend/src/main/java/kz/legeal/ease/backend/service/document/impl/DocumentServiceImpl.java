@@ -260,8 +260,9 @@ public class DocumentServiceImpl implements DocumentService {
             doc.setCurrentVersion(nextVersion);
             doc.setS3ObjectKey(objectKey);
             log.info("PDF v{} uploaded for document id={} → key={}", nextVersion, docId, objectKey);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("PDF generation/upload failed for document id={}: {}", docId, e.getMessage(), e);
+            throw e; // rolls back @Transactional — document status stays unchanged in DB
         }
 
         log.info("User id={} completed document id={}", currentUser.getId(), docId);

@@ -55,10 +55,10 @@ public class RequiredDocRuleServiceImpl implements RequiredDocRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.REQUIRED_DOC_RULES, allEntries = true)
     public RequiredDocRuleDto update(Long id, RequiredDocRuleRequest request) {
         final var rule     = findOrThrow(id);
         final var template = findTemplate(request.getTemplateId());
-        evictCache(rule.getTemplate().getId());
 
         rule.setTemplate(template);
         rule.setRequiredDocTitle(request.getRequiredDocTitle());
@@ -73,15 +73,12 @@ public class RequiredDocRuleServiceImpl implements RequiredDocRuleService {
 
     @Override
     @Transactional
+    @CacheEvict(value = CacheConfig.REQUIRED_DOC_RULES, allEntries = true)
     public void delete(Long id) {
         final var rule = findOrThrow(id);
-        evictCache(rule.getTemplate().getId());
         rule.setActive(false);
         repository.save(rule);
     }
-
-    @CacheEvict(value = CacheConfig.REQUIRED_DOC_RULES, key = "#templateId")
-    public void evictCache(Long templateId) {}
 
     private RequiredDocRule findOrThrow(Long id) {
         return repository.findById(id)
