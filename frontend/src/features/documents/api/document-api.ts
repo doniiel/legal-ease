@@ -117,6 +117,21 @@ export interface GetDocumentsParams {
   sort?: string[];
 }
 
+export interface DocumentVersion {
+  version: number;
+  createdDate: string;
+}
+
+export interface PresignedUrlResponse {
+  url: string;
+}
+
+export interface DocumentShareResponse {
+  shareToken: string;
+  shareUrl: string;
+  expiresAt: string;
+}
+
 export const documentApi = createApi({
   reducerPath: "documentApi",
   baseQuery: fetchBaseQuery({
@@ -131,6 +146,10 @@ export const documentApi = createApi({
   endpoints: (builder) => ({
     getDocuments: builder.query<DocumentsPage, GetDocumentsParams>({
       query: (params) => ({ url: "/user/documents", params }),
+      providesTags: ["Document"],
+    }),
+    getAllDocuments: builder.query<DocumentsPage, GetDocumentsParams>({
+      query: (params) => ({ url: "/user/documents/all", params }),
       providesTags: ["Document"],
     }),
     getDocumentById: builder.query<DocumentDetail, number>({
@@ -153,6 +172,29 @@ export const documentApi = createApi({
       query: (id) => ({ url: `/user/documents/${id}/complete`, method: "POST" }),
       invalidatesTags: ["Document"],
     }),
+    validateDocument: builder.mutation<AnalysisResult, number>({
+      query: (id) => ({ url: `/user/documents/${id}/validate`, method: "POST" }),
+    }),
+    analyzeDocument: builder.mutation<AnalysisResult, number>({
+      query: (id) => ({ url: `/user/documents/${id}/analyze`, method: "POST" }),
+    }),
+    archiveDocument: builder.mutation<DocumentDetail, number>({
+      query: (id) => ({ url: `/user/documents/${id}/archive`, method: "POST" }),
+      invalidatesTags: ["Document"],
+    }),
+    restoreDocument: builder.mutation<DocumentDetail, number>({
+      query: (id) => ({ url: `/user/documents/${id}/restore`, method: "POST" }),
+      invalidatesTags: ["Document"],
+    }),
+    getDocumentUrl: builder.query<PresignedUrlResponse, number>({
+      query: (id) => `/user/documents/${id}/url`,
+    }),
+    shareDocument: builder.mutation<DocumentShareResponse, number>({
+      query: (id) => ({ url: `/user/documents/${id}/share`, method: "POST" }),
+    }),
+    getDocumentVersions: builder.query<DocumentVersion[], number>({
+      query: (id) => `/user/documents/${id}/versions`,
+    }),
     getDocumentSuggestions: builder.query<AnalysisResult, number>({
       query: (id) => `/user/documents/${id}/suggestions`,
     }),
@@ -161,10 +203,18 @@ export const documentApi = createApi({
 
 export const {
   useGetDocumentsQuery,
+  useGetAllDocumentsQuery,
   useGetDocumentByIdQuery,
   useCreateDocumentMutation,
   useUpdateDocumentMutation,
   useDeleteDocumentMutation,
   useCompleteDocumentMutation,
+  useValidateDocumentMutation,
+  useAnalyzeDocumentMutation,
+  useArchiveDocumentMutation,
+  useRestoreDocumentMutation,
+  useGetDocumentUrlQuery,
+  useShareDocumentMutation,
+  useGetDocumentVersionsQuery,
   useGetDocumentSuggestionsQuery,
 } = documentApi;

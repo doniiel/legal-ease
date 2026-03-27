@@ -1,221 +1,124 @@
-import { useState, useMemo } from "react";
 import {
-  App,
-  Card,
-  Table,
-  Tag,
-  Button,
-  Space,
-  Modal,
-  Form,
-  Input,
-  Select,
-  Typography,
-  Popconfirm,
-  Descriptions,
-  Drawer,
-  DatePicker,
-  Row,
-  Col,
-  Avatar,
-  Badge,
-  Statistic,
-  Divider,
+  App, Table, Modal, Form, Input, Select, Typography, Descriptions,
+  Drawer, DatePicker, Avatar, Divider, Badge, Tooltip, Button, Space,
 } from "antd";
-import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  Trash2,
-  Eye,
-  RotateCcw,
-  Users,
-  ShieldCheck,
-  ShieldX,
-  Filter,
-  SlidersHorizontal,
-} from "lucide-react";
 import type { ColumnsType } from "antd/es/table";
-import type { Dayjs } from "dayjs";
-import type { AdminLawyerApplication } from "../../../features/admin/api/admin-lawyer-api";
 import {
-  useGetApplicationsQuery,
-  useApproveApplicationMutation,
-  useRejectApplicationMutation,
-  useDeleteApplicationMutation,
-} from "../../../features/admin/api/admin-lawyer-api";
+  Eye, UserCheck, UserX, Trash2, Clock, CheckCircle, XCircle,
+  SlidersHorizontal, RotateCcw, Users, ShieldCheck, ShieldX, FileSearch,
+  AlertTriangle,
+} from "lucide-react";
+import { useState } from "react";
+import { useAdminApplications, EMPTY_FILTERS } from "../../../features/admin/model/use-admin-applications";
+import type { AdminLawyerApplication } from "../../../features/admin/api/admin-lawyer-api";
+import StatCard from "../../../shared/ui/StatCard";
+import editorialTableComponents from "../../../shared/ui/table-components";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-interface Filters {
-  status?: "PENDING" | "APPROVED" | "REJECTED";
-  licenseNumber?: string;
-  userId?: number;
-  reviewerFio?: string;
-  createdRange?: [Dayjs, Dayjs] | null;
-  reviewedRange?: [Dayjs, Dayjs] | null;
-  page: number;
-  size: number;
-}
-
-const EMPTY_FILTERS: Filters = { page: 0, size: 10 };
-
-const STATUS_STYLE: Record<string, { color: string; bg: string; label: string }> = {
-  PENDING:  { color: "#1d4ed8", bg: "#eff6ff", label: "На рассмотрении" },
-  APPROVED: { color: "#15803d", bg: "#f0fdf4", label: "Одобрено" },
-  REJECTED: { color: "#b91c1c", bg: "#fef2f2", label: "Отклонено" },
+// ─── Status pill ──────────────────────────────────────────────
+const STATUS_CONFIG = {
+  PENDING:  { color: "#1d4ed8", bg: "rgba(29,78,216,0.08)",  border: "rgba(29,78,216,0.2)",  dot: "#1d4ed8", label: "На рассмотрении", icon: <Clock size={11} /> },
+  APPROVED: { color: "#059669", bg: "rgba(5,150,105,0.08)",  border: "rgba(5,150,105,0.2)",  dot: "#059669", label: "Одобрено",         icon: <CheckCircle size={11} /> },
+  REJECTED: { color: "#ef4444", bg: "rgba(239,68,68,0.08)",  border: "rgba(239,68,68,0.2)",  dot: "#ef4444", label: "Отклонено",        icon: <XCircle size={11} /> },
 };
 
-function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_STYLE[status] ?? STATUS_STYLE.PENDING;
-  const icons: Record<string, React.ReactNode> = {
-    APPROVED: <CheckCircle size={11} />,
-    REJECTED: <XCircle size={11} />,
-    PENDING:  <Clock size={11} />,
-  };
+function StatusPill({ status }: { status: string }) {
+  const s = STATUS_CONFIG[status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.PENDING;
   return (
-    <Tag
-      icon={icons[status]}
-      style={{
-        color: s.color,
-        background: s.bg,
-        border: "none",
-        fontWeight: 500,
-        borderRadius: 20,
-        padding: "2px 10px",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 4,
-      }}
-    >
-      {s.label}
-    </Tag>
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 20, background: s.bg, border: `1px solid ${s.border}` }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
+      <span style={{ fontSize: 11, fontWeight: 700, color: s.color, letterSpacing: "0.04em" }}>{s.label}</span>
+    </div>
+  );
+}
+
+// ─── Ghost icon button ────────────────────────────────────────
+function IconBtn({ icon, tooltip, onClick, hoverBg, hoverColor, disabled = false }: {
+  icon: React.ReactNode; tooltip: string; onClick?: () => void;
+  hoverBg: string; hoverColor: string; disabled?: boolean;
+}) {
+  return (
+    <Tooltip title={tooltip}>
+      <button
+        disabled={disabled}
+        onClick={onClick}
+        style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: "transparent", cursor: disabled ? "not-allowed" : "pointer", color: disabled ? "#cbd5e1" : "#64748b", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.15s, color 0.15s" }}
+        onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = hoverBg; e.currentTarget.style.color = hoverColor; } }}
+        onMouseLeave={(e) => { if (!disabled) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; } }}
+      >
+        {icon}
+      </button>
+    </Tooltip>
+  );
+}
+
+// ─── Delete confirm modal ─────────────────────────────────────
+function DeleteModal({
+  open, loading, onConfirm, onCancel,
+}: { open: boolean; loading: boolean; onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <Modal open={open} footer={null} onCancel={onCancel} centered width={420} closable={false}>
+      <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
+        <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff1f2", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", border: "2px solid rgba(239,68,68,0.2)" }}>
+          <AlertTriangle size={26} color="#ef4444" />
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#0b1c30", marginBottom: 8, fontFamily: "Manrope, sans-serif" }}>
+          Удалить заявку?
+        </div>
+        <div style={{ fontSize: 13, color: "#64748b", marginBottom: 6, lineHeight: 1.6 }}>
+          Заявка будет удалена без возможности восстановления.
+        </div>
+        <div style={{ fontSize: 12, color: "#991b1b", background: "#fff1f2", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "10px 16px", marginBottom: 28, lineHeight: 1.6 }}>
+          ⚠ Это действие необратимо. История заявки будет потеряна.
+        </div>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+          <Button onClick={onCancel} style={{ borderRadius: 8, minWidth: 110 }}>Отмена</Button>
+          <Button loading={loading} onClick={onConfirm} style={{ borderRadius: 8, minWidth: 110, background: "#ef4444", borderColor: "#ef4444", color: "#fff", fontWeight: 600 }}>
+            Удалить
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
 function getInitials(fio: string) {
   return fio.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 }
-
 const AVATAR_COLORS = ["#0F2A44", "#1d4ed8", "#7c3aed", "#b45309", "#0369a1"];
+const fmtDate = (v: string) => new Date(v).toLocaleDateString("ru-KZ", { day: "2-digit", month: "short", year: "numeric" });
 
+// ─── Main panel ───────────────────────────────────────────────
 export default function AdminLawyerApplicationsPanel() {
   const { message } = App.useApp();
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  const [filterModalOpen, setFilterModalOpen] = useState(false);
-  const [rejectModal, setRejectModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
-  const [detailDrawer, setDetailDrawer] = useState<{ open: boolean; record: AdminLawyerApplication | null }>({ open: false, record: null });
+  void message;
+
   const [rejectForm] = Form.useForm();
   const [filterForm] = Form.useForm();
-  const [loadingIds, setLoadingIds] = useState<number[]>([]);
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
 
-  // API queries
-  const { data, isLoading, isFetching } = useGetApplicationsQuery({
-    status: filters.status,
-    licenseNumber: filters.licenseNumber,
-    userId: filters.userId,
-    page: 0,
-    size: 200,
-  });
-
-  // Stats queries (size=1 to minimize payload, we only need totalElements)
-  const { data: statsAll }      = useGetApplicationsQuery({ page: 0, size: 1 });
-  const { data: statsPending }  = useGetApplicationsQuery({ status: "PENDING",  page: 0, size: 1 });
-  const { data: statsApproved } = useGetApplicationsQuery({ status: "APPROVED", page: 0, size: 1 });
-  const { data: statsRejected } = useGetApplicationsQuery({ status: "REJECTED", page: 0, size: 1 });
-
-  const [approveApplication] = useApproveApplicationMutation();
-  const [rejectApplication]  = useRejectApplicationMutation();
-  const [deleteApplication]  = useDeleteApplicationMutation();
-
-  const stats = {
-    total:    statsAll?.totalElements      ?? 0,
-    pending:  statsPending?.totalElements  ?? 0,
-    approved: statsApproved?.totalElements ?? 0,
-    rejected: statsRejected?.totalElements ?? 0,
-  };
+  const {
+    filters, setFilters,
+    isLoading, isFetching,
+    stats, filtered, paginatedData,
+    loadingIds, activeFilterCount,
+    rejectModal, setRejectModal,
+    detailDrawer, setDetailDrawer,
+    filterModalOpen, setFilterModalOpen,
+    handleApprove, handleRejectSubmit, handleDelete,
+  } = useAdminApplications();
 
   const openFilterModal = () => {
-    filterForm.setFieldsValue({
-      status:        filters.status ?? null,
-      licenseNumber: filters.licenseNumber ?? "",
-      userId:        filters.userId ?? null,
-      createdRange:  filters.createdRange ?? null,
-      reviewedRange: filters.reviewedRange ?? null,
-    });
+    filterForm.setFieldsValue({ status: filters.status ?? null, licenseNumber: filters.licenseNumber ?? "", userId: filters.userId ?? null, createdRange: filters.createdRange ?? null, reviewedRange: filters.reviewedRange ?? null });
     setFilterModalOpen(true);
   };
   const applyFilters = () => {
     const v = filterForm.getFieldsValue();
-    setFilters((f) => ({
-      ...EMPTY_FILTERS,
-      reviewerFio:   f.reviewerFio,
-      status:        v.status || undefined,
-      licenseNumber: v.licenseNumber || undefined,
-      userId:        v.userId || undefined,
-      createdRange:  v.createdRange || null,
-      reviewedRange: v.reviewedRange || null,
-    }));
+    setFilters({ ...EMPTY_FILTERS, reviewerFio: filters.reviewerFio, status: v.status || undefined, licenseNumber: v.licenseNumber || undefined, userId: v.userId || undefined, createdRange: v.createdRange || null, reviewedRange: v.reviewedRange || null });
     setFilterModalOpen(false);
-  };
-  const resetFilters = () => filterForm.resetFields();
-  const resetAndClose = () => { setFilters(EMPTY_FILTERS); filterForm.resetFields(); setFilterModalOpen(false); };
-
-  // Client-side filtering for fields not supported by the API
-  const filtered = useMemo(() => {
-    const content = data?.content ?? [];
-    return content.filter((a) => {
-      if (filters.reviewerFio && !a.reviewerInfo?.fio.toLowerCase().includes(filters.reviewerFio.toLowerCase())) return false;
-      if (filters.createdRange) {
-        const t = new Date(a.submittedAt).getTime();
-        if (t < filters.createdRange[0].startOf("day").valueOf()) return false;
-        if (t > filters.createdRange[1].endOf("day").valueOf()) return false;
-      }
-      if (filters.reviewedRange && a.reviewedAt) {
-        const t = new Date(a.reviewedAt).getTime();
-        if (t < filters.reviewedRange[0].startOf("day").valueOf()) return false;
-        if (t > filters.reviewedRange[1].endOf("day").valueOf()) return false;
-      }
-      return true;
-    });
-  }, [data, filters]);
-
-  const paginatedData = filtered.slice(filters.page * filters.size, filters.page * filters.size + filters.size);
-
-  const withLoading = async (id: number, fn: () => Promise<void>) => {
-    setLoadingIds((ids) => [...ids, id]);
-    try {
-      await fn();
-    } finally {
-      setLoadingIds((ids) => ids.filter((i) => i !== id));
-    }
-  };
-
-  const handleApprove = (id: number) => {
-    withLoading(id, async () => {
-      await approveApplication(id).unwrap();
-      message.success("Заявка успешно одобрена");
-    }).catch(() => message.error("Ошибка при одобрении заявки"));
-  };
-
-  const handleRejectSubmit = (values: { reason: string }) => {
-    if (!rejectModal.id) return;
-    const id = rejectModal.id;
-    withLoading(id, async () => {
-      await rejectApplication({ id, reason: values.reason }).unwrap();
-      message.success("Заявка отклонена");
-      setRejectModal({ open: false, id: null });
-      rejectForm.resetFields();
-    }).catch(() => message.error("Ошибка при отклонении заявки"));
-  };
-
-  const handleDelete = (id: number) => {
-    withLoading(id, async () => {
-      await deleteApplication(id).unwrap();
-      message.success("Заявка удалена");
-    }).catch(() => message.error("Ошибка при удалении заявки"));
   };
 
   const columns: ColumnsType<AdminLawyerApplication> = [
@@ -223,18 +126,13 @@ export default function AdminLawyerApplicationsPanel() {
       title: "Заявитель",
       key: "lawyer",
       render: (_, r) => (
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Avatar
-            size={36}
-            style={{ background: AVATAR_COLORS[r.id % AVATAR_COLORS.length], flexShrink: 0, fontSize: 13, fontWeight: 600 }}
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <Avatar size={40} style={{ background: AVATAR_COLORS[r.id % AVATAR_COLORS.length], fontWeight: 700, flexShrink: 0, borderRadius: 10, fontSize: 13 }}>
             {getInitials(r.lawyerInfo.fio)}
           </Avatar>
           <div>
-            <div style={{ fontWeight: 500, fontSize: 13, color: "#111827", lineHeight: 1.3 }}>
-              {r.lawyerInfo.fio}
-            </div>
-            <div style={{ fontSize: 12, color: "#6b7280" }}>{r.lawyerInfo.email}</div>
+            <Text strong style={{ display: "block", fontSize: 14, color: "#0b1c30" }}>{r.lawyerInfo.fio}</Text>
+            <Text style={{ fontSize: 12, color: "#64748b" }}>{r.lawyerInfo.email}</Text>
           </div>
         </div>
       ),
@@ -243,426 +141,306 @@ export default function AdminLawyerApplicationsPanel() {
       title: "Лицензия",
       dataIndex: "licenseNumber",
       render: (val) => (
-        <Tag style={{ fontFamily: "monospace", fontSize: 12, borderRadius: 6, padding: "1px 8px" }}>
+        <span style={{ fontFamily: "monospace", fontSize: 12, color: "#475569", background: "#f8fafc", padding: "3px 8px", borderRadius: 6, border: "1px solid #e2e8f0" }}>
           {val}
-        </Tag>
+        </span>
       ),
     },
     {
       title: "Статус",
       dataIndex: "status",
-      render: (status) => <StatusBadge status={status} />,
+      render: (status) => <StatusPill status={status} />,
     },
     {
       title: "Дата подачи",
       dataIndex: "submittedAt",
-      render: (val) => (
-        <Text style={{ fontSize: 12, color: "#6b7280" }}>
-          {new Date(val).toLocaleDateString("ru-KZ", { day: "2-digit", month: "short", year: "numeric" })}
-        </Text>
-      ),
+      render: (val) => <Text style={{ fontSize: 13, color: "#64748b" }}>{fmtDate(val)}</Text>,
     },
     {
       title: "Действия",
       key: "actions",
-      align: "right",
+      width: 140,
       render: (_, record) => {
         const loading = loadingIds.includes(record.id);
         return (
-          <Space size={4}>
-            <Button
-              size="small"
-              icon={<Eye size={13} />}
-              style={{ borderRadius: 6 }}
-              onClick={() => setDetailDrawer({ open: true, record })}
-            />
-            {record.status === "PENDING" && (
-              <>
-                <Popconfirm
-                  title="Одобрить заявку?"
-                  description="Пользователь получит статус адвоката."
-                  onConfirm={() => handleApprove(record.id)}
-                  okText="Одобрить"
-                  cancelText="Отмена"
-                  okButtonProps={{ style: { background: "#16a34a" } }}
-                >
-                  <Button
-                    size="small"
-                    loading={loading}
-                    icon={<CheckCircle size={13} />}
-                    style={{ borderRadius: 6, background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0", fontWeight: 500 }}
-                  >
-                    Одобрить
-                  </Button>
-                </Popconfirm>
-                <Button
-                  size="small"
-                  loading={loading}
-                  icon={<XCircle size={13} />}
-                  style={{ borderRadius: 6, background: "#fef2f2", color: "#b91c1c", border: "1px solid #fecaca", fontWeight: 500 }}
-                  onClick={() => setRejectModal({ open: true, id: record.id })}
-                >
-                  Отклонить
-                </Button>
-              </>
-            )}
-            <Popconfirm
-              title="Удалить заявку?"
-              description="Это действие необратимо."
-              onConfirm={() => handleDelete(record.id)}
-              okText="Удалить"
-              cancelText="Отмена"
-              okButtonProps={{ danger: true }}
-            >
-              <Button
-                size="small"
-                danger
-                icon={<Trash2 size={13} />}
-                style={{ borderRadius: 6 }}
-                loading={loading}
-              />
-            </Popconfirm>
+          <Space size={2}>
+            <IconBtn icon={<Eye size={15} />}       tooltip="Просмотр"  hoverBg="#f1f5f9" hoverColor="#0F2A44" onClick={() => setDetailDrawer({ open: true, record })} />
+            {record.status === "PENDING" && <>
+              <IconBtn icon={loading ? <span style={{ fontSize: 11 }}>…</span> : <UserCheck size={15} />} tooltip="Одобрить"   hoverBg="#f0fdf4" hoverColor="#059669"
+                onClick={() => handleApprove(record.id)} disabled={loading} />
+              <IconBtn icon={<UserX size={15} />}    tooltip="Отклонить" hoverBg="#fff1f2" hoverColor="#ef4444"
+                onClick={() => setRejectModal({ open: true, id: record.id })} disabled={loading} />
+            </>}
+            <IconBtn icon={loading ? <span style={{ fontSize: 11 }}>…</span> : <Trash2 size={15} />} tooltip="Удалить" hoverBg="#fff1f2" hoverColor="#ef4444" disabled={loading}
+              onClick={() => setDeleteModal({ open: true, id: record.id })} />
           </Space>
         );
       },
     },
   ];
 
-  const activeFilterCount = Object.keys(filters).filter(
-    (k) => !["page", "size"].includes(k) && filters[k as keyof Filters] != null
-  ).length;
-
   return (
-    <div>
-      {/* Page header */}
-      <div style={{ marginBottom: 24 }}>
-        <Title level={4} style={{ margin: 0, color: "#0F2A44" }}>
-          Заявки на статус адвоката
-        </Title>
-        <Text type="secondary" style={{ fontSize: 13 }}>
-          Рассмотрите и управляйте заявками пользователей
-        </Text>
+    <div style={{ overflowX: "hidden" }}>
+      {/* ── Full-bleed hero ── */}
+      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+          <div>
+            <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+              Заявки на статус адвоката
+            </h1>
+            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
+              Рассмотрение, одобрение и отклонение заявок пользователей
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ padding: "12px 20px" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{stats.total}</div>
+            </div>
+            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ padding: "12px 20px", textAlign: "right" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Ожидают</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#f59e0b", fontFamily: "Manrope, sans-serif" }}>{stats.pending}</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Stats row */}
-      <Row gutter={12} style={{ marginBottom: 20 }}>
-        {[
-          { label: "Всего",            value: stats.total,    icon: <Users size={18} />,      color: "#0F2A44", bg: "#f0f4f8" },
-          { label: "На рассмотрении",  value: stats.pending,  icon: <Clock size={18} />,      color: "#1d4ed8", bg: "#eff6ff" },
-          { label: "Одобрено",         value: stats.approved, icon: <ShieldCheck size={18} />,color: "#15803d", bg: "#f0fdf4" },
-          { label: "Отклонено",        value: stats.rejected, icon: <ShieldX size={18} />,    color: "#b91c1c", bg: "#fef2f2" },
-        ].map((s) => (
-          <Col xs={12} sm={6} key={s.label}>
-            <Card
-              style={{ borderRadius: 12, border: "1px solid #e5e7eb", cursor: "default" }}
-              styles={{ body: { padding: "16px 20px" } }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <Text style={{ fontSize: 12, color: "#6b7280", fontWeight: 500 }}>{s.label}</Text>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", color: s.color }}>
-                  {s.icon}
-                </div>
-              </div>
-              <Statistic
-                value={s.value}
-                valueStyle={{ fontSize: 26, fontWeight: 700, color: s.color, lineHeight: 1 }}
-              />
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      {/* Toolbar */}
-      <Card
-        style={{ borderRadius: 12, border: "1px solid #e5e7eb", marginBottom: 12 }}
-        styles={{ body: { padding: "12px 16px" } }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Input.Search
-            placeholder="Поиск по ФИО проверяющего..."
-            allowClear
-            size="large"
-            style={{ flex: 1, maxWidth: 380 }}
-            value={filters.reviewerFio ?? ""}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, reviewerFio: e.target.value || undefined, page: 0 }))
-            }
-            onSearch={(val) =>
-              setFilters((f) => ({ ...f, reviewerFio: val || undefined, page: 0 }))
-            }
-          />
-
-          <div style={{ flex: 1 }} />
-
-          <Text style={{ fontSize: 12, color: "#9ca3af", whiteSpace: "nowrap" }}>
-            Найдено: <strong style={{ color: "#374151" }}>{filtered.length}</strong>
-          </Text>
-
-          {(activeFilterCount > 0 || filters.reviewerFio) && (
-            <Button
-              type="text"
-              size="small"
-              icon={<RotateCcw size={13} />}
-              onClick={() => { resetAndClose(); setFilters(EMPTY_FILTERS); }}
-              style={{ color: "#9ca3af", whiteSpace: "nowrap" }}
-            >
-              Сбросить
-            </Button>
-          )}
-
-          <Badge count={activeFilterCount} size="small" color="#1d4ed8" offset={[-4, 4]}>
-            <Button
-              icon={<SlidersHorizontal size={15} />}
-              onClick={openFilterModal}
-              type={activeFilterCount > 0 ? "primary" : "default"}
-              ghost={activeFilterCount > 0}
-              style={{ borderRadius: 8, fontWeight: 500 }}
-            >
-              Фильтры
-            </Button>
-          </Badge>
+      <div style={{ padding: "0 32px 32px" }}>
+        {/* ── Stat cards ── */}
+        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+          <StatCard label="Всего заявок"       value={stats.total}    color="#0F2A44" icon={<Users size={26} />} />
+          <StatCard label="На рассмотрении"    value={stats.pending}  color="#1d4ed8" icon={<Clock size={26} />} />
+          <StatCard label="Одобрено"           value={stats.approved} color="#059669" icon={<ShieldCheck size={26} />} />
+          <StatCard label="Отклонено"          value={stats.rejected} color="#ef4444" icon={<ShieldX size={26} />} />
         </div>
-      </Card>
 
-      {/* Table */}
-      <Card style={{ borderRadius: 12, border: "1px solid #e5e7eb" }} styles={{ body: { padding: 0 } }}>
-        <Table
-          columns={columns}
-          dataSource={paginatedData}
-          rowKey="id"
-          loading={isLoading || isFetching}
-          style={{ borderRadius: 12, overflow: "hidden" }}
-          rowClassName={() => "table-row-hover"}
-          pagination={{
-            current: filters.page + 1,
-            pageSize: filters.size,
-            total: filtered.length,
-            onChange: (p, ps) => setFilters((f) => ({ ...f, page: p - 1, size: ps })),
-            showTotal: (total, range) => (
-              <Text style={{ fontSize: 12, color: "#6b7280" }}>
-                {range[0]}–{range[1]} из {total} заявок
-              </Text>
-            ),
-            style: { padding: "12px 20px" },
-          }}
-          scroll={{ x: 700 }}
-        />
-      </Card>
+        {/* ── Filter toolbar ── */}
+        <div style={{ background: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 1px 4px rgba(11,28,48,0.06)", border: "1px solid rgba(197,198,210,0.15)" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
+            {/* Search reviewer */}
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#757682", marginBottom: 8 }}>Поиск по проверяющему</div>
+              <Input
+                prefix={<FileSearch size={15} color="#757682" />}
+                placeholder="ФИО проверяющего..."
+                allowClear
+                value={filters.reviewerFio ?? ""}
+                onChange={(e) => setFilters((f) => ({ ...f, reviewerFio: e.target.value || undefined, page: 0 }))}
+                style={{ borderRadius: 12, background: "#eff4ff", border: "none" }}
+              />
+            </div>
 
-      {/* Filter Modal */}
+            {/* Quick status filter */}
+            <div style={{ minWidth: 180 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#757682", marginBottom: 8 }}>Статус</div>
+              <Select
+                allowClear placeholder="Все статусы"
+                value={filters.status}
+                onChange={(v) => setFilters((f) => ({ ...f, status: v, page: 0 }))}
+                style={{ width: "100%" }}
+              >
+                <Option value="PENDING"><Space size={6}><Clock size={12} color="#1d4ed8" />На рассмотрении</Space></Option>
+                <Option value="APPROVED"><Space size={6}><CheckCircle size={12} color="#059669" />Одобрено</Space></Option>
+                <Option value="REJECTED"><Space size={6}><XCircle size={12} color="#ef4444" />Отклонено</Space></Option>
+              </Select>
+            </div>
+
+            {/* Filter modal btn */}
+            <Badge count={activeFilterCount} size="small" color="#1d4ed8" offset={[-4, 4]}>
+              <Button
+                icon={<SlidersHorizontal size={15} />}
+                onClick={openFilterModal}
+                style={{ borderRadius: 12, height: 40, paddingLeft: 16, paddingRight: 16, background: activeFilterCount > 0 ? "#eff4ff" : "transparent", borderColor: activeFilterCount > 0 ? "#1d4ed8" : "#e2e8f0", color: activeFilterCount > 0 ? "#1d4ed8" : "#64748b", fontWeight: 600 }}
+              >
+                Фильтры
+              </Button>
+            </Badge>
+
+            {/* Reset */}
+            {(activeFilterCount > 0 || filters.reviewerFio) && (
+              <Button icon={<RotateCcw size={13} />} type="text" onClick={() => setFilters(EMPTY_FILTERS)} style={{ color: "#94a3b8", height: 40 }}>
+                Сбросить
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Table ── */}
+        <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 8px 32px rgba(11,28,48,0.04)", overflow: "hidden" }}>
+          <Table
+            components={editorialTableComponents}
+            columns={columns}
+            dataSource={paginatedData}
+            rowKey="id"
+            loading={isLoading || isFetching}
+            scroll={{ x: "max-content" }}
+            pagination={{
+              current: filters.page + 1,
+              pageSize: filters.size,
+              total: filtered.length,
+              onChange: (p, ps) => setFilters((f) => ({ ...f, page: p - 1, size: ps })),
+              showSizeChanger: false,
+              showTotal: (total, range) => `${range[0]}–${range[1]} из ${total} заявок`,
+              style: { padding: "16px 32px", margin: 0 },
+            }}
+            style={{ borderRadius: 0 }}
+          />
+        </div>
+      </div>
+
+      {/* ── Filter modal ── */}
       <Modal
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Filter size={16} color="#1d4ed8" />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff4ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <SlidersHorizontal size={16} color="#0F2A44" />
             </div>
-            <span>Фильтры</span>
+            <span style={{ fontWeight: 700, color: "#0b1c30" }}>Расширенные фильтры</span>
           </div>
         }
         open={filterModalOpen}
         onCancel={() => setFilterModalOpen(false)}
-        width={560}
+        width={520}
         footer={
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <Button
-              icon={<RotateCcw size={13} />}
-              onClick={resetFilters}
-              style={{ color: "#6b7280" }}
-            >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0" }}>
+            <Button icon={<RotateCcw size={13} />} type="text" onClick={() => filterForm.resetFields()} style={{ color: "#94a3b8" }}>
               Сбросить всё
             </Button>
             <Space>
-              <Button style={{ borderRadius: 8 }} onClick={() => setFilterModalOpen(false)}>
-                Отмена
-              </Button>
-              <Button
-                type="primary"
-                style={{ borderRadius: 8, background: "#0F2A44" }}
-                onClick={applyFilters}
-              >
+              <Button style={{ borderRadius: 8 }} onClick={() => setFilterModalOpen(false)}>Отмена</Button>
+              <Button style={{ borderRadius: 8, background: "#0F2A44", borderColor: "#0F2A44", color: "#fff", fontWeight: 600 }} onClick={applyFilters}>
                 Применить
               </Button>
             </Space>
           </div>
         }
-        destroyOnClose={false}
       >
-        <Form form={filterForm} layout="vertical" style={{ padding: "4px 0" }}>
-          <Row gutter={16}>
-            <Col xs={24} sm={12}>
-              <Form.Item name="status" label="Статус">
-                <Select placeholder="Все статусы" allowClear size="large" style={{ width: "100%" }}>
-                  <Option value="PENDING">
-                    <Space size={6}><Clock size={12} color="#1d4ed8" />На рассмотрении</Space>
-                  </Option>
-                  <Option value="APPROVED">
-                    <Space size={6}><CheckCircle size={12} color="#15803d" />Одобрено</Space>
-                  </Option>
-                  <Option value="REJECTED">
-                    <Space size={6}><XCircle size={12} color="#b91c1c" />Отклонено</Space>
-                  </Option>
-                </Select>
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} sm={12}>
-              <Form.Item name="licenseNumber" label="Номер лицензии">
-                <Input
-                  placeholder="KZ-ADV-2024-00123"
-                  allowClear
-                  size="large"
-                  style={{ fontFamily: "monospace" }}
-                />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24}>
-              <Form.Item name="createdRange" label="Период подачи">
-                <RangePicker style={{ width: "100%" }} size="large" placeholder={["От", "До"]} />
-              </Form.Item>
-            </Col>
-
-            <Col xs={24}>
-              <Form.Item name="reviewedRange" label="Период рассмотрения" style={{ marginBottom: 0 }}>
-                <RangePicker style={{ width: "100%" }} size="large" placeholder={["От", "До"]} />
-              </Form.Item>
-            </Col>
-          </Row>
+        <Form form={filterForm} layout="vertical" style={{ padding: "8px 0 0" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <Form.Item name="status" label={<span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#757682" }}>Статус</span>}>
+              <Select placeholder="Все статусы" allowClear style={{ borderRadius: 8 }}>
+                <Option value="PENDING"><Space size={6}><Clock size={12} color="#1d4ed8" />На рассмотрении</Space></Option>
+                <Option value="APPROVED"><Space size={6}><CheckCircle size={12} color="#059669" />Одобрено</Space></Option>
+                <Option value="REJECTED"><Space size={6}><XCircle size={12} color="#ef4444" />Отклонено</Space></Option>
+              </Select>
+            </Form.Item>
+            <Form.Item name="licenseNumber" label={<span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#757682" }}>Номер лицензии</span>}>
+              <Input placeholder="KZ-ADV-2024-..." allowClear style={{ borderRadius: 8, fontFamily: "monospace" }} />
+            </Form.Item>
+          </div>
+          <Form.Item name="createdRange" label={<span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#757682" }}>Период подачи</span>}>
+            <RangePicker style={{ width: "100%", borderRadius: 8 }} placeholder={["От", "До"]} />
+          </Form.Item>
+          <Form.Item name="reviewedRange" label={<span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#757682" }}>Период рассмотрения</span>} style={{ marginBottom: 0 }}>
+            <RangePicker style={{ width: "100%", borderRadius: 8 }} placeholder={["От", "До"]} />
+          </Form.Item>
         </Form>
       </Modal>
 
-      {/* Reject Modal */}
+      {/* ── Reject modal ── */}
       <Modal
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <XCircle size={16} color="#b91c1c" />
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#fff1f2", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <UserX size={16} color="#ef4444" />
             </div>
-            <span>Отклонить заявку</span>
+            <span style={{ fontWeight: 700, color: "#0b1c30" }}>Отклонить заявку</span>
           </div>
         }
         open={rejectModal.open}
         onCancel={() => { setRejectModal({ open: false, id: null }); rejectForm.resetFields(); }}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
         width={480}
       >
-        <Text type="secondary" style={{ fontSize: 13, display: "block", marginBottom: 20 }}>
+        <p style={{ fontSize: 13, color: "#64748b", margin: "8px 0 20px", lineHeight: 1.6 }}>
           Укажите причину отклонения — она будет показана заявителю.
-        </Text>
-        <Form form={rejectForm} layout="vertical" onFinish={handleRejectSubmit}>
-          <Form.Item
-            name="reason"
-            label="Причина отклонения"
-            rules={[{ required: true, message: "Укажите причину" }]}
-          >
-            <Input.TextArea
-              rows={4}
-              placeholder="Например: Лицензия не найдена в реестре адвокатов РК..."
-              style={{ borderRadius: 8 }}
-            />
+        </p>
+        <Form form={rejectForm} layout="vertical" onFinish={(v) => { handleRejectSubmit(v); rejectForm.resetFields(); }}>
+          <Form.Item name="reason" label={<span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#757682" }}>Причина отклонения</span>}
+            rules={[{ required: true, message: "Укажите причину" }]}>
+            <Input.TextArea rows={4} placeholder="Например: Лицензия не найдена в реестре адвокатов РК..." style={{ borderRadius: 8 }} />
           </Form.Item>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-            <Button style={{ borderRadius: 8 }} onClick={() => { setRejectModal({ open: false, id: null }); rejectForm.resetFields(); }}>
-              Отмена
-            </Button>
-            <Button type="primary" danger htmlType="submit" style={{ borderRadius: 8 }}>
+            <Button style={{ borderRadius: 8 }} onClick={() => { setRejectModal({ open: false, id: null }); rejectForm.resetFields(); }}>Отмена</Button>
+            <Button htmlType="submit" style={{ borderRadius: 8, background: "#ef4444", borderColor: "#ef4444", color: "#fff", fontWeight: 600 }}>
               Отклонить заявку
             </Button>
           </div>
         </Form>
       </Modal>
 
-      {/* Detail Drawer */}
+      {/* ── Delete modal ── */}
+      <DeleteModal
+        open={deleteModal.open}
+        loading={deleteModal.id !== null && loadingIds.includes(deleteModal.id)}
+        onConfirm={() => {
+          if (deleteModal.id !== null) {
+            handleDelete(deleteModal.id);
+            setDeleteModal({ open: false, id: null });
+          }
+        }}
+        onCancel={() => setDeleteModal({ open: false, id: null })}
+      />
+
+      {/* ── Detail drawer ── */}
       <Drawer
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Eye size={16} color="#6b7280" />
-            <span>Детали заявки #{detailDrawer.record?.id}</span>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff4ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Eye size={15} color="#0F2A44" />
+            </div>
+            <span style={{ fontWeight: 700, color: "#0b1c30" }}>Заявка #{detailDrawer.record?.id}</span>
           </div>
         }
         open={detailDrawer.open}
         onClose={() => setDetailDrawer({ open: false, record: null })}
         width={440}
-        styles={{ body: { padding: "24px" } }}
+        styles={{ body: { padding: 24 } }}
       >
         {detailDrawer.record && (() => {
           const r = detailDrawer.record;
-          const s = STATUS_STYLE[r.status];
+          const s = STATUS_CONFIG[r.status as keyof typeof STATUS_CONFIG];
           return (
             <>
               {/* Status banner */}
-              <div
-                style={{
-                  background: s.bg,
-                  border: `1px solid`,
-                  borderColor: r.status === "APPROVED" ? "#bbf7d0" : r.status === "REJECTED" ? "#fecaca" : "#bfdbfe",
-                  borderRadius: 10,
-                  padding: "14px 18px",
-                  marginBottom: 24,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                {r.status === "APPROVED" && <CheckCircle size={18} color={s.color} />}
-                {r.status === "REJECTED" && <XCircle size={18} color={s.color} />}
-                {r.status === "PENDING"  && <Clock size={18} color={s.color} />}
-                <Text style={{ color: s.color, fontWeight: 600, fontSize: 13 }}>{s.label}</Text>
+              <div style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: 10, padding: "14px 18px", marginBottom: 24, display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
+                <Text style={{ color: s.color, fontWeight: 700, fontSize: 13 }}>{s.label}</Text>
               </div>
 
               {/* Applicant */}
-              <Text style={{ fontSize: 11, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                Заявитель
-              </Text>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 8, marginBottom: 20 }}>
-                <Avatar size={44} style={{ background: AVATAR_COLORS[r.id % AVATAR_COLORS.length], fontWeight: 600 }}>
+              <Text style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>Заявитель</Text>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10, marginBottom: 20 }}>
+                <Avatar size={44} style={{ background: AVATAR_COLORS[r.id % AVATAR_COLORS.length], fontWeight: 700, borderRadius: 10 }}>
                   {getInitials(r.lawyerInfo.fio)}
                 </Avatar>
                 <div>
-                  <div style={{ fontWeight: 600, color: "#111827" }}>{r.lawyerInfo.fio}</div>
-                  <div style={{ fontSize: 12, color: "#6b7280" }}>{r.lawyerInfo.email}</div>
-                  <div style={{ fontSize: 12, color: "#9ca3af" }}>ИИН: {r.lawyerInfo.iin}</div>
+                  <Text strong style={{ display: "block", color: "#0b1c30" }}>{r.lawyerInfo.fio}</Text>
+                  <Text style={{ fontSize: 12, color: "#64748b" }}>{r.lawyerInfo.email}</Text>
+                  <Text style={{ fontSize: 12, color: "#94a3b8", display: "block" }}>ИИН: {r.lawyerInfo.iin}</Text>
                 </div>
               </div>
 
               <Divider style={{ margin: "0 0 20px" }} />
 
-              <Descriptions column={1} size="small" colon={false}>
-                <Descriptions.Item
-                  label={<Text style={{ fontSize: 12, color: "#9ca3af" }}>Номер лицензии</Text>}
-                >
-                  <Tag style={{ fontFamily: "monospace", borderRadius: 6 }}>{r.licenseNumber}</Tag>
+              <Descriptions column={1} size="small" colon={false} styles={{ label: { color: "#94a3b8", fontSize: 12 }, content: { fontSize: 13 } }}>
+                <Descriptions.Item label="Номер лицензии">
+                  <span style={{ fontFamily: "monospace", background: "#f8fafc", padding: "2px 8px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 12 }}>{r.licenseNumber}</span>
                 </Descriptions.Item>
-                <Descriptions.Item
-                  label={<Text style={{ fontSize: 12, color: "#9ca3af" }}>Дата подачи</Text>}
-                >
-                  <Text style={{ fontSize: 13 }}>{new Date(r.submittedAt).toLocaleString("ru-KZ")}</Text>
-                </Descriptions.Item>
-                {r.reviewerInfo && (
-                  <Descriptions.Item
-                    label={<Text style={{ fontSize: 12, color: "#9ca3af" }}>Проверил</Text>}
-                  >
-                    <Text style={{ fontSize: 13 }}>{r.reviewerInfo.fio}</Text>
-                  </Descriptions.Item>
-                )}
-                {r.reviewedAt && (
-                  <Descriptions.Item
-                    label={<Text style={{ fontSize: 12, color: "#9ca3af" }}>Дата рассмотрения</Text>}
-                  >
-                    <Text style={{ fontSize: 13 }}>{new Date(r.reviewedAt).toLocaleString("ru-KZ")}</Text>
-                  </Descriptions.Item>
-                )}
+                <Descriptions.Item label="Дата подачи">{fmtDate(r.submittedAt)}</Descriptions.Item>
+                {r.reviewerInfo && <Descriptions.Item label="Проверил">{r.reviewerInfo.fio}</Descriptions.Item>}
+                {r.reviewedAt && <Descriptions.Item label="Дата рассмотрения">{new Date(r.reviewedAt).toLocaleString("ru-KZ")}</Descriptions.Item>}
               </Descriptions>
 
               {r.rejectionReason && (
                 <>
                   <Divider style={{ margin: "16px 0" }} />
-                  <Text style={{ fontSize: 11, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.05em", display: "block", marginBottom: 8 }}>
-                    Причина отклонения
-                  </Text>
-                  <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "12px 16px" }}>
-                    <Text style={{ fontSize: 13, color: "#b91c1c" }}>{r.rejectionReason}</Text>
+                  <Text style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: 8 }}>Причина отклонения</Text>
+                  <div style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 8, padding: "12px 16px" }}>
+                    <Text style={{ fontSize: 13, color: "#ef4444" }}>{r.rejectionReason}</Text>
                   </div>
                 </>
               )}
@@ -670,26 +448,16 @@ export default function AdminLawyerApplicationsPanel() {
               {r.status === "PENDING" && (
                 <>
                   <Divider style={{ margin: "20px 0" }} />
-                  <Space style={{ width: "100%" }} direction="vertical" size={8}>
-                    <Popconfirm
-                      title="Одобрить заявку?"
-                      onConfirm={() => { handleApprove(r.id); setDetailDrawer({ open: false, record: null }); }}
-                      okText="Да"
-                      cancelText="Нет"
-                    >
-                      <Button block style={{ borderRadius: 8, background: "#f0fdf4", color: "#15803d", border: "1px solid #bbf7d0", fontWeight: 500, height: 40 }} icon={<CheckCircle size={14} />}>
-                        Одобрить заявку
-                      </Button>
-                    </Popconfirm>
-                    <Button
-                      block
-                      style={{ borderRadius: 8, background: "#fef2f2", color: "#b91c1c", border: "1px solid #fecaca", fontWeight: 500, height: 40 }}
-                      icon={<XCircle size={14} />}
-                      onClick={() => { setDetailDrawer({ open: false, record: null }); setRejectModal({ open: true, id: r.id }); }}
-                    >
+                  <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: 8 }}>
+                    <Button block icon={<UserCheck size={14} />} onClick={() => { handleApprove(r.id); setDetailDrawer({ open: false, record: null }); }}
+                      style={{ borderRadius: 8, height: 40, background: "rgba(5,150,105,0.08)", borderColor: "rgba(5,150,105,0.2)", color: "#059669", fontWeight: 600 }}>
+                      Одобрить заявку
+                    </Button>
+                    <Button block icon={<UserX size={14} />} onClick={() => { setDetailDrawer({ open: false, record: null }); setRejectModal({ open: true, id: r.id }); }}
+                      style={{ borderRadius: 8, height: 40, background: "rgba(239,68,68,0.06)", borderColor: "rgba(239,68,68,0.2)", color: "#ef4444", fontWeight: 600 }}>
                       Отклонить заявку
                     </Button>
-                  </Space>
+                  </div>
                 </>
               )}
             </>

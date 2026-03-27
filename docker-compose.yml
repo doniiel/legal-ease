@@ -52,6 +52,12 @@ services:
     container_name: legalease-backend
     restart: unless-stopped
     env_file: .env
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend/src
+        - action: rebuild
+          path: ./backend/build.gradle
     depends_on:
       postgres:
         condition: service_healthy
@@ -109,6 +115,14 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend/src
+        - action: rebuild
+          path: ./frontend/index.html
+        - action: rebuild
+          path: ./frontend/package.json
 
 networks:
   legalease-network:

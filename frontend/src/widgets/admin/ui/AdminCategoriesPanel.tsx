@@ -1,304 +1,359 @@
 import { useState } from "react";
 import {
-  App,
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Switch,
-  Tag,
-  Popconfirm,
-  Space,
-  Typography,
-  Tooltip,
+  App, Table, Modal, Form, Input, Switch, Popconfirm, Space, Typography, Tooltip, Button,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { FolderOpen, Search, Plus, Pencil, PowerOff } from "lucide-react";
 import {
-  useGetCategoriesQuery,
-  useCreateCategoryMutation,
-  useUpdateCategoryMutation,
-  useDeactivateCategoryMutation,
-  type Category,
-  type UpdateCategoryRequest,
-} from "../../../features/admin/api/admin-category-api";
+  FolderOpen, Search, Plus, FilePen, CircleSlash, CircleCheck,
+  FolderCheck, FolderX, AlertTriangle,
+} from "lucide-react";
+import { useAdminCategories } from "../../../features/admin/model/use-admin-categories";
+import StatCard from "../../../shared/ui/StatCard";
+import editorialTableComponents from "../../../shared/ui/table-components";
+import type { Category, UpdateCategoryRequest } from "../../../features/admin/api/admin-category-api";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { TextArea } = Input;
 
-const isFetchError = (e: unknown): e is { status: number } =>
-  typeof e === "object" && e !== null && "status" in e;
+// ─── Status pill ──────────────────────────────────────────────
+function StatusPill({ active }: { active: boolean }) {
+  return (
+    <div
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 6,
+        padding: "4px 12px", borderRadius: 20,
+        background: active ? "rgba(5,150,105,0.08)" : "rgba(148,163,184,0.12)",
+        border: `1px solid ${active ? "rgba(5,150,105,0.2)" : "rgba(148,163,184,0.25)"}`,
+      }}
+    >
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: active ? "#059669" : "#94a3b8", flexShrink: 0 }} />
+      <span style={{ fontSize: 11, fontWeight: 700, color: active ? "#059669" : "#94a3b8", letterSpacing: "0.04em" }}>
+        {active ? "Активна" : "Неактивна"}
+      </span>
+    </div>
+  );
+}
 
+// ─── Ghost icon button ────────────────────────────────────────
+function IconBtn({
+  icon, tooltip, onClick, hoverBg, hoverColor, disabled = false,
+}: {
+  icon: React.ReactNode; tooltip: string; onClick?: () => void;
+  hoverBg: string; hoverColor: string; disabled?: boolean;
+}) {
+  return (
+    <Tooltip title={tooltip}>
+      <button
+        disabled={disabled}
+        onClick={onClick}
+        style={{
+          width: 32, height: 32, borderRadius: 8, border: "none",
+          background: "transparent", cursor: disabled ? "not-allowed" : "pointer",
+          color: disabled ? "#cbd5e1" : "#64748b",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          transition: "background 0.15s, color 0.15s",
+        }}
+        onMouseEnter={(e) => { if (!disabled) { e.currentTarget.style.background = hoverBg; e.currentTarget.style.color = hoverColor; } }}
+        onMouseLeave={(e) => { if (!disabled) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; } }}
+      >
+        {icon}
+      </button>
+    </Tooltip>
+  );
+}
+
+// ─── Deactivate confirm modal ─────────────────────────────────
+function DeactivateModal({
+  category,
+  loading,
+  onConfirm,
+  onCancel,
+}: {
+  category: Category | null;
+  loading: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <Modal open={category !== null} footer={null} onCancel={onCancel} centered width={420} closable={false}>
+      <div style={{ textAlign: "center", padding: "8px 0 4px" }}>
+        <div
+          style={{
+            width: 60, height: 60, borderRadius: "50%",
+            background: "#fff7ed",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            margin: "0 auto 20px",
+            border: "2px solid rgba(245,158,11,0.2)",
+          }}
+        >
+          <AlertTriangle size={26} color="#f59e0b" />
+        </div>
+
+        <div style={{ fontSize: 18, fontWeight: 800, color: "#0b1c30", marginBottom: 8, fontFamily: "Manrope, sans-serif" }}>
+          Деактивировать категорию?
+        </div>
+        <div style={{ fontSize: 13, color: "#64748b", marginBottom: 6, lineHeight: 1.6 }}>
+          Категория <strong style={{ color: "#0F2A44" }}>«{category?.name}»</strong> будет скрыта из системы.
+        </div>
+        <div
+          style={{
+            fontSize: 12, color: "#92400e", background: "#fffbeb",
+            border: "1px solid rgba(245,158,11,0.25)", borderRadius: 8,
+            padding: "10px 16px", marginBottom: 28, lineHeight: 1.6,
+          }}
+        >
+          ⚠ Нельзя деактивировать категорию, если к ней привязаны активные шаблоны.
+        </div>
+
+        <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+          <Button onClick={onCancel} style={{ borderRadius: 8, minWidth: 110 }}>
+            Отмена
+          </Button>
+          <Button
+            loading={loading}
+            onClick={onConfirm}
+            style={{
+              borderRadius: 8, minWidth: 110,
+              background: "#f59e0b", borderColor: "#f59e0b", color: "#fff", fontWeight: 600,
+            }}
+          >
+            Деактивировать
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── Main panel ───────────────────────────────────────────────
 export default function AdminCategoriesPanel() {
   const { message } = App.useApp();
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  void message;
   const [form] = Form.useForm();
+  const [deactivateTarget, setDeactivateTarget] = useState<Category | null>(null);
 
-  const { data, isLoading } = useGetCategoriesQuery({ page: page - 1, size: 10 });
-  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
-  const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryMutation();
-  const [deactivateCategory, { isLoading: isDeactivating }] = useDeactivateCategoryMutation();
-
-  const filtered = (data?.content ?? []).filter((c) => {
-    const q = search.toLowerCase();
-    return (
-      c.name.toLowerCase().includes(q) ||
-      c.description?.toLowerCase().includes(q)
-    );
-  });
-
-  const openCreate = () => {
-    setEditingCategory(null);
-    form.resetFields();
-    setModalOpen(true);
-  };
-
-  const openEdit = (category: Category) => {
-    setEditingCategory(category);
-    form.setFieldsValue({
-      name: category.name,
-      description: category.description,
-      active: category.active,
-    });
-    setModalOpen(true);
-  };
-
-  const handleSubmit = async () => {
-    const values = await form.validateFields();
-    try {
-      if (editingCategory) {
-        await updateCategory({
-          id: editingCategory.id,
-          body: values as UpdateCategoryRequest,
-        }).unwrap();
-        message.success("Категория обновлена");
-      } else {
-        await createCategory({ name: values.name, description: values.description }).unwrap();
-        message.success("Категория создана");
-      }
-      setModalOpen(false);
-      form.resetFields();
-    } catch (e) {
-      if (isFetchError(e) && e.status === 409) {
-        message.error("Категория с таким названием уже существует");
-      } else if (isFetchError(e) && e.status === 400) {
-        message.error("Ошибка валидации данных");
-      } else {
-        message.error("Произошла ошибка");
-      }
-    }
-  };
-
-  const handleDeactivate = async (id: number) => {
-    try {
-      await deactivateCategory(id).unwrap();
-      message.success("Категория деактивирована");
-    } catch (e) {
-      if (isFetchError(e) && e.status === 409) {
-        message.error("Нельзя деактивировать: есть связанные шаблоны");
-      } else {
-        message.error("Произошла ошибка");
-      }
-    }
-  };
+  const {
+    data, isLoading, filtered,
+    activeCount, inactiveCount,
+    page, setPage,
+    search, setSearch,
+    modalOpen, editingCategory,
+    isCreating, isUpdating, isDeactivating,
+    openCreate, openEdit, closeModal, handleSubmit, handleDeactivate, handleActivate,
+  } = useAdminCategories();
 
   const columns: ColumnsType<Category> = [
     {
       title: "Название",
-      dataIndex: "name",
       key: "name",
-      render: (name: string) => (
-        <Text strong style={{ fontSize: 13 }}>
-          {name}
-        </Text>
+      render: (_, record) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+              background: record.active ? "#eff4ff" : "#f8fafc",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              border: `1px solid ${record.active ? "#dce9ff" : "#e2e8f0"}`,
+            }}
+          >
+            <FolderOpen size={18} color={record.active ? "#0F2A44" : "#94a3b8"} />
+          </div>
+          <Text strong style={{ fontSize: 14, color: "#0b1c30" }}>{record.name}</Text>
+        </div>
       ),
     },
     {
       title: "Описание",
       dataIndex: "description",
       key: "description",
-      render: (desc: string) => (
-        <Text type="secondary" style={{ fontSize: 13 }}>
-          {desc || "—"}
-        </Text>
-      ),
+      render: (v) => <Text style={{ fontSize: 13, color: "#64748b" }}>{v || "—"}</Text>,
     },
     {
       title: "Статус",
       dataIndex: "active",
       key: "active",
-      width: 120,
-      align: "center",
-      render: (active: boolean) =>
-        active ? (
-          <Tag color="success">Активна</Tag>
-        ) : (
-          <Tag color="default">Неактивна</Tag>
-        ),
+      width: 140,
+      render: (active: boolean) => <StatusPill active={active} />,
     },
     {
       title: "Действия",
       key: "actions",
-      width: 120,
+      width: 110,
       render: (_, record) => (
-        <Space size={6}>
-          <Tooltip title="Редактировать">
-            <Button
-              size="small"
-              icon={<Pencil size={14} />}
-              onClick={() => openEdit(record)}
+        <Space size={2}>
+          {/* Edit */}
+          <IconBtn
+            icon={<FilePen size={15} />}
+            tooltip="Редактировать"
+            hoverBg="#f1f5f9" hoverColor="#0F2A44"
+            onClick={() => openEdit(record, form.setFieldsValue)}
+          />
+
+          {/* Deactivate → custom modal */}
+          {record.active && (
+            <IconBtn
+              icon={isDeactivating && deactivateTarget?.id === record.id
+                ? <span style={{ fontSize: 12 }}>…</span>
+                : <CircleSlash size={15} />
+              }
+              tooltip="Деактивировать"
+              hoverBg="#fff7ed" hoverColor="#f59e0b"
+              onClick={() => setDeactivateTarget(record)}
             />
-          </Tooltip>
-          <Tooltip title={record.active ? "Деактивировать" : "Уже неактивна"}>
+          )}
+
+          {/* Activate → keep Popconfirm (low risk action) */}
+          {!record.active && (
             <Popconfirm
-              title="Деактивировать категорию?"
-              description="Нельзя применить, если есть связанные шаблоны."
-              onConfirm={() => handleDeactivate(record.id)}
-              okText="Да"
-              cancelText="Отмена"
-              disabled={!record.active}
+              title="Активировать категорию?"
+              onConfirm={() => handleActivate(record)}
+              okText="Да" cancelText="Отмена"
             >
-              <Button
-                size="small"
-                icon={<PowerOff size={14} />}
-                danger
-                disabled={!record.active}
-                loading={isDeactivating}
-              />
+              <span>
+                <IconBtn
+                  icon={isUpdating ? <span style={{ fontSize: 12 }}>…</span> : <CircleCheck size={15} />}
+                  tooltip="Активировать"
+                  hoverBg="#f0fdf4" hoverColor="#059669"
+                />
+              </span>
             </Popconfirm>
-          </Tooltip>
+          )}
         </Space>
       ),
     },
   ];
 
   return (
-    <div>
-      {/* Header banner */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-          borderRadius: 16,
-          padding: "28px 36px",
-          marginBottom: 24,
-          display: "flex",
-          alignItems: "center",
-          gap: 20,
-        }}
-      >
-        <div
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: 14,
-            background: "rgba(255,255,255,0.15)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <FolderOpen size={26} color="#fff" />
+    <div style={{ overflowX: "hidden" }}>
+      {/* ── Full-bleed hero ── */}
+      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+          <div>
+            <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+              Управление категориями
+            </h1>
+            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
+              Создание, редактирование и управление статусом категорий документов
+            </p>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ padding: "12px 20px" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{data?.totalElements ?? "—"}</div>
+            </div>
+            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
+            <div style={{ padding: "12px 20px", textAlign: "right" }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Активных</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "#059669", fontFamily: "Manrope, sans-serif" }}>{activeCount}</div>
+            </div>
+          </div>
         </div>
-        <div>
-          <Title level={4} style={{ margin: 0, color: "#fff", fontWeight: 700 }}>
-            Управление категориями
-          </Title>
-          <Text style={{ color: "rgba(255,255,255,0.65)", fontSize: 13 }}>
-            Создание, редактирование и деактивация категорий
-          </Text>
+      </div>
+
+      <div style={{ padding: "0 32px 32px" }}>
+        {/* ── Stat cards ── */}
+        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+          <StatCard label="Всего категорий" value={data?.totalElements} color="#0F2A44" icon={<FolderOpen size={26} />} loading={isLoading} />
+          <StatCard label="Активных"        value={activeCount}         color="#059669"  icon={<FolderCheck size={26} />} />
+          <StatCard label="Неактивных"      value={inactiveCount}       color="#94a3b8"  icon={<FolderX size={26} />} />
         </div>
-        {data && (
-          <div style={{ marginLeft: "auto", display: "flex", gap: 12, alignItems: "center" }}>
-            <div
-              style={{
-                background: "rgba(255,255,255,0.12)",
-                borderRadius: 10,
-                padding: "8px 18px",
-                textAlign: "center",
-              }}
-            >
-              <Text style={{ color: "#fff", fontSize: 22, fontWeight: 700, display: "block" }}>
-                {data.totalElements}
-              </Text>
-              <Text style={{ color: "rgba(255,255,255,0.65)", fontSize: 12 }}>Всего</Text>
+
+        {/* ── Filter toolbar ── */}
+        <div style={{ background: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 1px 4px rgba(11,28,48,0.06)", border: "1px solid rgba(197,198,210,0.15)" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#757682", marginBottom: 8 }}>Поиск</div>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", display: "flex", pointerEvents: "none" }}>
+                  <Search size={15} color="#757682" />
+                </span>
+                <Input
+                  placeholder="Название или описание категории..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{ paddingLeft: 36, borderRadius: 12, background: "#eff4ff", border: "none" }}
+                  allowClear
+                />
+              </div>
             </div>
             <Button
-              icon={<Plus size={16} />}
-              onClick={openCreate}
-              style={{
-                background: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.3)",
-                color: "#fff",
-                borderRadius: 8,
-              }}
+              icon={<Plus size={15} />}
+              onClick={() => openCreate(form.resetFields)}
+              style={{ borderRadius: 12, background: "#0F2A44", borderColor: "#0F2A44", color: "#fff", height: 40, paddingLeft: 20, paddingRight: 20, fontWeight: 600 }}
             >
               Добавить
             </Button>
           </div>
-        )}
+        </div>
+
+        {/* ── Table ── */}
+        <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 8px 32px rgba(11,28,48,0.04)", overflow: "hidden" }}>
+          <Table
+            components={editorialTableComponents}
+            columns={columns}
+            dataSource={filtered}
+            rowKey="id"
+            loading={isLoading}
+            pagination={{
+              current: page,
+              total: data?.totalElements,
+              pageSize: 10,
+              onChange: (p) => setPage(p),
+              showSizeChanger: false,
+              showTotal: (total) => `Всего ${total} категорий`,
+              style: { padding: "16px 32px", margin: 0 },
+            }}
+            style={{ borderRadius: 0 }}
+          />
+        </div>
       </div>
 
-      {/* Search */}
-      <div style={{ marginBottom: 16 }}>
-        <Input
-          prefix={<Search size={15} color="#9ca3af" />}
-          placeholder="Поиск по названию или описанию..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ maxWidth: 360, borderRadius: 8 }}
-        />
-      </div>
-
-      {/* Table */}
-      <Table
-        columns={columns}
-        dataSource={filtered}
-        rowKey="id"
-        loading={isLoading}
-        pagination={{
-          current: page,
-          total: data?.totalElements,
-          pageSize: 10,
-          onChange: (p) => setPage(p),
-          showSizeChanger: false,
-          showTotal: (total) => `Всего ${total} категорий`,
+      {/* ── Deactivate confirm modal ── */}
+      <DeactivateModal
+        category={deactivateTarget}
+        loading={isDeactivating}
+        onConfirm={async () => {
+          if (deactivateTarget) {
+            await handleDeactivate(deactivateTarget.id);
+            setDeactivateTarget(null);
+          }
         }}
-        style={{ background: "#fff", borderRadius: 12 }}
+        onCancel={() => setDeactivateTarget(null)}
       />
 
-      {/* Create / Edit Modal */}
+      {/* ── Create / Edit modal ── */}
       <Modal
-        title={editingCategory ? "Редактировать категорию" : "Новая категория"}
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff4ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <FolderOpen size={16} color="#0F2A44" />
+            </div>
+            <span style={{ fontWeight: 700, color: "#0b1c30" }}>
+              {editingCategory ? "Редактировать категорию" : "Новая категория"}
+            </span>
+          </div>
+        }
         open={modalOpen}
-        onCancel={() => {
-          setModalOpen(false);
-          form.resetFields();
+        onCancel={() => closeModal(form.resetFields)}
+        onOk={async () => {
+          const values = await form.validateFields();
+          await handleSubmit(values as UpdateCategoryRequest, form.resetFields);
         }}
-        onOk={handleSubmit}
         okText={editingCategory ? "Сохранить" : "Создать"}
         cancelText="Отмена"
         confirmLoading={isCreating || isUpdating}
-        destroyOnClose
+        okButtonProps={{ style: { background: "#0F2A44", borderColor: "#0F2A44", borderRadius: 8 } }}
+        cancelButtonProps={{ style: { borderRadius: 8 } }}
+        destroyOnHidden
+        width={480}
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
-          <Form.Item
-            label="Название"
-            name="name"
-            rules={[{ required: true, message: "Введите название категории" }]}
-          >
-            <Input placeholder="Например: Гражданское право" />
+          <Form.Item label="Название" name="name" rules={[{ required: true, message: "Введите название категории" }]}>
+            <Input placeholder="Например: Гражданское право" style={{ borderRadius: 8 }} />
           </Form.Item>
-          <Form.Item
-            label="Описание"
-            name="description"
-            rules={[{ required: true, message: "Введите описание" }]}
-          >
-            <TextArea rows={3} placeholder="Краткое описание категории..." />
+          <Form.Item label="Описание" name="description" rules={[{ required: true, message: "Введите описание" }]}>
+            <TextArea rows={3} placeholder="Краткое описание категории..." style={{ borderRadius: 8 }} />
           </Form.Item>
           {editingCategory && (
             <Form.Item label="Активна" name="active" valuePropName="checked">

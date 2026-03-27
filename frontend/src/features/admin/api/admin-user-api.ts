@@ -16,7 +16,7 @@ export interface AdminUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: UserRole;
+  role: string; // enum: "USER" | "LAWYER" | "ADMIN"
   telephone: string;
   userProfileImageUrl: string;
 }
