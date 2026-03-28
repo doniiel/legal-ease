@@ -23,6 +23,7 @@ import { userTemplateApi } from "../../features/templates/api/user-template-api"
 import { matchingApi } from "../../features/matching/api/matching-api";
 import { aiApi } from "../../features/ai/api/ai-api";
 import { publicShareApi } from "../../features/share/api/public-share-api";
+import { profileApi } from "../../features/profile/api/profile-api";
 
 export const store = configureStore({
   reducer: {
@@ -50,6 +51,7 @@ export const store = configureStore({
     [matchingApi.reducerPath]: matchingApi.reducer,
     [aiApi.reducerPath]: aiApi.reducer,
     [publicShareApi.reducerPath]: publicShareApi.reducer,
+    [profileApi.reducerPath]: profileApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -76,6 +78,7 @@ export const store = configureStore({
       matchingApi.middleware,
       aiApi.middleware,
       publicShareApi.middleware,
+      profileApi.middleware,
     ),
 });
 

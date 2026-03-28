@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export type DocumentStatus = "DRAFT" | "COMPLETED" | "PROCESSING";
+export type DocumentStatus = "DRAFT" | "VALIDATED" | "PROCESSING" | "COMPLETED" | "ARCHIVED";
 export type RiskLevel = "HIGH" | "MEDIUM" | "LOW";
 
 export interface FieldValue {
@@ -214,6 +214,7 @@ export const {
   useArchiveDocumentMutation,
   useRestoreDocumentMutation,
   useGetDocumentUrlQuery,
+  useLazyGetDocumentUrlQuery,
   useShareDocumentMutation,
   useGetDocumentVersionsQuery,
   useGetDocumentSuggestionsQuery,

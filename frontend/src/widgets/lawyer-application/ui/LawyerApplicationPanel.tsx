@@ -5,7 +5,6 @@ import {
   Form,
   Input,
   Button,
-  Tag,
   Typography,
   Steps,
   Alert,
@@ -45,15 +44,21 @@ const STATUS_CONFIG = {
     step: 1,
     title: "Заявка на рассмотрении",
     description: "Администратор рассмотрит вашу заявку в ближайшее время.",
+    pillBg: "#dbeafe",
+    pillColor: "#1d4ed8",
+    pillLabel: "На рассмотрении",
   },
   APPROVED: {
-    color: "#15803d",
+    color: "#059669",
     bg: "#f0fdf4",
     border: "#bbf7d0",
-    icon: <BadgeCheck size={28} color="#15803d" />,
+    icon: <BadgeCheck size={28} color="#059669" />,
     step: 2,
     title: "Заявка одобрена!",
     description: "Поздравляем! Вам присвоен статус адвоката в системе LegalEase.",
+    pillBg: "#d1fae5",
+    pillColor: "#059669",
+    pillLabel: "Одобрена",
   },
   REJECTED: {
     color: "#b91c1c",
@@ -63,6 +68,9 @@ const STATUS_CONFIG = {
     step: 2,
     title: "Заявка отклонена",
     description: "К сожалению, ваша заявка была отклонена.",
+    pillBg: "#fee2e2",
+    pillColor: "#b91c1c",
+    pillLabel: "Отклонена",
   },
 };
 
@@ -91,7 +99,6 @@ export default function LawyerApplicationPanel() {
 
   const hasApplication = !isError && application != null;
   const displayForm = !isLoading && (!hasApplication || showForm);
-
   const cfg = hasApplication && !showForm ? STATUS_CONFIG[application.status] : null;
 
   const handleSubmit = async (values: { licenseNum: string }) => {
@@ -105,14 +112,14 @@ export default function LawyerApplicationPanel() {
   };
 
   return (
-    <div>
-      {/* Header banner */}
+    <div style={{ padding: "0 32px 32px" }}>
+      {/* ── Full-bleed hero ── */}
       <div
         style={{
           background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-          borderRadius: 16,
-          padding: "28px 36px",
-          marginBottom: 24,
+          padding: "40px 40px 56px",
+          marginLeft: -32,
+          marginRight: -32,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -159,6 +166,83 @@ export default function LawyerApplicationPanel() {
           />
         </div>
       </div>
+
+      {/* ── Status/license pills row (overlaps hero) ── */}
+      {hasApplication && cfg && (
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            flexWrap: "wrap",
+            marginTop: -28,
+            position: "relative",
+            zIndex: 2,
+            marginBottom: 24,
+          }}
+        >
+          <div
+            style={{
+              background: cfg.pillBg,
+              border: `1px solid ${cfg.border}`,
+              borderRadius: 10,
+              padding: "10px 20px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            }}
+          >
+            {cfg.icon && <span style={{ display: "flex" }}>{cfg.icon}</span>}
+            <div>
+              <div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Статус</div>
+              <div style={{ fontWeight: 700, fontSize: 14, color: cfg.pillColor }}>{cfg.pillLabel}</div>
+            </div>
+          </div>
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 10,
+              padding: "10px 20px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            }}
+          >
+            <FileText size={20} color="#0F2A44" />
+            <div>
+              <div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Лицензия</div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", fontFamily: "monospace" }}>{application.licenseNumber}</div>
+            </div>
+          </div>
+          <div
+            style={{
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: 10,
+              padding: "10px 20px",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            }}
+          >
+            <CalendarDays size={20} color="#64748b" />
+            <div>
+              <div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Дата подачи</div>
+              <div style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>
+                {new Date(application.submittedAt).toLocaleDateString("ru-KZ")}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* No application yet — spacer */}
+      {!hasApplication && !isLoading && (
+        <div style={{ marginTop: 24 }} />
+      )}
 
       {isLoading ? (
         <div style={{ textAlign: "center", padding: "60px 0" }}>
@@ -215,48 +299,6 @@ export default function LawyerApplicationPanel() {
                     style={{ marginTop: 16, borderRadius: 8 }}
                   />
                 )}
-
-                <div
-                  style={{
-                    marginTop: 20,
-                    paddingTop: 16,
-                    borderTop: `1px solid ${cfg.border}`,
-                    display: "flex",
-                    gap: 32,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <div>
-                    <Text style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      Номер лицензии
-                    </Text>
-                    <div style={{ marginTop: 4 }}>
-                      <Tag
-                        style={{
-                          fontFamily: "monospace",
-                          fontSize: 13,
-                          padding: "2px 10px",
-                          borderRadius: 6,
-                          background: "#fff",
-                          borderColor: cfg.border,
-                          color: cfg.color,
-                        }}
-                      >
-                        {application.licenseNumber}
-                      </Tag>
-                    </div>
-                  </div>
-                  <div>
-                    <Text style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      Дата подачи
-                    </Text>
-                    <div style={{ marginTop: 4 }}>
-                      <Text style={{ fontSize: 13, color: "#374151", fontWeight: 500 }}>
-                        {new Date(application.submittedAt).toLocaleString("ru-KZ")}
-                      </Text>
-                    </div>
-                  </div>
-                </div>
 
                 {application.status === "REJECTED" && (
                   <Button
@@ -355,8 +397,8 @@ export default function LawyerApplicationPanel() {
               <Timeline
                 items={[
                   {
-                    color: hasApplication ? "#15803d" : "#0F2A44",
-                    dot: <CircleCheck size={16} color={hasApplication ? "#15803d" : "#0F2A44"} />,
+                    color: hasApplication ? "#059669" : "#0F2A44",
+                    dot: <CircleCheck size={16} color={hasApplication ? "#059669" : "#0F2A44"} />,
                     children: (
                       <div>
                         <Text style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>
@@ -369,8 +411,8 @@ export default function LawyerApplicationPanel() {
                     ),
                   },
                   {
-                    color: hasApplication && application.status !== "PENDING" ? "#15803d" : "#9ca3af",
-                    dot: <Clock3 size={16} color={hasApplication && application.status !== "PENDING" ? "#15803d" : "#9ca3af"} />,
+                    color: hasApplication && application.status !== "PENDING" ? "#059669" : "#9ca3af",
+                    dot: <Clock3 size={16} color={hasApplication && application.status !== "PENDING" ? "#059669" : "#9ca3af"} />,
                     children: (
                       <div>
                         <Text style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>
@@ -383,9 +425,9 @@ export default function LawyerApplicationPanel() {
                     ),
                   },
                   {
-                    color: application?.status === "APPROVED" ? "#15803d" : application?.status === "REJECTED" ? "#b91c1c" : "#9ca3af",
+                    color: application?.status === "APPROVED" ? "#059669" : application?.status === "REJECTED" ? "#b91c1c" : "#9ca3af",
                     dot: application?.status === "APPROVED"
-                      ? <BadgeCheck size={16} color="#15803d" />
+                      ? <BadgeCheck size={16} color="#059669" />
                       : application?.status === "REJECTED"
                         ? <XCircle size={16} color="#b91c1c" />
                         : <CheckCircle2 size={16} color="#9ca3af" />,

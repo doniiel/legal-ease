@@ -17,6 +17,7 @@ import AdminAudit from "../../pages/admin-audit";
 import LawyerTemplates from "../../pages/lawyer-templates";
 import LawyerMatchingRules from "../../pages/lawyer-matching-rules";
 import LawyerRuleManager from "../../pages/lawyer-rule-manager";
+import LawyerDocuments from "../../pages/lawyer-documents";
 import DocumentDetail from "../../pages/document-detail";
 import ProtectedRoute from "../../shared/ui/ProtectedRoute";
 import { ROUTES } from "./router";
@@ -61,4 +62,5 @@ export const PAGES = [
   { path: ROUTES.LAWYER_TEMPLATES,     element: auth(<LawyerTemplates />,    ["LAWYER"]) },
   { path: ROUTES.LAWYER_MATCHING_RULES,element: auth(<LawyerMatchingRules />,["LAWYER"]) },
   { path: ROUTES.LAWYER_RULE_MANAGER,  element: auth(<LawyerRuleManager />,  ["LAWYER"]) },
+  { path: ROUTES.LAWYER_DOCUMENTS,     element: auth(<LawyerDocuments />,    ["LAWYER"]) },
 ];

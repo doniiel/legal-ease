@@ -30,16 +30,17 @@ const NAV_ITEMS = [
   { key: ROUTES.HOME,                icon: <Home size={18} />,           label: "Главная",          roles: ["USER", "LAWYER", "ADMIN"] },
   { key: ROUTES.DOCUMENTS,           icon: <FileText size={18} />,       label: "Документы",        roles: ["USER", "LAWYER", "ADMIN"] },
   { key: ROUTES.PROFILE,             icon: <User size={18} />,           label: "Профиль",          roles: ["USER", "LAWYER", "ADMIN"] },
-  { key: ROUTES.LAWYER_APPLICATION,  icon: <ShieldCheck size={18} />,    label: "Заявка адвоката",  roles: ["USER"] },
-  { key: ROUTES.SETTINGS,            icon: <Settings size={18} />,       label: "Настройки",        roles: ["USER", "LAWYER", "ADMIN"] },
+  { key: ROUTES.LAWYER_APPLICATION,  icon: <ShieldCheck size={18} />,    label: "Заявка адвоката",  roles: ["USER", "LAWYER"] },
   { key: ROUTES.ADMIN_DASHBOARD,     icon: <LayoutDashboard size={18} />,label: "Дашборд",          roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_APPLICATIONS,  icon: <ClipboardList size={18} />,  label: "Заявки",           roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_USERS,         icon: <Users size={18} />,          label: "Пользователи",     roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_CATEGORIES,    icon: <FolderOpen size={18} />,     label: "Категории",        roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_RULES,         icon: <ShieldCheck size={18} />,    label: "Правила",          roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_AUDIT,         icon: <ScrollText size={18} />,     label: "Аудит логи",       roles: ["ADMIN"] },
-  { key: ROUTES.LAWYER_TEMPLATES,    icon: <FileCode size={18} />,       label: "Мои шаблоны",      roles: ["LAWYER"] },
-  { key: ROUTES.LAWYER_RULE_MANAGER, icon: <ShieldAlert size={18} />,    label: "Rule Manager",     roles: ["LAWYER"] },
+  { key: ROUTES.LAWYER_TEMPLATES,      icon: <FileCode size={18} />,       label: "Мои шаблоны",      roles: ["LAWYER"] },
+  { key: ROUTES.LAWYER_MATCHING_RULES, icon: <Scale size={18} />,          label: "Матчинг",          roles: ["LAWYER"] },
+  { key: ROUTES.LAWYER_RULE_MANAGER,   icon: <ShieldAlert size={18} />,    label: "Rule Manager",     roles: ["LAWYER"] },
+  { key: ROUTES.LAWYER_DOCUMENTS,      icon: <FileText size={18} />,       label: "Документы клиентов", roles: ["LAWYER"] },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
@@ -147,7 +148,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
   };
 
   // Dashboard gets zero padding — hero section goes edge-to-edge
-  const isFullBleed = [ROUTES.ADMIN_DASHBOARD, ROUTES.ADMIN_USERS, ROUTES.ADMIN_RULES, ROUTES.ADMIN_CATEGORIES, ROUTES.ADMIN_APPLICATIONS, ROUTES.ADMIN_AUDIT].includes(pathname);
+  const isFullBleed =
+    pathname.startsWith(ROUTES.DOCUMENTS) ||
+    [
+      ROUTES.HOME,
+      ROUTES.LAWYER_APPLICATION,
+      ROUTES.SETTINGS,
+      ROUTES.ADMIN_DASHBOARD, ROUTES.ADMIN_USERS, ROUTES.ADMIN_RULES,
+      ROUTES.ADMIN_CATEGORIES, ROUTES.ADMIN_APPLICATIONS, ROUTES.ADMIN_AUDIT,
+      ROUTES.LAWYER_TEMPLATES, ROUTES.LAWYER_MATCHING_RULES,
+      ROUTES.LAWYER_RULE_MANAGER, ROUTES.LAWYER_DOCUMENTS,
+    ].includes(pathname);
 
   return (
     <Layout style={{ minHeight: "100vh" }}>

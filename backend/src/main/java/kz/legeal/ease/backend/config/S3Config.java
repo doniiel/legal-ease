@@ -1,11 +1,12 @@
 package kz.legeal.ease.backend.config;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
@@ -76,7 +77,7 @@ public class S3Config {
      * Step 6 — Ensure the configured bucket exists on application startup.
      * Creates it if absent; does nothing if it already exists.
      */
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void initBucket() {
         final var bucket = props.getBucket();
         try {

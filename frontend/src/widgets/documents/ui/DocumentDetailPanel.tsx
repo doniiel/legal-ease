@@ -1,337 +1,315 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  App,
-  Button,
-  Card,
-  Col,
-  Divider,
-  Form,
-  Input,
-  Row,
-  Spin,
-  Tag,
-  Typography,
-  Alert,
-  Progress,
-  Empty,
-  Tooltip,
-  Space,
+  App, Form, Input, Spin, Typography, Alert, Progress, Empty, Tooltip, Divider,
 } from "antd";
 import {
-  ArrowLeft,
-  Save,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
-  Lightbulb,
-  FileSearch,
-  Zap,
-  ShieldAlert,
-  FileCheck2,
-  BrainCircuit,
+  ArrowLeft, Save, CheckCircle2, AlertTriangle, Lightbulb,
+  FileSearch, Zap, ShieldAlert, FileCheck2, BrainCircuit,
+  FileText, Clock, FilePen, Download, Share2, Archive,
+  RotateCcw, ShieldCheck, Copy, Check, History,
 } from "lucide-react";
 import {
   useGetDocumentByIdQuery,
   useUpdateDocumentMutation,
   useCompleteDocumentMutation,
+  useValidateDocumentMutation,
+  useArchiveDocumentMutation,
+  useRestoreDocumentMutation,
+  useShareDocumentMutation,
+  useLazyGetDocumentUrlQuery,
+  useGetDocumentVersionsQuery,
   useGetDocumentSuggestionsQuery,
   type AnalysisResult,
+  type DocumentVersion,
 } from "../../../features/documents/api/document-api";
+import { useGetTemplateByIdQuery } from "../../../features/templates/api/user-template-api";
+import type { TemplateField } from "../../../features/lawyer/api/lawyer-template-api";
 import { ROUTES } from "../../../app/router/router";
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 
-const STATUS_CONFIG = {
-  DRAFT: { color: "orange", label: "Черновик" },
-  COMPLETED: { color: "green", label: "Завершён" },
-  PROCESSING: { color: "blue", label: "Обработка" },
-};
-
-const RISK_COLORS = {
-  HIGH: { border: "#fecaca", bg: "#fef2f2", text: "#b91c1c", tag: "error" as const },
-  MEDIUM: { border: "#fed7aa", bg: "#fff7ed", text: "#c2410c", tag: "warning" as const },
-  LOW: { border: "#bbf7d0", bg: "#f0fdf4", text: "#15803d", tag: "success" as const },
-};
-
-function AnalysisResultBlock({ result }: { result: AnalysisResult }) {
-  if (!result) return null;
-
+// ─── Status pill ──────────────────────────────────────────────
+function StatusPill({ status }: { status: string }) {
+  const cfg =
+    status === "COMPLETED"  ? { color: "#059669", bg: "rgba(5,150,105,0.12)",   border: "rgba(5,150,105,0.3)",   dot: "#059669", label: "Завершён"     } :
+    status === "VALIDATED"  ? { color: "#7c3aed", bg: "rgba(124,58,237,0.12)",  border: "rgba(124,58,237,0.3)",  dot: "#7c3aed", label: "Проверен"     } :
+    status === "PROCESSING" ? { color: "#1677ff", bg: "rgba(22,119,255,0.12)",  border: "rgba(22,119,255,0.3)",  dot: "#1677ff", label: "В обработке"  } :
+    status === "ARCHIVED"   ? { color: "#6b7280", bg: "rgba(107,114,128,0.12)", border: "rgba(107,114,128,0.3)", dot: "#6b7280", label: "Архив"         } :
+                              { color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.3)",  dot: "#f59e0b", label: "Черновик"     };
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* AI Summary */}
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot }} />
+      <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color, letterSpacing: "0.04em" }}>{cfg.label}</span>
+    </div>
+  );
+}
+
+// ─── Risk pill ────────────────────────────────────────────────
+function RiskPill({ level }: { level: string }) {
+  const cfg =
+    level === "HIGH"   ? { color: "#ef4444", bg: "rgba(239,68,68,0.08)",   label: "Высокий" } :
+    level === "MEDIUM" ? { color: "#f59e0b", bg: "rgba(245,158,11,0.08)",  label: "Средний" } :
+                         { color: "#059669", bg: "rgba(5,150,105,0.08)",   label: "Низкий"  };
+  return <span style={{ fontSize: 10, fontWeight: 700, color: cfg.color, background: cfg.bg, padding: "2px 8px", borderRadius: 20 }}>{cfg.label}</span>;
+}
+
+// ─── Hero action button ───────────────────────────────────────
+function HeroBtn({
+  icon, label, onClick, disabled = false,
+  variant = "ghost",
+}: {
+  icon: React.ReactNode; label: string; onClick?: () => void;
+  disabled?: boolean; variant?: "ghost" | "success" | "danger" | "primary";
+}) {
+  const styles: Record<string, React.CSSProperties> = {
+    ghost:   { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.2)",  color: "rgba(255,255,255,0.85)" },
+    success: { background: "rgba(5,150,105,0.7)",   border: "1px solid rgba(5,150,105,0.8)",    color: "#fff" },
+    danger:  { background: "rgba(239,68,68,0.6)",   border: "1px solid rgba(239,68,68,0.8)",    color: "#fff" },
+    primary: { background: "rgba(124,58,237,0.7)",  border: "1px solid rgba(124,58,237,0.8)",   color: "#fff" },
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        display: "flex", alignItems: "center", gap: 6,
+        ...styles[variant],
+        borderRadius: 8, padding: "7px 14px",
+        cursor: disabled ? "not-allowed" : "pointer",
+        fontSize: 13, fontWeight: 600,
+        opacity: disabled ? 0.6 : 1,
+        transition: "opacity 0.15s",
+      }}
+    >
+      {icon}{label}
+    </button>
+  );
+}
+
+// ─── Analysis block ───────────────────────────────────────────
+function AnalysisBlock({ result }: { result: AnalysisResult }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {result.aiSummary && (
-        <Card
-          size="small"
-          style={{ borderRadius: 10, border: "1px solid #bfdbfe", background: "#eff6ff" }}
-          styles={{ body: { padding: "16px 20px" } }}
-        >
-          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-            <BrainCircuit size={18} color="#1d4ed8" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div>
-              <Text strong style={{ color: "#1d4ed8", fontSize: 13, display: "block", marginBottom: 4 }}>
-                AI Анализ
-              </Text>
-              <Paragraph style={{ margin: 0, fontSize: 13, color: "#1e3a8a" }}>
-                {result.aiSummary}
-              </Paragraph>
-              {result.aiRecommendation && (
-                <Paragraph style={{ margin: "8px 0 0", fontSize: 12, color: "#1e40af" }}>
-                  <strong>Рекомендация:</strong> {result.aiRecommendation}
-                </Paragraph>
-              )}
-              {result.aiIntentLabel && (
-                <div style={{ marginTop: 8 }}>
-                  <Tag color="blue">{result.aiIntentLabel}</Tag>
-                  <Text style={{ fontSize: 11, color: "#6b7280", marginLeft: 6 }}>
-                    Уверенность: {Math.round(result.aiIntentConfidence * 100)}%
-                  </Text>
-                  <Progress
-                    percent={Math.round(result.aiIntentConfidence * 100)}
-                    size="small"
-                    style={{ marginTop: 4 }}
-                    strokeColor="#1d4ed8"
-                  />
-                </div>
-              )}
+        <div style={{ background: "rgba(22,119,255,0.06)", borderRadius: 12, padding: "16px 18px", border: "1px solid rgba(22,119,255,0.15)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <BrainCircuit size={16} color="#1677ff" />
+            <Text strong style={{ color: "#1677ff", fontSize: 12 }}>AI Анализ</Text>
+            {result.aiIntentLabel && (
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#1677ff", background: "rgba(22,119,255,0.12)", padding: "1px 8px", borderRadius: 20, marginLeft: "auto" }}>
+                {result.aiIntentLabel}
+              </span>
+            )}
+          </div>
+          <Paragraph style={{ margin: 0, fontSize: 13, color: "#1e3a8a", lineHeight: 1.6 }}>{result.aiSummary}</Paragraph>
+          {result.aiRecommendation && (
+            <Paragraph style={{ margin: "8px 0 0", fontSize: 12, color: "#1e40af" }}>
+              <strong>Рекомендация:</strong> {result.aiRecommendation}
+            </Paragraph>
+          )}
+          {result.aiIntentConfidence > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <Text style={{ fontSize: 11, color: "#94a3b8" }}>Уверенность AI</Text>
+                <Text style={{ fontSize: 11, fontWeight: 700, color: "#1677ff" }}>{Math.round(result.aiIntentConfidence * 100)}%</Text>
+              </div>
+              <Progress percent={Math.round(result.aiIntentConfidence * 100)} size="small" showInfo={false} strokeColor="#1677ff" />
             </div>
-          </div>
-        </Card>
+          )}
+        </div>
       )}
 
-      {/* Aborted */}
       {result.aborted && (
-        <Alert
-          type="warning"
-          showIcon
-          message="Анализ прерван"
-          description={result.abortReason}
-          style={{ borderRadius: 10 }}
-        />
+        <Alert type="warning" showIcon message="Анализ прерван" description={result.abortReason} style={{ borderRadius: 10 }} />
       )}
 
-      {/* Validation errors */}
+      {result.valid && !result.aborted && !result.risks?.length && !result.validationErrors?.length && (
+        <div style={{ background: "rgba(5,150,105,0.06)", borderRadius: 12, padding: "14px 18px", border: "1px solid rgba(5,150,105,0.2)", display: "flex", alignItems: "center", gap: 10 }}>
+          <CheckCircle2 size={18} color="#059669" />
+          <Text style={{ fontSize: 13, color: "#059669", fontWeight: 600 }}>Документ прошёл проверку без замечаний</Text>
+        </div>
+      )}
+
       {result.validationErrors?.length > 0 && (
-        <Card
-          size="small"
-          title={
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <AlertTriangle size={15} color="#b91c1c" />
-              <Text style={{ fontSize: 13, color: "#b91c1c" }}>
-                Ошибки валидации ({result.validationErrors.length})
-              </Text>
-            </span>
-          }
-          style={{ borderRadius: 10, borderColor: "#fecaca" }}
-          styles={{ body: { padding: "12px 16px" } }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(239,68,68,0.2)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(239,68,68,0.05)", padding: "10px 16px", borderBottom: "1px solid rgba(239,68,68,0.12)", display: "flex", alignItems: "center", gap: 8 }}>
+            <AlertTriangle size={14} color="#ef4444" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#ef4444" }}>Ошибки валидации ({result.validationErrors.length})</Text>
+          </div>
+          <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
             {result.validationErrors.map((e, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  background: "#fef2f2",
-                  border: "1px solid #fecaca",
-                }}
-              >
-                <Text strong style={{ fontSize: 12, color: "#991b1b", display: "block" }}>
-                  {e.label || e.fieldKey}
-                </Text>
-                <Text style={{ fontSize: 12, color: "#b91c1c" }}>{e.message}</Text>
+              <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.12)" }}>
+                <Text strong style={{ fontSize: 12, color: "#991b1b", display: "block" }}>{e.label || e.fieldKey}</Text>
+                <Text style={{ fontSize: 12, color: "#dc2626" }}>{e.message}</Text>
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* Risks */}
       {result.risks?.length > 0 && (
-        <Card
-          size="small"
-          title={
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <ShieldAlert size={15} color="#d97706" />
-              <Text style={{ fontSize: 13, color: "#92400e" }}>
-                Риски ({result.risks.length})
-              </Text>
-            </span>
-          }
-          style={{ borderRadius: 10, borderColor: "#fed7aa" }}
-          styles={{ body: { padding: "12px 16px" } }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {result.risks.map((r, i) => {
-              const cfg = RISK_COLORS[r.level] ?? RISK_COLORS.LOW;
-              return (
-                <div
-                  key={i}
-                  style={{
-                    padding: "10px 14px",
-                    borderRadius: 8,
-                    background: cfg.bg,
-                    border: `1px solid ${cfg.border}`,
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                    <Tag color={cfg.tag} style={{ margin: 0 }}>
-                      {r.level}
-                    </Tag>
-                    <Text strong style={{ fontSize: 12, color: cfg.text }}>
-                      {r.message}
-                    </Text>
-                  </div>
-                  {r.aiExplanation && (
-                    <Text style={{ fontSize: 11, color: "#6b7280" }}>{r.aiExplanation}</Text>
-                  )}
-                </div>
-              );
-            })}
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(245,158,11,0.2)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(245,158,11,0.05)", padding: "10px 16px", borderBottom: "1px solid rgba(245,158,11,0.12)", display: "flex", alignItems: "center", gap: 8 }}>
+            <ShieldAlert size={14} color="#f59e0b" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#92400e" }}>Правовые риски ({result.risks.length})</Text>
           </div>
-        </Card>
+          <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
+            {result.risks.map((r, i) => (
+              <div key={i} style={{ padding: "10px 14px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                  <RiskPill level={r.level} />
+                  <Text strong style={{ fontSize: 12, color: "#0b1c30" }}>{r.message}</Text>
+                </div>
+                {r.aiExplanation && <Text style={{ fontSize: 11, color: "#64748b" }}>{r.aiExplanation}</Text>}
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
-      {/* Field suggestions */}
       {result.fieldSuggestions?.length > 0 && (
-        <Card
-          size="small"
-          title={
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Lightbulb size={15} color="#0F2A44" />
-              <Text style={{ fontSize: 13 }}>Предложения по полям</Text>
-            </span>
-          }
-          style={{ borderRadius: 10 }}
-          styles={{ body: { padding: "12px 16px" } }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(15,42,68,0.12)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(15,42,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(15,42,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+            <Lightbulb size={14} color="#0F2A44" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Предложения по полям ({result.fieldSuggestions.length})</Text>
+          </div>
+          <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
             {result.fieldSuggestions.map((s, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  background: "#f8fafc",
-                  border: "1px solid #e2e8f0",
-                }}
-              >
-                <Text strong style={{ fontSize: 12, color: "#0F2A44", display: "block" }}>
-                  {s.label || s.fieldKey}
-                </Text>
+              <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9" }}>
+                <Text strong style={{ fontSize: 12, color: "#0F2A44", display: "block" }}>{s.label || s.fieldKey}</Text>
                 <Text style={{ fontSize: 12, color: "#374151" }}>
-                  Предлагается: <code style={{ background: "#e2e8f0", padding: "1px 5px", borderRadius: 4 }}>{s.suggestedValue}</code>
+                  Предлагается: <span style={{ fontFamily: "monospace", background: "#e2e8f0", padding: "1px 5px", borderRadius: 4, fontSize: 11 }}>{s.suggestedValue}</span>
                 </Text>
-                {s.reason && (
-                  <Text style={{ fontSize: 11, color: "#6b7280", display: "block", marginTop: 2 }}>
-                    {s.reason}
-                  </Text>
-                )}
+                {s.reason && <Text style={{ fontSize: 11, color: "#64748b", display: "block", marginTop: 2 }}>{s.reason}</Text>}
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* Matched templates */}
       {result.matchedTemplates?.length > 0 && (
-        <Card
-          size="small"
-          title={
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <FileSearch size={15} color="#0F2A44" />
-              <Text style={{ fontSize: 13 }}>Похожие шаблоны</Text>
-            </span>
-          }
-          style={{ borderRadius: 10 }}
-          styles={{ body: { padding: "12px 16px" } }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(15,42,68,0.12)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(15,42,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(15,42,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+            <FileSearch size={14} color="#0F2A44" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Похожие шаблоны</Text>
+          </div>
+          <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
             {result.matchedTemplates.map((t, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  background: "#f8fafc",
-                  border: "1px solid #e2e8f0",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+              <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <Text strong style={{ fontSize: 13, color: "#0F2A44" }}>{t.title}</Text>
-                  <Text style={{ fontSize: 11, color: "#6b7280", display: "block" }}>
-                    {t.categoryName}
-                  </Text>
-                  {t.aiNote && (
-                    <Text style={{ fontSize: 11, color: "#374151" }}>{t.aiNote}</Text>
-                  )}
+                  <Text strong style={{ fontSize: 12, color: "#0F2A44" }}>{t.title}</Text>
+                  <Text style={{ fontSize: 11, color: "#94a3b8", display: "block" }}>{t.categoryName}</Text>
+                  {t.aiNote && <Text style={{ fontSize: 11, color: "#64748b" }}>{t.aiNote}</Text>}
                 </div>
-                <Tag color="blue" style={{ flexShrink: 0 }}>
-                  {t.score}%
-                </Tag>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#1677ff", background: "rgba(22,119,255,0.08)", padding: "3px 10px", borderRadius: 20, flexShrink: 0 }}>{t.score}%</span>
               </div>
             ))}
           </div>
-        </Card>
+        </div>
       )}
 
-      {/* Required documents */}
       {result.requiredDocuments?.length > 0 && (
-        <Card
-          size="small"
-          title={
-            <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <FileCheck2 size={15} color="#0F2A44" />
-              <Text style={{ fontSize: 13 }}>Требуемые документы</Text>
-            </span>
-          }
-          style={{ borderRadius: 10 }}
-          styles={{ body: { padding: "12px 16px" } }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(15,42,68,0.12)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(15,42,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(15,42,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+            <FileCheck2 size={14} color="#0F2A44" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Требуемые документы</Text>
+          </div>
+          <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
             {result.requiredDocuments.map((d, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 6,
-                  background: "#f8fafc",
-                  border: "1px solid #e2e8f0",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                {d.mandatory && <Tag color="red" style={{ margin: 0, flexShrink: 0 }}>Обязательно</Tag>}
+              <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                {d.mandatory && <span style={{ fontSize: 10, fontWeight: 700, color: "#ef4444", background: "rgba(239,68,68,0.08)", padding: "2px 8px", borderRadius: 20, flexShrink: 0, marginTop: 2 }}>Обязательно</span>}
                 <div>
                   <Text strong style={{ fontSize: 12, color: "#0F2A44" }}>{d.title}</Text>
-                  <Text style={{ fontSize: 11, color: "#6b7280", display: "block" }}>{d.reason}</Text>
+                  <Text style={{ fontSize: 11, color: "#94a3b8", display: "block" }}>{d.reason}</Text>
                 </div>
               </div>
             ))}
           </div>
-        </Card>
-      )}
-
-      {result.valid && !result.aborted && result.risks?.length === 0 && result.validationErrors?.length === 0 && (
-        <Alert
-          type="success"
-          showIcon
-          icon={<CheckCircle2 size={16} />}
-          message="Документ прошёл проверку без замечаний"
-          style={{ borderRadius: 10 }}
-        />
+        </div>
       )}
     </div>
   );
 }
 
-interface Props {
-  documentId: number;
+// ─── Share modal ─────────────────────────────────────────────
+function ShareModal({ url, onClose }: { url: string; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "#fff", borderRadius: 16, width: 480, boxShadow: "0 24px 64px rgba(0,0,0,0.2)", overflow: "hidden" }}>
+        {/* Header */}
+        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "20px 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Share2 size={18} color="#fff" />
+            <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>Поделиться документом</span>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, margin: "6px 0 0" }}>
+            Ссылка действительна ограниченное время. Получатель сможет скачать PDF без авторизации.
+          </p>
+        </div>
+        {/* Body */}
+        <div style={{ padding: "24px" }}>
+          <div style={{ display: "flex", gap: 8 }}>
+            <div style={{
+              flex: 1, background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 8,
+              padding: "10px 14px", fontSize: 12, color: "#374151",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>
+              {url}
+            </div>
+            <button
+              onClick={handleCopy}
+              style={{
+                background: copied ? "#059669" : "#0F2A44",
+                color: "#fff", border: "none", borderRadius: 8,
+                padding: "10px 16px", cursor: "pointer", fontSize: 13,
+                fontWeight: 600, display: "flex", alignItems: "center", gap: 6,
+                transition: "background 0.2s", flexShrink: 0,
+              }}
+            >
+              {copied ? <><Check size={14} />Скопировано</> : <><Copy size={14} />Копировать</>}
+            </button>
+          </div>
+          <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
+            <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+              Закрыть
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
+
+// ─── Versions panel ───────────────────────────────────────────
+function VersionsPanel({ versions, isLoading }: { versions: DocumentVersion[]; isLoading: boolean }) {
+  if (isLoading) return <div style={{ textAlign: "center", padding: "20px 0" }}><Spin size="small" /></div>;
+  if (!versions.length) return <Text style={{ fontSize: 13, color: "#94a3b8" }}>Версии недоступны</Text>;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {versions.map((v) => (
+        <div key={v.version} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#0F2A44", background: "rgba(15,42,68,0.08)", padding: "2px 8px", borderRadius: 20 }}>v{v.version}</span>
+            <Text style={{ fontSize: 12, color: "#64748b" }}>{new Date(v.createdDate).toLocaleString("ru-KZ")}</Text>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main panel ───────────────────────────────────────────────
+interface Props { documentId: number }
 
 export default function DocumentDetailPanel({ documentId }: Props) {
   const { message } = App.useApp();
@@ -339,17 +317,38 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   const [form] = Form.useForm();
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showVersions, setShowVersions] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   const { data: doc, isLoading } = useGetDocumentByIdQuery(documentId);
-  const { data: suggestions, isFetching: isFetchingSuggestions } =
-    useGetDocumentSuggestionsQuery(documentId, { skip: !showSuggestions });
-  const [updateDocument, { isLoading: isUpdating }] = useUpdateDocumentMutation();
+  const { data: template } = useGetTemplateByIdQuery(doc?.templateId ?? 0, { skip: !doc?.templateId });
+  const { data: suggestions, isFetching: isFetchingSuggestions } = useGetDocumentSuggestionsQuery(documentId, { skip: !showSuggestions });
+  const { data: versions = [], isLoading: versionsLoading } = useGetDocumentVersionsQuery(documentId, { skip: !showVersions });
+
+  const [updateDocument,   { isLoading: isUpdating }]   = useUpdateDocumentMutation();
   const [completeDocument, { isLoading: isCompleting }] = useCompleteDocumentMutation();
+  const [validateDocument, { isLoading: isValidating }] = useValidateDocumentMutation();
+  const [archiveDocument,  { isLoading: isArchiving }]  = useArchiveDocumentMutation();
+  const [restoreDocument,  { isLoading: isRestoring }]  = useRestoreDocumentMutation();
+  const [shareDocument,    { isLoading: isSharing }]    = useShareDocumentMutation();
+  const [triggerGetUrl] = useLazyGetDocumentUrlQuery();
+
+  // Template fields sorted by orderNum; fall back to fields derived from doc.fieldValues
+  const templateFields: TemplateField[] = template?.fields
+    ? [...template.fields].sort((a, b) => a.orderNum - b.orderNum)
+    : (doc?.fieldValues ?? []).map((fv) => ({
+        id: fv.id,
+        fieldKey: fv.fieldKey,
+        label: fv.fieldKey,
+        fieldType: "TEXT" as const,
+        required: false,
+        orderNum: fv.id,
+      }));
 
   useEffect(() => {
     if (doc) {
       const fieldMap: Record<string, string> = {};
-      doc.fieldValues?.forEach((f) => { fieldMap[f.fieldKey] = f.fieldValue; });
+      doc.fieldValues?.forEach(f => { fieldMap[f.fieldKey] = f.fieldValue; });
       form.setFieldsValue({ title: doc.title, ...fieldMap });
     }
   }, [doc, form]);
@@ -360,9 +359,19 @@ export default function DocumentDetailPanel({ documentId }: Props) {
       const { title, ...rest } = values;
       await updateDocument({ id: documentId, title, fieldValues: rest }).unwrap();
       message.success("Документ сохранён");
-    } catch {
-      message.error("Ошибка при сохранении");
-    }
+    } catch { message.error("Ошибка при сохранении"); }
+  };
+
+  const handleValidate = async () => {
+    try {
+      const values = await form.validateFields();
+      const { title, ...rest } = values;
+      await updateDocument({ id: documentId, title, fieldValues: rest }).unwrap();
+      const result = await validateDocument(documentId).unwrap();
+      setAnalysisResult(result);
+      if (result.valid) message.success("Документ прошёл валидацию");
+      else message.warning("Найдены ошибки валидации");
+    } catch { message.error("Ошибка при валидации"); }
   };
 
   const handleComplete = async () => {
@@ -372,169 +381,285 @@ export default function DocumentDetailPanel({ documentId }: Props) {
       await updateDocument({ id: documentId, title, fieldValues: rest }).unwrap();
       const response = await completeDocument(documentId).unwrap();
       setAnalysisResult(response.result);
-      message.success("Анализ завершён");
-    } catch {
-      message.error("Ошибка при завершении");
-    }
+      message.success("Документ завершён, PDF создан");
+    } catch { message.error("Ошибка при завершении"); }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const result = await triggerGetUrl(documentId).unwrap();
+      window.open(result.url, "_blank");
+    } catch { message.error("Не удалось получить ссылку для скачивания"); }
+  };
+
+  const handleShare = async () => {
+    try {
+      const result = await shareDocument(documentId).unwrap();
+      setShareUrl(result.shareUrl);
+    } catch { message.error("Не удалось создать ссылку для шаринга"); }
+  };
+
+  const handleArchive = async () => {
+    try {
+      await archiveDocument(documentId).unwrap();
+      message.success("Документ архивирован");
+    } catch { message.error("Ошибка при архивировании"); }
+  };
+
+  const handleRestore = async () => {
+    try {
+      await restoreDocument(documentId).unwrap();
+      message.success("Документ восстановлен в черновик");
+    } catch { message.error("Ошибка при восстановлении"); }
   };
 
   if (isLoading) {
     return (
-      <div style={{ textAlign: "center", padding: "80px 0" }}>
-        <Spin size="large" />
+      <div style={{ overflowX: "hidden" }}>
+        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", height: 140 }} />
+        <div style={{ padding: "32px" }}>
+          <Spin size="large" style={{ display: "block", margin: "80px auto" }} />
+        </div>
       </div>
     );
   }
 
   if (!doc) return null;
 
-  const statusCfg = STATUS_CONFIG[doc.status] ?? { color: "default", label: doc.status };
+  const isDraft     = doc.status === "DRAFT" || doc.status === "VALIDATED";
+  const isCompleted = doc.status === "COMPLETED";
+  const isArchived  = doc.status === "ARCHIVED";
+  const hasRightPanel = !!(analysisResult || showSuggestions || showVersions);
 
   return (
-    <div>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
-        <Button
-          icon={<ArrowLeft size={16} />}
-          onClick={() => navigate(ROUTES.DOCUMENTS)}
-          style={{ borderRadius: 8 }}
-        >
-          Назад
-        </Button>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <Title level={4} style={{ margin: 0, color: "#0F2A44" }}>
-              {doc.title}
-            </Title>
-            <Tag color={statusCfg.color}>{statusCfg.label}</Tag>
+    <div style={{ overflowX: "hidden" }}>
+      {shareUrl && <ShareModal url={shareUrl} onClose={() => setShareUrl(null)} />}
+
+      {/* ── Full-bleed hero ── */}
+      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+        <div style={{ padding: "28px 40px 48px", position: "relative", zIndex: 1 }}>
+          {/* Back + actions row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+            <HeroBtn icon={<ArrowLeft size={14} />} label="Назад" onClick={() => navigate(ROUTES.DOCUMENTS)} />
+            <div style={{ flex: 1 }} />
+
+            {/* DRAFT / VALIDATED */}
+            {isDraft && <>
+              <HeroBtn icon={<Lightbulb size={14} />} label={isFetchingSuggestions ? "Загрузка..." : "Предложения AI"} onClick={() => setShowSuggestions(!showSuggestions)} />
+              <HeroBtn icon={<Save size={14} />} label={isUpdating ? "Сохранение..." : "Сохранить"} onClick={handleSave} disabled={isUpdating} />
+              <HeroBtn icon={<ShieldCheck size={14} />} label={isValidating ? "Проверка..." : "Валидировать"} onClick={handleValidate} disabled={isValidating} variant="primary" />
+              <HeroBtn icon={<Zap size={14} />} label={isCompleting ? "Анализ..." : "Завершить"} onClick={handleComplete} disabled={isCompleting} variant="success" />
+            </>}
+
+            {/* COMPLETED */}
+            {isCompleted && <>
+              <HeroBtn icon={<History size={14} />} label="Версии" onClick={() => setShowVersions(!showVersions)} />
+              <HeroBtn icon={<Download size={14} />} label="Скачать PDF" onClick={handleDownload} />
+              <HeroBtn icon={<Share2 size={14} />} label={isSharing ? "Создание..." : "Поделиться"} onClick={handleShare} disabled={isSharing} variant="primary" />
+              <HeroBtn icon={<Archive size={14} />} label={isArchiving ? "Архивирование..." : "Архивировать"} onClick={handleArchive} disabled={isArchiving} variant="danger" />
+            </>}
+
+            {/* ARCHIVED */}
+            {isArchived && <>
+              <HeroBtn icon={<Download size={14} />} label="Скачать PDF" onClick={handleDownload} />
+              <HeroBtn icon={<RotateCcw size={14} />} label={isRestoring ? "Восстановление..." : "Восстановить"} onClick={handleRestore} disabled={isRestoring} variant="success" />
+            </>}
           </div>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            {doc.templateTitle} · {doc.categoryName} · Обновлён{" "}
-            {new Date(doc.updatedDate).toLocaleString("ru-KZ")}
-          </Text>
+
+          {/* Title + meta */}
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <FileText size={22} color="#fff" />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: "#fff", margin: "0 0 6px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.01em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {doc.title}
+              </h1>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <StatusPill status={doc.status} />
+                <span style={{ fontSize: 12, color: "rgba(186,213,255,0.7)" }}>{doc.templateTitle}</span>
+                {doc.categoryName && <span style={{ fontSize: 12, color: "rgba(186,213,255,0.5)" }}>· {doc.categoryName}</span>}
+                {doc.updatedDate && <span style={{ fontSize: 12, color: "rgba(186,213,255,0.5)" }}>· обновлён {new Date(doc.updatedDate).toLocaleDateString("ru-KZ")}</span>}
+              </div>
+            </div>
+          </div>
         </div>
-        <Space>
-          <Button
-            icon={<Info size={15} />}
-            onClick={() => setShowSuggestions(!showSuggestions)}
-            loading={isFetchingSuggestions}
-            style={{ borderRadius: 8 }}
-          >
-            Предложения
-          </Button>
-          <Button
-            icon={<Save size={15} />}
-            onClick={handleSave}
-            loading={isUpdating}
-            style={{ borderRadius: 8 }}
-          >
-            Сохранить
-          </Button>
-          <Button
-            type="primary"
-            icon={<Zap size={15} />}
-            onClick={handleComplete}
-            loading={isCompleting}
-            style={{ background: "#0F2A44", borderRadius: 8 }}
-            disabled={doc.status === "COMPLETED"}
-          >
-            Завершить анализ
-          </Button>
-        </Space>
       </div>
 
-      <Row gutter={24}>
-        {/* Left: Form */}
-        <Col xs={24} lg={analysisResult || showSuggestions ? 13 : 24}>
-          <Card
-            style={{ borderRadius: 12, border: "1px solid #e5e7eb" }}
-            styles={{ body: { padding: "24px 28px" } }}
-          >
+      <div style={{ padding: "0 32px 32px" }}>
+        {/* ── Stat pills ── */}
+        <div style={{ display: "flex", gap: 16, marginTop: -20, marginBottom: 24, position: "relative", zIndex: 2, flexWrap: "wrap" }}>
+          {[
+            { icon: <FilePen size={16} />,       label: "Полей",         value: templateFields.length,                                                    color: "#0F2A44" },
+            { icon: <AlertTriangle size={16} />, label: "Незаполненных", value: doc.missingRequiredFields?.length ?? 0,                                    color: doc.missingRequiredFields?.length ? "#f59e0b" : "#059669" },
+            { icon: <Clock size={16} />,         label: "Обновлён",      value: doc.updatedDate ? new Date(doc.updatedDate).toLocaleDateString("ru-KZ") : "—", color: "#64748b" },
+          ].map(item => (
+            <div key={item.label} style={{ background: "#fff", borderRadius: 10, padding: "12px 18px", boxShadow: "0 4px 16px rgba(11,28,48,0.06)", display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ color: item.color }}>{item.icon}</span>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94a3b8" }}>{item.label}</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: item.color, lineHeight: 1.2, fontFamily: "Manrope, sans-serif" }}>{item.value}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Main content grid ── */}
+        <div style={{ display: "grid", gridTemplateColumns: hasRightPanel ? "1fr 420px" : "1fr", gap: 24, alignItems: "start" }}>
+          {/* Left: Form */}
+          <div style={{ background: "#fff", borderRadius: 16, padding: "28px 32px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(15,42,68,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <FilePen size={15} color="#0F2A44" />
+              </div>
+              <Text strong style={{ fontSize: 15, color: "#0b1c30", fontFamily: "Manrope, sans-serif" }}>Поля документа</Text>
+              {!isDraft && (
+                <span style={{ marginLeft: "auto", fontSize: 11, color: "#94a3b8", fontStyle: "italic" }}>
+                  {isArchived ? "Документ в архиве — только чтение" : "Документ завершён — только чтение"}
+                </span>
+              )}
+            </div>
             <Form form={form} layout="vertical">
-              <Form.Item
-                name="title"
-                label={<Text strong style={{ color: "#374151" }}>Название документа</Text>}
-                rules={[{ required: true, message: "Введите название" }]}
-              >
-                <Input style={{ borderRadius: 8 }} />
+              <Form.Item name="title"
+                label={<span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94a3b8" }}>Название документа</span>}
+                rules={[{ required: true, message: "Введите название" }]}>
+                <Input disabled={!isDraft} style={{ borderRadius: 10, height: 44, background: isDraft ? "#fff" : "#f8fafc", border: isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9", color: isDraft ? "#0b1c30" : "#64748b" }} />
               </Form.Item>
 
-              {doc.fieldValues?.length > 0 && (
+              {templateFields.length > 0 && (
                 <>
                   <Divider style={{ margin: "8px 0 20px" }}>
-                    <Text type="secondary" style={{ fontSize: 12 }}>Поля документа</Text>
+                    <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 600 }}>Поля шаблона</span>
                   </Divider>
-                  {doc.fieldValues.map((field) => (
-                    <Form.Item
-                      key={field.id}
-                      name={field.fieldKey}
-                      label={
-                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <Text style={{ color: "#374151", fontSize: 13 }}>{field.fieldKey}</Text>
-                          {doc.missingRequiredFields?.includes(field.fieldKey) && (
-                            <Tooltip title="Обязательное поле не заполнено">
-                              <AlertTriangle size={13} color="#d97706" />
-                            </Tooltip>
-                          )}
-                        </span>
-                      }
-                    >
-                      <Input style={{ borderRadius: 8, fontFamily: "inherit" }} />
-                    </Form.Item>
-                  ))}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 24px" }}>
+                    {templateFields.map(field => {
+                      const isMissing = doc.missingRequiredFields?.includes(field.fieldKey);
+                      return (
+                        <Form.Item
+                          key={field.fieldKey}
+                          name={field.fieldKey}
+                          rules={field.required ? [{ required: true, message: `Заполните "${field.label}"` }] : undefined}
+                          label={
+                            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: isMissing ? "#f59e0b" : "#94a3b8" }}>
+                                {field.label || field.fieldKey}
+                              </span>
+                              {field.required && <span style={{ color: "#ef4444", fontSize: 11 }}>*</span>}
+                              {isMissing && <Tooltip title="Обязательное поле не заполнено"><AlertTriangle size={12} color="#f59e0b" /></Tooltip>}
+                            </span>
+                          }
+                        >
+                          <Input
+                            disabled={!isDraft}
+                            type={field.fieldType === "NUMBER" ? "number" : "text"}
+                            placeholder={field.fieldType === "DATE" ? "ГГГГ-ММ-ДД" : undefined}
+                            style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                          />
+                        </Form.Item>
+                      );
+                    })}
+                  </div>
                 </>
               )}
 
-              {doc.missingRequiredFields?.length > 0 && (
-                <Alert
-                  type="warning"
-                  showIcon
-                  message={`Незаполненные обязательные поля: ${doc.missingRequiredFields.join(", ")}`}
-                  style={{ borderRadius: 8, marginTop: 8 }}
-                />
+              {templateFields.length === 0 && (
+                <Empty description="Поля шаблона не определены" image={Empty.PRESENTED_IMAGE_SIMPLE} />
               )}
 
-              {(!doc.fieldValues || doc.fieldValues.length === 0) && (
-                <Empty
-                  description="Поля документа не заданы"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
+              {doc.missingRequiredFields?.length > 0 && (
+                <div style={{ marginTop: 8, background: "rgba(245,158,11,0.06)", borderRadius: 10, padding: "10px 16px", border: "1px solid rgba(245,158,11,0.2)", display: "flex", alignItems: "center", gap: 10 }}>
+                  <AlertTriangle size={14} color="#f59e0b" />
+                  <Text style={{ fontSize: 12, color: "#92400e" }}>
+                    Незаполненные обязательные поля: <strong>{doc.missingRequiredFields.join(", ")}</strong>
+                  </Text>
+                </div>
+              )}
+
+              {isDraft && (
+                <div style={{ display: "flex", gap: 10, marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9", flexWrap: "wrap" }}>
+                  <button onClick={handleSave} disabled={isUpdating}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e2e8f0", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#0F2A44", fontSize: 13, fontWeight: 600, height: 40, opacity: isUpdating ? 0.6 : 1 }}>
+                    <Save size={14} />{isUpdating ? "Сохранение..." : "Сохранить"}
+                  </button>
+                  <button onClick={handleValidate} disabled={isValidating}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#7c3aed", fontSize: 13, fontWeight: 700, height: 40, opacity: isValidating ? 0.6 : 1 }}>
+                    <ShieldCheck size={14} />{isValidating ? "Проверка..." : "Валидировать"}
+                  </button>
+                  <button onClick={handleComplete} disabled={isCompleting}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#0F2A44", border: "1px solid #0F2A44", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 700, height: 40, opacity: isCompleting ? 0.6 : 1 }}>
+                    <Zap size={14} />{isCompleting ? "Анализ..." : "Завершить"}
+                  </button>
+                </div>
+              )}
+
+              {isCompleted && (
+                <div style={{ display: "flex", gap: 10, marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9", flexWrap: "wrap" }}>
+                  <button onClick={handleDownload}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#0F2A44", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, height: 40 }}>
+                    <Download size={14} />Скачать PDF
+                  </button>
+                  <button onClick={handleShare} disabled={isSharing}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e2e8f0", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#0F2A44", fontSize: 13, fontWeight: 600, height: 40, opacity: isSharing ? 0.6 : 1 }}>
+                    <Share2 size={14} />{isSharing ? "Создание..." : "Поделиться"}
+                  </button>
+                  <button onClick={handleArchive} disabled={isArchiving}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #fecaca", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#ef4444", fontSize: 13, fontWeight: 600, height: 40, opacity: isArchiving ? 0.6 : 1 }}>
+                    <Archive size={14} />{isArchiving ? "Архивирование..." : "Архивировать"}
+                  </button>
+                </div>
+              )}
+
+              {isArchived && (
+                <div style={{ display: "flex", gap: 10, marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9" }}>
+                  <button onClick={handleDownload}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#0F2A44", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, height: 40 }}>
+                    <Download size={14} />Скачать PDF
+                  </button>
+                  <button onClick={handleRestore} disabled={isRestoring}
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #bbf7d0", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#059669", fontSize: 13, fontWeight: 600, height: 40, opacity: isRestoring ? 0.6 : 1 }}>
+                    <RotateCcw size={14} />{isRestoring ? "Восстановление..." : "Восстановить"}
+                  </button>
+                </div>
               )}
             </Form>
-          </Card>
-        </Col>
+          </div>
 
-        {/* Right: Analysis / Suggestions */}
-        {(analysisResult || showSuggestions) && (
-          <Col xs={24} lg={11}>
-            {analysisResult && (
-              <div style={{ marginBottom: showSuggestions ? 16 : 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  <Zap size={16} color="#0F2A44" />
-                  <Text strong style={{ color: "#0F2A44" }}>Результат анализа</Text>
+          {/* Right: Analysis / Suggestions / Versions */}
+          {hasRightPanel && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {analysisResult && (
+                <div style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                    <Zap size={16} color="#0F2A44" />
+                    <Text strong style={{ color: "#0F2A44", fontSize: 14 }}>Результат анализа</Text>
+                  </div>
+                  <AnalysisBlock result={analysisResult} />
                 </div>
-                <AnalysisResultBlock result={analysisResult} />
-              </div>
-            )}
-
-            {showSuggestions && suggestions && (
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  <Lightbulb size={16} color="#0F2A44" />
-                  <Text strong style={{ color: "#0F2A44" }}>Предложения</Text>
+              )}
+              {showSuggestions && (
+                <div style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                    <Lightbulb size={16} color="#0F2A44" />
+                    <Text strong style={{ color: "#0F2A44", fontSize: 14 }}>Предложения AI</Text>
+                  </div>
+                  {isFetchingSuggestions ? <div style={{ textAlign: "center", padding: "32px 0" }}><Spin /></div>
+                    : suggestions ? <AnalysisBlock result={suggestions} /> : null}
                 </div>
-                <AnalysisResultBlock result={suggestions} />
-              </div>
-            )}
-
-            {showSuggestions && isFetchingSuggestions && (
-              <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <Spin />
-              </div>
-            )}
-          </Col>
-        )}
-      </Row>
+              )}
+              {showVersions && (
+                <div style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+                    <History size={16} color="#0F2A44" />
+                    <Text strong style={{ color: "#0F2A44", fontSize: 14 }}>История версий</Text>
+                  </div>
+                  <VersionsPanel versions={versions} isLoading={versionsLoading} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

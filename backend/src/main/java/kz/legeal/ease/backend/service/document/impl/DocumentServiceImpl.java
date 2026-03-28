@@ -34,6 +34,7 @@ import kz.legeal.ease.backend.storage.StorageService;
 import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final S3Properties              s3Properties;
     private final AuditService              auditService;
     private final RateLimitService          rateLimitService;
+    private final EntityManager             entityManager;
 
     // ─── CREATE ──────────────────────────────────────────────────────────────
 
@@ -151,6 +153,7 @@ public class DocumentServiceImpl implements DocumentService {
         if (req.getFieldValues() != null) {
             validateUnknownKeys(req.getFieldValues(), doc.getTemplate());
             doc.getFieldValues().clear();
+            entityManager.flush(); // force DELETEs before INSERTs to avoid uq_document_field_key violation
             final var newValues = buildFieldValues(req.getFieldValues(), doc);
             doc.getFieldValues().addAll(newValues);
             // Editing field values invalidates any prior VALIDATED state
