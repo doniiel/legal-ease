@@ -42,9 +42,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -250,6 +253,7 @@ public class DocumentServiceImpl implements DocumentService {
         try {
             final int nextVersion  = doc.getCurrentVersion() + 1;
             final byte[] pdfBytes  = pdfService.generate(doc);
+            doc.setContentHash(sha256Hex(pdfBytes));
             final String objectKey = buildVersionedObjectKey(currentUser.getId(), docId, nextVersion);
             storageService.uploadFile(objectKey, pdfBytes, "application/pdf");
 
@@ -530,5 +534,15 @@ public class DocumentServiceImpl implements DocumentService {
 
     private String buildVersionedObjectKey(Long userId, Long docId, int version) {
         return "documents/%d/%d/v%d.pdf".formatted(userId, docId, version);
+    }
+
+    /** Computes a hex-encoded SHA-256 digest of the given bytes. */
+    private static String sha256Hex(byte[] data) {
+        try {
+            return HexFormat.of().formatHex(
+                    MessageDigest.getInstance("SHA-256").digest(data));
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available on this JVM", e);
+        }
     }
 }

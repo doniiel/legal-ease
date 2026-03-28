@@ -25,6 +25,11 @@ public class TemplateDto {
     @Schema(description = "Template description")
     private String description;
 
+    @Schema(description = "Template body with {{field_key}} placeholders. " +
+            "When present, the PDF renders this as the primary document narrative " +
+            "with placeholders substituted by actual field values.")
+    private String body;
+
     @Schema(description = "Category", example = "CIVIL")
     private CategoryDto category;
 

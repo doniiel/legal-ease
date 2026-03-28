@@ -14,7 +14,7 @@ export function useAdminAudit() {
   const { data, isLoading } = useGetAuditLogsQuery({
     page: page - 1,
     size: 20,
-    sort: "createdDate,DESC",
+    sort: "createdAt,DESC",
   });
 
   const allLogs = data?.content ?? [];

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Adds content_hash to the documents table.
+
+        Stores the SHA-256 hex digest of the PDF bytes computed at completion time.
+        Used by the public verification endpoint (GET /open-api/documents/verify/{id})
+        to confirm that the document was properly finalized.
+
+        Nullable so existing completed documents (without a hash) remain valid rows —
+        they will appear as INVALID in the verification response until re-completed.
+    -->
+    <changeSet id="2026-03-28-002-add-content-hash-to-documents" author="daniyal">
+        <addColumn tableName="documents">
+            <column name="content_hash" type="VARCHAR(64)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

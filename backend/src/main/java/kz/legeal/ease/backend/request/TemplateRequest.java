@@ -19,6 +19,18 @@ public class TemplateRequest {
     @Size(max = 2000, message = "Description must not exceed 2000 characters")
     private String description;
 
+    /**
+     * Optional template body with {@code {{field_key}}} placeholders.
+     * Example:
+     * <pre>
+     *   Настоящий договор заключён {{date}} между {{client_name}} и {{company_name}}.
+     *   Предмет договора: {{subject}}.
+     * </pre>
+     * Leave blank to use the legacy field-table PDF layout.
+     */
+    @Size(max = 100_000, message = "Template body must not exceed 100 000 characters")
+    private String body;
+
     @NotNull(message = "Category is required")
     private Long categoryId;
 

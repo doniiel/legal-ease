@@ -15,13 +15,19 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 
     Page<AuditLog> findAllByAction(AuditAction action, Pageable pageable);
 
-    @Query("""
+    @Query(value = """
             SELECT a FROM AuditLog a
             WHERE (:userId IS NULL OR a.userId = :userId)
               AND (:action IS NULL OR a.action = :action)
               AND (:entityType IS NULL OR a.entityType = :entityType)
               AND (:entityId IS NULL OR a.entityId = :entityId)
-            ORDER BY a.createdAt DESC
+            """,
+            countQuery = """
+            SELECT COUNT(a) FROM AuditLog a
+            WHERE (:userId IS NULL OR a.userId = :userId)
+              AND (:action IS NULL OR a.action = :action)
+              AND (:entityType IS NULL OR a.entityType = :entityType)
+              AND (:entityId IS NULL OR a.entityId = :entityId)
             """)
     Page<AuditLog> search(Long userId, AuditAction action, String entityType, Long entityId, Pageable pageable);
 

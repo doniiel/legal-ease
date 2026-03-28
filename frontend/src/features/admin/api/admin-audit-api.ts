@@ -8,7 +8,7 @@ export interface AuditLog {
   entityType: string;
   entityId: number;
   details: string;
-  createdDate: string;
+  createdAt: string;
 }
 
 export interface AuditLogsPage {
@@ -45,7 +45,7 @@ export const adminAuditApi = createApi({
   tagTypes: ["AuditLog"],
   endpoints: (builder) => ({
     getAuditLogs: builder.query<AuditLogsPage, GetAuditLogsParams>({
-      query: ({ page = 0, size = 20, sort = "createdDate,DESC", ...filters } = {}) => ({
+      query: ({ page = 0, size = 20, sort = "createdAt,DESC", ...filters } = {}) => ({
         url: "/admin/audit-logs",
         params: { page, size, sort, ...filters },
       }),

@@ -61,4 +61,10 @@
     <!-- v1.9.0 — Lawyer Legal Clause Knowledge Base -->
     <include file="changelogs/v1/2026-03-15-009-create-legal-clauses.xml"              relativeToChangelogFile="true"/>
 
+    <!-- v1.10.0 — Template body text with {{placeholder}} support -->
+    <include file="changelogs/v1/2026-03-28-001-add-template-body.xml"                 relativeToChangelogFile="true"/>
+
+    <!-- v1.11.0 — Document content hash for verification -->
+    <include file="changelogs/v1/2026-03-28-002-add-content-hash-to-documents.xml"     relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

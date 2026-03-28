@@ -61,5 +61,13 @@ public class Document extends AbstractAuditingEntity {
     @Builder.Default
     private int currentVersion = 0;
 
+    /**
+     * SHA-256 hex digest of the PDF bytes computed at completion time.
+     * {@code null} for documents not yet completed.
+     * Used by the public verification endpoint to confirm document integrity.
+     */
+    @Column(name = "content_hash", length = 64)
+    private String contentHash;
+
 }
 

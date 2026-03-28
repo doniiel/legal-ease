@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Adds a nullable `body` column to the templates table.
+
+        The body stores the template text with {{field_key}} placeholders, e.g.:
+            "Настоящий договор заключён {{date}} между {{client_name}} и {{company_name}}."
+
+        Nullable so that:
+          - existing templates remain valid without migration data
+          - templates without a body fall back to the legacy field-table PDF layout
+    -->
+    <changeSet id="2026-03-28-001-add-template-body" author="daniyal">
+        <addColumn tableName="templates">
+            <column name="body" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

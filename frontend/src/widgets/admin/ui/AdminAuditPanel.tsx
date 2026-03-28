@@ -91,8 +91,8 @@ export default function AdminAuditPanel() {
   const columns: ColumnsType<AuditLog> = [
     {
       title: "Дата",
-      dataIndex: "createdDate",
-      key: "createdDate",
+      dataIndex: "createdAt",
+      key: "createdAt",
       width: 170,
       render: (v: string) => (
         <Text style={{ fontSize: 12, color: "#64748b", fontVariantNumeric: "tabular-nums" }}>{fmtDate(v)}</Text>
@@ -345,7 +345,7 @@ export default function AdminAuditPanel() {
               <Divider style={{ margin: "0 0 20px" }} />
 
               <Descriptions column={1} size="small" colon={false} styles={{ label: { color: "#94a3b8", fontSize: 12 }, content: { fontSize: 13 } }}>
-                <Descriptions.Item label="Дата события">{fmtDate(r.createdDate)}</Descriptions.Item>
+                <Descriptions.Item label="Дата события">{fmtDate(r.createdAt)}</Descriptions.Item>
                 <Descriptions.Item label="Действие"><ActionPill action={r.action} /></Descriptions.Item>
                 <Descriptions.Item label="Тип сущности"><EntityPill type={r.entityType} /></Descriptions.Item>
                 <Descriptions.Item label="ID сущности">

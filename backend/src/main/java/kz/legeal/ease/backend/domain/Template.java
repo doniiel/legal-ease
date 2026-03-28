@@ -35,6 +35,17 @@ public class Template extends AbstractAuditingEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    /**
+     * Optional template body with {@code {{field_key}}} placeholders, e.g.:
+     * <pre>
+     *   Настоящий договор заключён {{date}} между {{client_name}} и {{company_name}}.
+     * </pre>
+     * When present, the PDF renders the substituted narrative text as the primary
+     * document body. When null/blank, falls back to the legacy field-table layout.
+     */
+    @Column(name = "body", columnDefinition = "TEXT")
+    private String body;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;

@@ -505,7 +505,7 @@ export default function AdminDashboardPanel() {
 
                       {/* Date */}
                       <td style={{ padding: "20px 32px", fontSize: 13, color: "#94a3b8" }}>
-                        {new Date(log.createdDate).toLocaleString("ru-RU", {
+                        {new Date(log.createdAt).toLocaleString("ru-RU", {
                           hour: "2-digit",
                           minute: "2-digit",
                           day: "2-digit",

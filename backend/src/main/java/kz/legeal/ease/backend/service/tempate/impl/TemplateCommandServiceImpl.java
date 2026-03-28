@@ -45,6 +45,7 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
         final var template = Template.builder()
                 .title(request.getTitle())
                 .description(request.getDescription())
+                .body(request.getBody())
                 .category(category)
                 .lawyer(currentLawyer)
                 .build();
@@ -68,6 +69,7 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
 
         template.setTitle(request.getTitle());
         template.setDescription(request.getDescription());
+        template.setBody(request.getBody());
         template.setCategory(category);
 
         template.getTemplateFields().clear();
