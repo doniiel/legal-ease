@@ -41,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
         final var jwt = authHeader.substring(BEARER_PREFIX.length());
 
         if (jwt.isBlank()) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Empty JWT token");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Empty JWT token");
             return;
         }
 

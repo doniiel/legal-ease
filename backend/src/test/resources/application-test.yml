@@ -1,0 +1,48 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  liquibase:
+    enabled: true
+
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+
+  jwt:
+    access-secret: test-access-secret-key-must-be-at-least-32-bytes-long-for-hs256
+    refresh-secret: test-refresh-secret-key-must-be-at-least-32-bytes-long-for-hs256
+    issuer: legalease-test
+    access-exp-min: 30
+    refresh-exp-min: 1440
+
+app:
+  base-url: http://localhost:8080
+  rate-limit:
+    ai:
+      requests-per-minute: 10000
+    complete:
+      requests-per-hour: 10000
+  share:
+    expiry-hours: 24
+    cleanup-interval-hours: 1
+
+storage:
+  s3:
+    endpoint: http://localhost:9000
+    bucket: test-documents
+    region: us-east-1
+    access-key: minioadmin
+    secret-key: minioadmin
+    presigned-url-validity-minutes: 60
+    max-file-size-mb: 20
+
+logging:
+  level:
+    kz.legeal.ease: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN

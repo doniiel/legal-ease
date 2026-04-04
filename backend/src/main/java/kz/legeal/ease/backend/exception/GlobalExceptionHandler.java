@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,6 +65,24 @@ public class GlobalExceptionHandler {
                         .field(fe.getField())
                         .message(fe.getDefaultMessage())
                         .build())
+                .toList();
+
+        log.warn("[VALIDATION_001] {} — {} field error(s)", request.getRequestURI(), fieldErrors.size());
+        return build(request, HttpStatus.BAD_REQUEST, "VALIDATION_001", "Validation failed", fieldErrors);
+    }
+
+    // Spring 6.2+ throws HandlerMethodValidationException instead of
+    // MethodArgumentNotValidException for @Valid on @RequestBody / @PathVariable / @RequestParam
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponseDto> handleHandlerMethodValidation(
+            HandlerMethodValidationException ex, HttpServletRequest request) {
+
+        final var fieldErrors = ex.getAllValidationResults().stream()
+                .flatMap(r -> r.getResolvableErrors().stream()
+                        .map(e -> ErrorResponseDto.FieldError.builder()
+                                .field(r.getMethodParameter().getParameterName())
+                                .message(e.getDefaultMessage())
+                                .build()))
                 .toList();
 
         log.warn("[VALIDATION_001] {} — {} field error(s)", request.getRequestURI(), fieldErrors.size());
