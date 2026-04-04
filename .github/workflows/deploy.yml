@@ -59,7 +59,13 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -e
+            git config --global --add safe.directory /home/bekabigeldi/diploma/legal-ease
             cd /home/bekabigeldi/diploma/legal-ease
+
+            if [ ! -f .env ]; then
+              echo "❌ .env file not found!"
+              exit 1
+            fi
 
             echo "▶ Pulling latest code..."
             git pull origin main
