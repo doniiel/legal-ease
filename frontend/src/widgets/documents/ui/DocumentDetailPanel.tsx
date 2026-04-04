@@ -25,6 +25,7 @@ import {
 } from "../../../features/documents/api/document-api";
 import { useGetTemplateByIdQuery } from "../../../features/templates/api/user-template-api";
 import type { TemplateField } from "../../../features/lawyer/api/lawyer-template-api";
+import { useExplainClauseMutation, type ClauseExplainResponse } from "../../../features/ai/api/ai-api";
 import { ROUTES } from "../../../app/router/router";
 
 const { Text, Paragraph } = Typography;
@@ -290,6 +291,116 @@ function ShareModal({ url, onClose }: { url: string; onClose: () => void }) {
   );
 }
 
+// ─── AI Clause Explain modal ──────────────────────────────────
+function ClauseExplainModal({ onClose }: { onClose: () => void }) {
+  const { message } = App.useApp();
+  const [clause, setClause] = useState("");
+  const [context, setContext] = useState("");
+  const [result, setResult] = useState<ClauseExplainResponse | null>(null);
+  const [explainClause, { isLoading }] = useExplainClauseMutation();
+
+  const handleExplain = async () => {
+    if (!clause.trim()) { message.warning("Введите текст клаузы"); return; }
+    try {
+      const res = await explainClause({ clause, context: context || undefined }).unwrap();
+      setResult(res);
+    } catch { message.error("Ошибка при объяснении клаузы"); }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ background: "#fff", borderRadius: 16, width: 580, maxHeight: "85vh", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.2)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "20px 24px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <BrainCircuit size={18} color="#fff" />
+            <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>AI Объяснение клаузы</span>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, margin: "6px 0 0" }}>
+            Вставьте юридический текст — AI объяснит простыми словами и выявит риски
+          </p>
+        </div>
+        {/* Body */}
+        <div style={{ padding: "24px", overflowY: "auto", flex: 1 }}>
+          <div style={{ marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94a3b8", marginBottom: 6 }}>Текст клаузы *</div>
+            <textarea
+              value={clause}
+              onChange={e => setClause(e.target.value)}
+              placeholder="Вставьте текст юридической клаузы или пункта договора..."
+              rows={5}
+              style={{ width: "100%", boxSizing: "border-box", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 14px", fontSize: 13, resize: "vertical", outline: "none", fontFamily: "inherit", color: "#111827" }}
+            />
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94a3b8", marginBottom: 6 }}>Контекст (необязательно)</div>
+            <input
+              value={context}
+              onChange={e => setContext(e.target.value)}
+              placeholder="Например: договор аренды, Казахстан, 2024 год"
+              style={{ width: "100%", boxSizing: "border-box", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", fontFamily: "inherit", color: "#111827" }}
+            />
+          </div>
+
+          {result && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+              <div style={{ background: "rgba(22,119,255,0.05)", borderRadius: 12, padding: "16px 18px", border: "1px solid rgba(22,119,255,0.15)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <BrainCircuit size={14} color="#1677ff" />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#1677ff" }}>Объяснение</span>
+                </div>
+                <p style={{ fontSize: 13, color: "#1e3a8a", lineHeight: 1.6, margin: 0 }}>{result.explanation}</p>
+              </div>
+
+              <div style={{ background: "rgba(5,150,105,0.05)", borderRadius: 12, padding: "16px 18px", border: "1px solid rgba(5,150,105,0.15)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <CheckCircle2 size={14} color="#059669" />
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#059669" }}>Простыми словами</span>
+                </div>
+                <p style={{ fontSize: 13, color: "#065f46", lineHeight: 1.6, margin: 0 }}>{result.simplifiedText}</p>
+              </div>
+
+              {result.risks.length > 0 && (
+                <div style={{ background: "rgba(245,158,11,0.05)", borderRadius: 12, padding: "16px 18px", border: "1px solid rgba(245,158,11,0.2)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <ShieldAlert size={14} color="#f59e0b" />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#92400e" }}>Риски ({result.risks.length})</span>
+                  </div>
+                  {result.risks.map((r, i) => (
+                    <div key={i} style={{ fontSize: 12, color: "#92400e", marginBottom: 4 }}>• {r}</div>
+                  ))}
+                </div>
+              )}
+
+              {result.recommendations.length > 0 && (
+                <div style={{ background: "rgba(15,42,68,0.04)", borderRadius: 12, padding: "16px 18px", border: "1px solid rgba(15,42,68,0.1)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <Lightbulb size={14} color="#0F2A44" />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Рекомендации</span>
+                  </div>
+                  {result.recommendations.map((r, i) => (
+                    <div key={i} style={{ fontSize: 12, color: "#374151", marginBottom: 4 }}>• {r}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "9px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+              Закрыть
+            </button>
+            <button onClick={handleExplain} disabled={isLoading || !clause.trim()}
+              style={{ display: "flex", alignItems: "center", gap: 6, background: isLoading || !clause.trim() ? "#94a3b8" : "#0F2A44", color: "#fff", border: "none", borderRadius: 8, padding: "9px 20px", cursor: isLoading || !clause.trim() ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 700 }}>
+              <BrainCircuit size={14} />{isLoading ? "Анализ..." : "Объяснить"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Versions panel ───────────────────────────────────────────
 function VersionsPanel({ versions, isLoading }: { versions: DocumentVersion[]; isLoading: boolean }) {
   if (isLoading) return <div style={{ textAlign: "center", padding: "20px 0" }}><Spin size="small" /></div>;
@@ -319,6 +430,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [showExplainModal, setShowExplainModal] = useState(false);
 
   const { data: doc, isLoading } = useGetDocumentByIdQuery(documentId);
   const { data: template } = useGetTemplateByIdQuery(doc?.templateId ?? 0, { skip: !doc?.templateId });
@@ -434,6 +546,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   return (
     <div style={{ overflowX: "hidden" }}>
       {shareUrl && <ShareModal url={shareUrl} onClose={() => setShareUrl(null)} />}
+      {showExplainModal && <ClauseExplainModal onClose={() => setShowExplainModal(false)} />}
 
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
@@ -454,6 +567,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
 
             {/* COMPLETED */}
             {isCompleted && <>
+              <HeroBtn icon={<BrainCircuit size={14} />} label="AI Объяснение" onClick={() => setShowExplainModal(true)} variant="primary" />
               <HeroBtn icon={<History size={14} />} label="Версии" onClick={() => setShowVersions(!showVersions)} />
               <HeroBtn icon={<Download size={14} />} label="Скачать PDF" onClick={handleDownload} />
               <HeroBtn icon={<Share2 size={14} />} label={isSharing ? "Создание..." : "Поделиться"} onClick={handleShare} disabled={isSharing} variant="primary" />

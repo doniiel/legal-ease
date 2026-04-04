@@ -4,9 +4,12 @@ export interface LegalClause {
   id: number;
   title: string;
   content: string;
-  category: { id: number; name: string };
+  tags: string | null;
+  active: boolean;
+  categoryId: number | null;
+  categoryName: string | null;
   createdDate: string;
-  updatedDate: string;
+  updatedDate: string | null;
 }
 
 export interface LegalClausesPage {
@@ -23,7 +26,8 @@ export interface LegalClausesPage {
 export interface LegalClauseRequest {
   title: string;
   content: string;
-  categoryId: number;
+  categoryId?: number;
+  tags?: string;
 }
 
 export interface GetClausesParams {

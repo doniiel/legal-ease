@@ -18,7 +18,10 @@ import LawyerTemplates from "../../pages/lawyer-templates";
 import LawyerMatchingRules from "../../pages/lawyer-matching-rules";
 import LawyerRuleManager from "../../pages/lawyer-rule-manager";
 import LawyerDocuments from "../../pages/lawyer-documents";
+import LawyerClauses from "../../pages/lawyer-clauses";
+import Matching from "../../pages/matching";
 import DocumentDetail from "../../pages/document-detail";
+import DocumentVerify from "../../pages/document-verify";
 import ProtectedRoute from "../../shared/ui/ProtectedRoute";
 import { ROUTES } from "./router";
 import type { JSX } from "react";
@@ -40,12 +43,16 @@ export const PAGES = [
   { path: ROUTES.FORGOT,   element: pub(<ForgotPassword />) },
   { path: ROUTES.CONFIRM,  element: pub(<Confirm />) },
 
+  // ── Open (no auth, no redirect) ──
+  { path: `${ROUTES.VERIFY}/:id`, element: <DocumentVerify /> },
+
   // ── Authenticated (all roles) ──
   { path: ROUTES.HOME,      element: auth(<Home />) },
   { path: ROUTES.DOCUMENTS, element: auth(<Documents />) },
   { path: `${ROUTES.DOCUMENTS}/:id`, element: auth(<DocumentDetail />) },
   { path: ROUTES.PROFILE,   element: auth(<Profile />) },
   { path: ROUTES.SETTINGS,  element: auth(<Settings />) },
+  { path: ROUTES.MATCHING,  element: auth(<Matching />) },
 
   // ── USER only ──
   { path: ROUTES.LAWYER_APPLICATION, element: auth(<LawyerApplication />, ["USER"]) },
@@ -59,8 +66,9 @@ export const PAGES = [
   { path: ROUTES.ADMIN_AUDIT,       element: auth(<AdminAudit />,       ["ADMIN"]) },
 
   // ── LAWYER only ──
-  { path: ROUTES.LAWYER_TEMPLATES,     element: auth(<LawyerTemplates />,    ["LAWYER"]) },
-  { path: ROUTES.LAWYER_MATCHING_RULES,element: auth(<LawyerMatchingRules />,["LAWYER"]) },
-  { path: ROUTES.LAWYER_RULE_MANAGER,  element: auth(<LawyerRuleManager />,  ["LAWYER"]) },
-  { path: ROUTES.LAWYER_DOCUMENTS,     element: auth(<LawyerDocuments />,    ["LAWYER"]) },
+  { path: ROUTES.LAWYER_TEMPLATES,      element: auth(<LawyerTemplates />,    ["LAWYER"]) },
+  { path: ROUTES.LAWYER_MATCHING_RULES, element: auth(<LawyerMatchingRules />,["LAWYER"]) },
+  { path: ROUTES.LAWYER_RULE_MANAGER,   element: auth(<LawyerRuleManager />,  ["LAWYER"]) },
+  { path: ROUTES.LAWYER_DOCUMENTS,      element: auth(<LawyerDocuments />,    ["LAWYER"]) },
+  { path: ROUTES.LAWYER_CLAUSES,        element: auth(<LawyerClauses />,      ["LAWYER"]) },
 ];

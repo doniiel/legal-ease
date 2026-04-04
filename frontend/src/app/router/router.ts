@@ -18,4 +18,7 @@ export const ROUTES = {
   LAWYER_MATCHING_RULES: "/lawyer-matching-rules",
   LAWYER_RULE_MANAGER: "/lawyer-rule-manager",
   LAWYER_DOCUMENTS: "/lawyer-documents",
+  LAWYER_CLAUSES: "/lawyer-clauses",
+  MATCHING: "/matching",
+  VERIFY: "/verify",
 };

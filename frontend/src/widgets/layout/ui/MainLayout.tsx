@@ -20,6 +20,8 @@ import {
   Scale,
   Bell,
   HelpCircle,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
 import { ROUTES } from "../../../app/router/router";
 import { useAuth } from "../../../features/auth/model/use-auth";
@@ -41,6 +43,8 @@ const NAV_ITEMS = [
   { key: ROUTES.LAWYER_MATCHING_RULES, icon: <Scale size={18} />,          label: "Матчинг",          roles: ["LAWYER"] },
   { key: ROUTES.LAWYER_RULE_MANAGER,   icon: <ShieldAlert size={18} />,    label: "Rule Manager",     roles: ["LAWYER"] },
   { key: ROUTES.LAWYER_DOCUMENTS,      icon: <FileText size={18} />,       label: "Документы клиентов", roles: ["LAWYER"] },
+  { key: ROUTES.LAWYER_CLAUSES,        icon: <BookOpen size={18} />,       label: "Библиотека клауз", roles: ["LAWYER"] },
+  { key: ROUTES.MATCHING,              icon: <Sparkles size={18} />,       label: "Подбор шаблона",   roles: ["USER", "LAWYER", "ADMIN"] },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
@@ -158,6 +162,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       ROUTES.ADMIN_CATEGORIES, ROUTES.ADMIN_APPLICATIONS, ROUTES.ADMIN_AUDIT,
       ROUTES.LAWYER_TEMPLATES, ROUTES.LAWYER_MATCHING_RULES,
       ROUTES.LAWYER_RULE_MANAGER, ROUTES.LAWYER_DOCUMENTS,
+      ROUTES.LAWYER_CLAUSES, ROUTES.MATCHING,
     ].includes(pathname);
 
   return (

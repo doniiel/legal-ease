@@ -24,6 +24,7 @@ import { matchingApi } from "../../features/matching/api/matching-api";
 import { aiApi } from "../../features/ai/api/ai-api";
 import { publicShareApi } from "../../features/share/api/public-share-api";
 import { profileApi } from "../../features/profile/api/profile-api";
+import { documentVerificationApi } from "../../features/documents/api/document-verification-api";
 
 export const store = configureStore({
   reducer: {
@@ -52,6 +53,7 @@ export const store = configureStore({
     [aiApi.reducerPath]: aiApi.reducer,
     [publicShareApi.reducerPath]: publicShareApi.reducer,
     [profileApi.reducerPath]: profileApi.reducer,
+    [documentVerificationApi.reducerPath]: documentVerificationApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -79,6 +81,7 @@ export const store = configureStore({
       aiApi.middleware,
       publicShareApi.middleware,
       profileApi.middleware,
+      documentVerificationApi.middleware,
     ),
 });
 

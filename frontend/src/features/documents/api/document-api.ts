@@ -198,11 +198,22 @@ export const documentApi = createApi({
     getDocumentSuggestions: builder.query<AnalysisResult, number>({
       query: (id) => `/user/documents/${id}/suggestions`,
     }),
+    downloadDocumentVersion: builder.query<string, { id: number; version: number }>({
+      query: ({ id, version }) => ({
+        url: `/user/documents/${id}/versions/${version}/download`,
+        responseHandler: async (response) => {
+          const blob = await response.blob();
+          return URL.createObjectURL(blob);
+        },
+        cache: "no-cache",
+      }),
+    }),
   }),
 });
 
 export const {
   useGetDocumentsQuery,
+  useLazyDownloadDocumentVersionQuery,
   useGetAllDocumentsQuery,
   useGetDocumentByIdQuery,
   useCreateDocumentMutation,
