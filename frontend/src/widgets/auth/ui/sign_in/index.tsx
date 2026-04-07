@@ -48,7 +48,16 @@ export const SignInForm: FC<Props> = ({ onSuccess }) => {
         label="Password"
         name="password"
         layout="vertical"
-        rules={[{ required: true, message: "Please enter your password" }]}
+        rules={[
+          { 
+            required: true, message: "Please enter your password" 
+          },
+          { min: 8, message: "Минимум 8 символов" },
+          {
+            pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
+            message: "Пароль должен содержать заглавную, строчную букву и цифру",
+          },
+        ]}
       >
         <Input.Password size="large" placeholder="Enter your password"/>
       </Form.Item>

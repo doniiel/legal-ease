@@ -168,7 +168,11 @@ export default function Register() {
                 name="password"
                 rules={[
                   { required: true, message: "Введите пароль" },
-                  { min: 6, message: "Минимум 6 символов" },
+                  { min: 8, message: "Минимум 8 символов" },
+                  {
+                    pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
+                    message: "Пароль должен содержать заглавную, строчную букву и цифру",
+                  },
                 ]}
               >
                 <Input.Password

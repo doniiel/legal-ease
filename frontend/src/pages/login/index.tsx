@@ -41,7 +41,16 @@ export default function Login() {
             <Form.Item
               label="Пароль"
               name="password"
-              rules={[{ required: true, message: "Введите пароль" }]}
+              rules={[
+                { 
+                  required: true, message: "Введите пароль"
+                },
+                { min: 8, message: "Минимум 8 символов" },
+                {
+                  pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
+                  message: "Пароль должен содержать заглавную, строчную букву и цифру",
+                },
+              ]}
             >
               <Input.Password placeholder="••••••••" size="large" prefix={<Lock size={16} className="text-gray-400" />} />
             </Form.Item>
