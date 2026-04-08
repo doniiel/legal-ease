@@ -1,25 +1,20 @@
 import { type ReactNode, useState } from "react";
-import { Layout, Avatar } from "antd";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Layout, Avatar, Dropdown, type MenuProps } from "antd";
+import { useNavigate, useLocation, type NavigateFunction } from "react-router-dom";
 import {
   Home,
   FileText,
-  User,
-  Settings,
   ShieldCheck,
   ClipboardList,
   Users,
   FolderOpen,
   FileCode,
   ShieldAlert,
-  LogOut,
   PanelLeftClose,
   PanelLeftOpen,
   LayoutDashboard,
   ScrollText,
   Scale,
-  Bell,
-  HelpCircle,
   BookOpen,
   Sparkles,
 } from "lucide-react";
@@ -29,10 +24,9 @@ import { useAuth } from "../../../features/auth/model/use-auth";
 const { Sider, Content, Header } = Layout;
 
 const NAV_ITEMS = [
-  { key: ROUTES.HOME,                icon: <Home size={18} />,           label: "Главная",          roles: ["USER", "LAWYER", "ADMIN"] },
+  { key: ROUTES.HOME,                icon: <Home size={18} />,           label: "Главная",          roles: ["USER"] },
   { key: ROUTES.DOCUMENTS,           icon: <FileText size={18} />,       label: "Документы",        roles: ["USER", "LAWYER", "ADMIN"] },
-  { key: ROUTES.PROFILE,             icon: <User size={18} />,           label: "Профиль",          roles: ["USER", "LAWYER", "ADMIN"] },
-  { key: ROUTES.LAWYER_APPLICATION,  icon: <ShieldCheck size={18} />,    label: "Заявка адвоката",  roles: ["USER", "LAWYER"] },
+  { key: ROUTES.LAWYER_APPLICATION,  icon: <ShieldCheck size={18} />,    label: "Заявка адвоката",  roles: ["USER"] },
   { key: ROUTES.ADMIN_DASHBOARD,     icon: <LayoutDashboard size={18} />,label: "Дашборд",          roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_APPLICATIONS,  icon: <ClipboardList size={18} />,  label: "Заявки",           roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_USERS,         icon: <Users size={18} />,          label: "Пользователи",     roles: ["ADMIN"] },
@@ -45,6 +39,28 @@ const NAV_ITEMS = [
   { key: ROUTES.LAWYER_DOCUMENTS,      icon: <FileText size={18} />,       label: "Документы клиентов", roles: ["LAWYER"] },
   { key: ROUTES.LAWYER_CLAUSES,        icon: <BookOpen size={18} />,       label: "Библиотека клауз", roles: ["LAWYER"] },
   { key: ROUTES.MATCHING,              icon: <Sparkles size={18} />,       label: "Подбор шаблона",   roles: ["USER", "LAWYER", "ADMIN"] },
+];
+
+const getDropdownItems = (navigate: NavigateFunction, logout: () => void): MenuProps["items"] => [
+  {
+    key: "profile",
+    label: "Профиль",
+    onClick: () => navigate(ROUTES.PROFILE),
+  },
+  {
+    key: "settings",
+    label: "Настройки",
+    onClick: () => navigate(ROUTES.SETTINGS),
+  },
+  {
+    type: "divider",
+  },
+  {
+    key: "logout",
+    label: "Выйти",
+    danger: true,
+    onClick: logout,
+  },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
@@ -106,30 +122,30 @@ function NavItem({
 }
 
 // ─── Icon Button (header) ─────────────────────────────────────
-function IconBtn({ icon, onClick }: { icon: React.ReactNode; onClick?: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        width: 36,
-        height: 36,
-        borderRadius: "50%",
-        border: "none",
-        background: "transparent",
-        cursor: "pointer",
-        color: "#64748b",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transition: "background 0.2s",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
-      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-    >
-      {icon}
-    </button>
-  );
-}
+// function IconBtn({ icon, onClick }: { icon: React.ReactNode; onClick?: () => void }) {
+//   return (
+//     <button
+//       onClick={onClick}
+//       style={{
+//         width: 36,
+//         height: 36,
+//         borderRadius: "50%",
+//         border: "none",
+//         background: "transparent",
+//         cursor: "pointer",
+//         color: "#64748b",
+//         display: "flex",
+//         alignItems: "center",
+//         justifyContent: "center",
+//         transition: "background 0.2s",
+//       }}
+//       onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
+//       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+//     >
+//       {icon}
+//     </button>
+//   );
+// }
 
 // ─── Main Layout ──────────────────────────────────────────────
 interface MainLayoutProps {
@@ -150,6 +166,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     logout();
     navigate(ROUTES.LOGIN);
   };
+
+  const dropdownItems = getDropdownItems(navigate, handleLogout);
 
   // Dashboard gets zero padding — hero section goes edge-to-edge
   const isFullBleed =
@@ -256,16 +274,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         </nav>
 
         {/* Bottom: logout */}
-        <div style={{ padding: "12px 12px 24px" }}>
-          <NavItem
-            icon={<LogOut size={18} />}
-            label="Выйти"
-            isActive={false}
-            collapsed={collapsed}
-            onClick={handleLogout}
-            danger
-          />
-        </div>
+      
       </Sider>
 
       {/* ── Main area ── */}
@@ -317,34 +326,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
           {/* Right: icons + user */}
           <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <IconBtn icon={<Bell size={18} />} />
+            {/* <IconBtn icon={<Bell size={18} />} />
             <IconBtn icon={<HelpCircle size={18} />} />
-            <IconBtn icon={<Settings size={18} />} onClick={() => navigate(ROUTES.SETTINGS)} />
+            <IconBtn icon={<Settings size={18} />} onClick={() => navigate(ROUTES.SETTINGS)} /> */}
 
             <div style={{ width: 1, height: 32, background: "#e2e8f0", margin: "0 12px" }} />
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                cursor: "pointer",
-              }}
-              onClick={() => navigate(ROUTES.PROFILE)}
-            >
-             
-              <Avatar
-                size={34}
+            
+            <Dropdown trigger={["click"]}  menu={{ items: dropdownItems}}>
+              <div
                 style={{
-                  background: "#0F2A44",
-                  fontWeight: 700,
-                  borderRadius: 8,
-                  fontSize: 13,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  cursor: "pointer",
                 }}
               >
-                {role?.[0] ?? "U"}
-              </Avatar>
-            </div>
+                <Avatar
+                  size={34}
+                  style={{
+                    background: "#0F2A44",
+                    fontWeight: 700,
+                    borderRadius: 8,
+                    fontSize: 13,
+                  }}
+                >
+                  {role?.[0] ?? "U"}
+                </Avatar>
+              </div>
+            </Dropdown>
           </div>
         </Header>
 
