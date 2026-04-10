@@ -33,19 +33,19 @@ export const lawyerConditionalRulesApi = createApi({
   tagTypes: ["ConditionalRule"],
   endpoints: (builder) => ({
     getConditionalRulesByTemplate: builder.query<ConditionalRule[], number>({
-      query: (templateId) => `/lawyer/conditional-rules/template/${templateId}`,
+      query: (templateId) => `/conditional-rules/template/${templateId}`,
       providesTags: ["ConditionalRule"],
     }),
     createConditionalRule: builder.mutation<ConditionalRule, ConditionalRuleRequest>({
-      query: (body) => ({ url: "/lawyer/conditional-rules", method: "POST", body }),
+      query: (body) => ({ url: "/conditional-rules", method: "POST", body }),
       invalidatesTags: ["ConditionalRule"],
     }),
     updateConditionalRule: builder.mutation<ConditionalRule, { id: number; body: ConditionalRuleRequest }>({
-      query: ({ id, body }) => ({ url: `/lawyer/conditional-rules/${id}`, method: "PUT", body }),
+      query: ({ id, body }) => ({ url: `/conditional-rules/${id}`, method: "PUT", body }),
       invalidatesTags: ["ConditionalRule"],
     }),
     deleteConditionalRule: builder.mutation<void, number>({
-      query: (id) => ({ url: `/lawyer/conditional-rules/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/conditional-rules/${id}`, method: "DELETE" }),
       invalidatesTags: ["ConditionalRule"],
     }),
   }),

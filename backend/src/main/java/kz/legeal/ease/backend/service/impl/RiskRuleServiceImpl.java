@@ -10,6 +10,7 @@ import kz.legeal.ease.backend.repository.RiskRuleRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.RiskRuleRequest;
 import kz.legeal.ease.backend.service.RiskRuleService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,6 +31,7 @@ public class RiskRuleServiceImpl implements RiskRuleService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheConfig.RISK_RULES, key = "#templateId")
     public List<RiskRuleDto> getAllByTemplate(Long templateId) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         return repository.findAllByTemplateIdAndActiveTrue(templateId).stream()
                 .map(mapper::toDto)
                 .toList();
@@ -39,6 +41,7 @@ public class RiskRuleServiceImpl implements RiskRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.RISK_RULES, key = "#request.templateId")
     public RiskRuleDto create(RiskRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var template = findTemplate(request.getTemplateId());
         final var rule = RiskRule.builder()
                 .template(template)
@@ -57,6 +60,7 @@ public class RiskRuleServiceImpl implements RiskRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.RISK_RULES, allEntries = true)
     public RiskRuleDto update(Long id, RiskRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
 
         rule.setRuleCode(request.getRuleCode());
@@ -73,6 +77,7 @@ public class RiskRuleServiceImpl implements RiskRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.RISK_RULES, allEntries = true)
     public void delete(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
         rule.setActive(false);
         repository.save(rule);

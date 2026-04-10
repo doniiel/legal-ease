@@ -41,13 +41,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // ── Public (no token required) ──────────────────────────────
                         .requestMatchers("/open-api/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/lawyer/**").hasRole("LAWYER")
-                        .requestMatchers("/api/user/**").hasRole("USER")
-                        .requestMatchers("/api/ai/**").authenticated()
+                        // ── All other requests require a valid JWT ──────────────────
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->

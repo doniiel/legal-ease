@@ -29,6 +29,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserDto> getAll(Pageable pageable) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return userService.findAll(pageable)
                 .map(userMapper::toDto);
     }
@@ -36,6 +37,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Override
     @Transactional(readOnly = true)
     public UserDto getById(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return userMapper.toDto(userService.findById(id));
     }
 
@@ -89,8 +91,9 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     private User requireCurrentAdmin() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var user = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(user, "ADMIN");
+        return user;
     }
 
     private void guardAgainstSelf(Long adminId, Long targetUserId) {

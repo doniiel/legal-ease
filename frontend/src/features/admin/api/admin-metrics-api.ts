@@ -22,7 +22,7 @@ export const adminMetricsApi = createApi({
   }),
   endpoints: (builder) => ({
     getSystemMetrics: builder.query<SystemMetrics, void>({
-      query: () => "/admin/metrics",
+      query: () => "/metrics",
     }),
   }),
 });

@@ -37,10 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -528,8 +526,9 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     private User requireCurrentUser() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        final var user = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(user, "USER");
+        return user;
     }
 
     private String buildVersionedObjectKey(Long userId, Long docId, int version) {

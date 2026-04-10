@@ -11,6 +11,7 @@ import kz.legeal.ease.backend.repository.MatchingRuleRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.MatchingRuleRequest;
 import kz.legeal.ease.backend.service.MatchingRuleService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ public class MatchingRuleServiceImpl implements MatchingRuleService {
     @Override
     @Transactional(readOnly = true)
     public List<MatchingRuleDto> getAll() {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         return repository.findAllByActiveTrue().stream()
                 .map(mapper::toDto)
                 .toList();
@@ -37,6 +39,7 @@ public class MatchingRuleServiceImpl implements MatchingRuleService {
     @Override
     @Transactional(readOnly = true)
     public List<MatchingRuleDto> getAllByTemplate(Long templateId) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         // ✅ Исправлено: было findAllByCategoryIdAndActiveTrue(templateId) — неверный join
         return repository.findAllByTemplateIdAndActiveTrue(templateId).stream()
                 .map(mapper::toDto)
@@ -46,6 +49,7 @@ public class MatchingRuleServiceImpl implements MatchingRuleService {
     @Override
     @Transactional
     public MatchingRuleDto create(MatchingRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var template = findTemplate(request.getTemplateId());
         final var category = findCategory(request.getCategoryId());
 
@@ -63,6 +67,7 @@ public class MatchingRuleServiceImpl implements MatchingRuleService {
     @Override
     @Transactional
     public MatchingRuleDto update(Long id, MatchingRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
         final var template = findTemplate(request.getTemplateId());
         final var category = findCategory(request.getCategoryId());
@@ -78,6 +83,7 @@ public class MatchingRuleServiceImpl implements MatchingRuleService {
     @Override
     @Transactional
     public void delete(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
         rule.setActive(false);
         repository.save(rule);

@@ -39,19 +39,19 @@ export const lawyerRiskRulesApi = createApi({
   tagTypes: ["RiskRule"],
   endpoints: (builder) => ({
     getRiskRulesByTemplate: builder.query<RiskRule[], number>({
-      query: (templateId) => `/lawyer/risk-rules/template/${templateId}`,
+      query: (templateId) => `/risk-rules/template/${templateId}`,
       providesTags: ["RiskRule"],
     }),
     createRiskRule: builder.mutation<RiskRule, RiskRuleRequest>({
-      query: (body) => ({ url: "/lawyer/risk-rules", method: "POST", body }),
+      query: (body) => ({ url: "/risk-rules", method: "POST", body }),
       invalidatesTags: ["RiskRule"],
     }),
     updateRiskRule: builder.mutation<RiskRule, { id: number; body: RiskRuleRequest }>({
-      query: ({ id, body }) => ({ url: `/lawyer/risk-rules/${id}`, method: "PUT", body }),
+      query: ({ id, body }) => ({ url: `/risk-rules/${id}`, method: "PUT", body }),
       invalidatesTags: ["RiskRule"],
     }),
     deleteRiskRule: builder.mutation<void, number>({
-      query: (id) => ({ url: `/lawyer/risk-rules/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/risk-rules/${id}`, method: "DELETE" }),
       invalidatesTags: ["RiskRule"],
     }),
   }),

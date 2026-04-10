@@ -31,11 +31,11 @@ export const profileApi = createApi({
   tagTypes: ["Profile"],
   endpoints: (builder) => ({
     getProfile: builder.query<UserProfile, void>({
-      query: () => "/user/profile",
+      query: () => "/profile",
       providesTags: ["Profile"],
     }),
     updateProfile: builder.mutation<UserProfile, UpdateProfileRequest>({
-      query: (body) => ({ url: "/user/profile", method: "PUT", body }),
+      query: (body) => ({ url: "/profile", method: "PUT", body }),
       invalidatesTags: ["Profile"],
     }),
   }),

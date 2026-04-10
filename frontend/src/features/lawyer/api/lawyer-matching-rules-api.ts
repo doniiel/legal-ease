@@ -33,16 +33,16 @@ export const lawyerMatchingRulesApi = createApi({
   tagTypes: ["MatchingRule"],
   endpoints: (builder) => ({
     getRules: builder.query<MatchingRule[], void>({
-      query: () => "/lawyer/matching-rules",
+      query: () => "/matching-rules",
       providesTags: ["MatchingRule"],
     }),
     getRulesByTemplate: builder.query<MatchingRule[], number>({
-      query: (templateId) => `/lawyer/matching-rules/template/${templateId}`,
+      query: (templateId) => `/matching-rules/template/${templateId}`,
       providesTags: ["MatchingRule"],
     }),
     createRule: builder.mutation<MatchingRule, MatchingRuleRequest>({
       query: (body) => ({
-        url: "/lawyer/matching-rules",
+        url: "/matching-rules",
         method: "POST",
         body,
       }),
@@ -50,7 +50,7 @@ export const lawyerMatchingRulesApi = createApi({
     }),
     updateRule: builder.mutation<MatchingRule, { id: number; body: MatchingRuleRequest }>({
       query: ({ id, body }) => ({
-        url: `/lawyer/matching-rules/${id}`,
+        url: `/matching-rules/${id}`,
         method: "PUT",
         body,
       }),
@@ -58,7 +58,7 @@ export const lawyerMatchingRulesApi = createApi({
     }),
     deleteRule: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/lawyer/matching-rules/${id}`,
+        url: `/matching-rules/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["MatchingRule"],

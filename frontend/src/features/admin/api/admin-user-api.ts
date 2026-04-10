@@ -60,23 +60,23 @@ export const adminUserApi = createApi({
   tagTypes: ["AdminUser"],
   endpoints: (builder) => ({
     getUsers: builder.query<UsersPage, GetUsersParams>({
-      query: (params) => ({ url: "/admin/users", params }),
+      query: (params) => ({ url: "/users", params }),
       providesTags: ["AdminUser"],
     }),
     getUserById: builder.query<AdminUser, number>({
-      query: (id) => `/admin/users/${id}`,
+      query: (id) => `/users/${id}`,
       providesTags: ["AdminUser"],
     }),
     blockUser: builder.mutation<void, number>({
-      query: (id) => ({ url: `/admin/users/${id}/block`, method: "POST" }),
+      query: (id) => ({ url: `/users/${id}/block`, method: "POST" }),
       invalidatesTags: ["AdminUser"],
     }),
     unblockUser: builder.mutation<void, number>({
-      query: (id) => ({ url: `/admin/users/${id}/unblock`, method: "POST" }),
+      query: (id) => ({ url: `/users/${id}/unblock`, method: "POST" }),
       invalidatesTags: ["AdminUser"],
     }),
     revokeLawyer: builder.mutation<void, number>({
-      query: (id) => ({ url: `/admin/users/${id}/revoke-lawyer`, method: "POST" }),
+      query: (id) => ({ url: `/users/${id}/revoke-lawyer`, method: "POST" }),
       invalidatesTags: ["AdminUser"],
     }),
   }),

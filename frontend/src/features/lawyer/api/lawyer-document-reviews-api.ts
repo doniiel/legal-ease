@@ -46,25 +46,25 @@ export const lawyerDocumentReviewsApi = createApi({
   endpoints: (builder) => ({
     createReview: builder.mutation<DocumentReview, { documentId: number; body: DocumentReviewRequest }>({
       query: ({ documentId, body }) => ({
-        url: `/lawyer/documents/${documentId}/review`,
+        url: `/documents/${documentId}/reviews`,
         method: "POST",
         body,
       }),
       invalidatesTags: ["DocumentReview"],
     }),
     getDocumentReviews: builder.query<DocumentReview[], number>({
-      query: (documentId) => `/lawyer/documents/${documentId}/reviews`,
+      query: (documentId) => `/documents/${documentId}/reviews`,
       providesTags: ["DocumentReview"],
     }),
     getMyReviews: builder.query<DocumentReviewsPage, GetReviewsParams>({
       query: ({ page = 0, size = 10, sort = "createdDate,DESC" } = {}) => ({
-        url: "/lawyer/reviews",
+        url: "/reviews",
         params: { page, size, sort },
       }),
       providesTags: ["DocumentReview"],
     }),
     deleteReview: builder.mutation<void, number>({
-      query: (reviewId) => ({ url: `/lawyer/reviews/${reviewId}`, method: "DELETE" }),
+      query: (reviewId) => ({ url: `/reviews/${reviewId}`, method: "DELETE" }),
       invalidatesTags: ["DocumentReview"],
     }),
   }),

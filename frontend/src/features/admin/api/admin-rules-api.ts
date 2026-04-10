@@ -65,43 +65,43 @@ export const adminRulesApi = createApi({
   tagTypes: ["AdminValidationRule", "AdminRiskRule", "AdminMatchingRule", "AdminConditionalRule", "AdminRequiredDocRule"],
   endpoints: (builder) => ({
     getValidationRules: builder.query<AdminValidationRule[], void>({
-      query: () => "/admin/rules/validation",
+      query: () => "/rules/validation",
       providesTags: ["AdminValidationRule"],
     }),
     toggleValidationRule: builder.mutation<AdminValidationRule, number>({
-      query: (id) => ({ url: `/admin/rules/validation/${id}/toggle`, method: "PATCH" }),
+      query: (id) => ({ url: `/rules/validation/${id}/toggle`, method: "PATCH" }),
       invalidatesTags: ["AdminValidationRule"],
     }),
     getRiskRules: builder.query<AdminRiskRule[], void>({
-      query: () => "/admin/rules/risk",
+      query: () => "/rules/risk",
       providesTags: ["AdminRiskRule"],
     }),
     toggleRiskRule: builder.mutation<AdminRiskRule, number>({
-      query: (id) => ({ url: `/admin/rules/risk/${id}/toggle`, method: "PATCH" }),
+      query: (id) => ({ url: `/rules/risk/${id}/toggle`, method: "PATCH" }),
       invalidatesTags: ["AdminRiskRule"],
     }),
     getMatchingRules: builder.query<AdminMatchingRule[], void>({
-      query: () => "/admin/rules/matching",
+      query: () => "/rules/matching",
       providesTags: ["AdminMatchingRule"],
     }),
     toggleMatchingRule: builder.mutation<AdminMatchingRule, number>({
-      query: (id) => ({ url: `/admin/rules/matching/${id}/toggle`, method: "PATCH" }),
+      query: (id) => ({ url: `/rules/matching/${id}/toggle`, method: "PATCH" }),
       invalidatesTags: ["AdminMatchingRule"],
     }),
     getConditionalRules: builder.query<AdminConditionalRule[], void>({
-      query: () => "/admin/rules/conditional",
+      query: () => "/rules/conditional",
       providesTags: ["AdminConditionalRule"],
     }),
     toggleConditionalRule: builder.mutation<AdminConditionalRule, number>({
-      query: (id) => ({ url: `/admin/rules/conditional/${id}/toggle`, method: "PATCH" }),
+      query: (id) => ({ url: `/rules/conditional/${id}/toggle`, method: "PATCH" }),
       invalidatesTags: ["AdminConditionalRule"],
     }),
     getRequiredDocRules: builder.query<AdminRequiredDocRule[], void>({
-      query: () => "/admin/rules/required-docs",
+      query: () => "/rules/required-docs",
       providesTags: ["AdminRequiredDocRule"],
     }),
     toggleRequiredDocRule: builder.mutation<AdminRequiredDocRule, number>({
-      query: (id) => ({ url: `/admin/rules/required-docs/${id}/toggle`, method: "PATCH" }),
+      query: (id) => ({ url: `/rules/required-docs/${id}/toggle`, method: "PATCH" }),
       invalidatesTags: ["AdminRequiredDocRule"],
     }),
   }),

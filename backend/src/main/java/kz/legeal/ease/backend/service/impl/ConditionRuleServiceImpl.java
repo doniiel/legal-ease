@@ -10,6 +10,7 @@ import kz.legeal.ease.backend.repository.ConditionalRuleRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.ConditionalRuleRequest;
 import kz.legeal.ease.backend.service.ConditionalRuleService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,6 +31,7 @@ public class ConditionRuleServiceImpl implements ConditionalRuleService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheConfig.CONDITIONAL_RULES, key = "#templateId")
     public List<ConditionalRuleDto> getAllByTemplate(Long templateId) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         return repository.findAllByTemplateIdAndActiveTrue(templateId).stream()
                 .map(mapper::toDto)
                 .toList();
@@ -39,6 +41,7 @@ public class ConditionRuleServiceImpl implements ConditionalRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.CONDITIONAL_RULES, key = "#request.templateId")
     public ConditionalRuleDto create(ConditionalRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var template = findTemplate(request.getTemplateId());
         final var rule = ConditionRule.builder()
                 .template(template)
@@ -55,6 +58,7 @@ public class ConditionRuleServiceImpl implements ConditionalRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.CONDITIONAL_RULES, allEntries = true)
     public ConditionalRuleDto update(Long id, ConditionalRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule     = findOrThrow(id);
         final var template = findTemplate(request.getTemplateId());
 
@@ -71,6 +75,7 @@ public class ConditionRuleServiceImpl implements ConditionalRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.CONDITIONAL_RULES, allEntries = true)
     public void delete(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
         rule.setActive(false);
         repository.save(rule);

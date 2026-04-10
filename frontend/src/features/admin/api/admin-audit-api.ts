@@ -46,13 +46,13 @@ export const adminAuditApi = createApi({
   endpoints: (builder) => ({
     getAuditLogs: builder.query<AuditLogsPage, GetAuditLogsParams>({
       query: ({ page = 0, size = 20, sort = "createdAt,DESC", ...filters } = {}) => ({
-        url: "/admin/audit-logs",
+        url: "/audit-logs",
         params: { page, size, sort, ...filters },
       }),
       providesTags: ["AuditLog"],
     }),
     getAuditLogById: builder.query<AuditLog, number>({
-      query: (id) => `/admin/audit-logs/${id}`,
+      query: (id) => `/audit-logs/${id}`,
       providesTags: (_result, _error, id) => [{ type: "AuditLog", id }],
     }),
   }),

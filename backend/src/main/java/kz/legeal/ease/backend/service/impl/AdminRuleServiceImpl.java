@@ -5,6 +5,7 @@ import kz.legeal.ease.backend.exception.NotFoundException;
 import kz.legeal.ease.backend.mapper.*;
 import kz.legeal.ease.backend.repository.*;
 import kz.legeal.ease.backend.service.AdminRuleService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional(readOnly = true)
     public List<ValidationRuleDto> getAllValidationRules() {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return validationRuleRepository.findAll().stream()
                 .map(validationMapper::toDto)
                 .toList();
@@ -40,6 +42,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional
     public ValidationRuleDto toggleValidationRule(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         final var rule = validationRuleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ValidationRule", id));
         rule.setActive(!rule.isActive());
@@ -51,6 +54,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional(readOnly = true)
     public List<RiskRuleDto> getAllRiskRules() {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return riskRuleRepository.findAll().stream()
                 .map(riskRuleMapper::toDto)
                 .toList();
@@ -59,6 +63,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional
     public RiskRuleDto toggleRiskRule(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         final var rule = riskRuleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("RiskRule", id));
         rule.setActive(!rule.isActive());
@@ -70,6 +75,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional(readOnly = true)
     public List<MatchingRuleDto> getAllMatchingRules() {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return matchingRuleRepository.findAll().stream()
                 .map(matchingRuleMapper::toDto)
                 .toList();
@@ -78,6 +84,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional
     public MatchingRuleDto toggleMatchingRule(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         final var rule = matchingRuleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("MatchingRule", id));
         rule.setActive(!rule.isActive());
@@ -89,6 +96,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional(readOnly = true)
     public List<ConditionalRuleDto> getAllConditionalRules() {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return conditionalRuleRepository.findAll().stream()
                 .map(conditionalRuleMapper::toDto)
                 .toList();
@@ -97,6 +105,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional
     public ConditionalRuleDto toggleConditionalRule(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         final var rule = conditionalRuleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("ConditionalRule", id));
         rule.setActive(!rule.isActive());
@@ -108,6 +117,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional(readOnly = true)
     public List<RequiredDocRuleDto> getAllRequiredDocRules() {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return requiredDocRuleRepository.findAll().stream()
                 .map(requiredDocRuleMapper::toDto)
                 .toList();
@@ -116,6 +126,7 @@ public class AdminRuleServiceImpl implements AdminRuleService {
     @Override
     @Transactional
     public RequiredDocRuleDto toggleRequiredDocRule(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         final var rule = requiredDocRuleRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("RequiredDocRule", id));
         rule.setActive(!rule.isActive());

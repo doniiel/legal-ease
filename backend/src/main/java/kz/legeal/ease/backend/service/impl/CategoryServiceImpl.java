@@ -9,7 +9,6 @@ import kz.legeal.ease.backend.repository.CategoryRepository;
 import kz.legeal.ease.backend.request.category.CreateCategoryRequest;
 import kz.legeal.ease.backend.request.category.UpdateCategoryRequest;
 import kz.legeal.ease.backend.service.CategoryService;
-import kz.legeal.ease.backend.exception.UnauthorizedException;
 import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +31,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto create(CreateCategoryRequest request) {
-        final var curentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var curentAdmin = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(curentAdmin, "ADMIN");
 
         if (categoryRepository.existsByNameIgnoreCase(request.getName())) {
             throw new BusinessRuleException(
@@ -52,8 +51,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto update(Long id, UpdateCategoryRequest request) {
-        final var curentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var curentAdmin = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(curentAdmin, "ADMIN");
         final var category = findByIdOrThrow(id);
 
         if (!category.getName().equalsIgnoreCase(request.getName())
@@ -73,8 +72,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void delete(Long id) {
-        final var currentAdmin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentAdmin = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentAdmin, "ADMIN");
         final var category = findByIdOrThrow(id);
 
         if (categoryRepository.hasActiveTemplates(id)) {
@@ -92,6 +91,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public Page<CategoryDto> getAll(Pageable pageable) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return categoryRepository.findAllSorted(pageable)
                 .map(categoryMapper::toDto);
     }
@@ -99,6 +99,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public CategoryDto getById(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return categoryMapper.toDto(findByIdOrThrow(id));
     }
 
