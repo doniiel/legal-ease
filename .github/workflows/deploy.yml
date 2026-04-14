@@ -170,12 +170,6 @@ jobs:
             exit 1
           fi
 
-      - name: Sync configs to server directory
-        run: |
-          cp docker-compose.prod.yml /opt/legalease/legal-ease/docker-compose.prod.yml
-          mkdir -p /opt/legalease/legal-ease/nginx
-          cp nginx/nginx.conf /opt/legalease/legal-ease/nginx/nginx.conf
-
       - name: Log in to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
@@ -187,10 +181,11 @@ jobs:
       - name: Deploy with docker compose
         run: |
           set -e
-          cd /opt/legalease/legal-ease
 
           export BACKEND_IMAGE=${{ env.IMAGE_BACKEND }}:latest
           export FRONTEND_IMAGE=${{ env.IMAGE_FRONTEND }}:latest
+
+          cp /opt/legalease/legal-ease/.env .env
 
           docker compose -f docker-compose.prod.yml up -d postgres minio
           until docker exec legalease-postgres pg_isready -U postgres; do sleep 2; done
