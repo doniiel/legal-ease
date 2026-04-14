@@ -45,13 +45,13 @@ export const userTemplateApi = createApi({
   endpoints: (builder) => ({
     getTemplates: builder.query<UserTemplatesPage, GetUserTemplatesParams>({
       query: ({ categoryId, page = 0, size = 10, sort = "createdDate,DESC" } = {}) => ({
-        url: "/user/templates",
+        url: "/templates",
         params: { ...(categoryId !== undefined && { categoryId }), page, size, sort },
       }),
       providesTags: ["UserTemplate"],
     }),
     getTemplateById: builder.query<UserTemplate, number>({
-      query: (id) => `/user/templates/${id}`,
+      query: (id) => `/templates/${id}`,
       providesTags: (_result, _error, id) => [{ type: "UserTemplate", id }],
     }),
   }),

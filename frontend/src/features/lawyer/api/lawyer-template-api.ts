@@ -93,18 +93,18 @@ export const lawyerTemplateApi = createApi({
   endpoints: (builder) => ({
     getMyTemplates: builder.query<TemplatesPage, GetTemplatesParams>({
       query: ({ page = 0, size = 10, sort = "createdDate,DESC" } = {}) => ({
-        url: "/lawyer/templates",
+        url: "/my-templates",
         params: { page, size, sort },
       }),
       providesTags: ["Template"],
     }),
     getTemplateById: builder.query<Template, number>({
-      query: (id) => `/lawyer/templates/${id}`,
+      query: (id) => `/my-templates/${id}`,
       providesTags: (_result, _error, id) => [{ type: "Template", id }],
     }),
     createTemplate: builder.mutation<Template, CreateTemplateRequest>({
       query: (body) => ({
-        url: "/lawyer/templates",
+        url: "/my-templates",
         method: "POST",
         body,
       }),
@@ -112,7 +112,7 @@ export const lawyerTemplateApi = createApi({
     }),
     updateTemplate: builder.mutation<Template, { id: number; body: UpdateTemplateRequest }>({
       query: ({ id, body }) => ({
-        url: `/lawyer/templates/${id}`,
+        url: `/my-templates/${id}`,
         method: "PUT",
         body,
       }),
@@ -120,14 +120,14 @@ export const lawyerTemplateApi = createApi({
     }),
     deleteTemplate: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/lawyer/templates/${id}`,
+        url: `/my-templates/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Template"],
     }),
     publishTemplate: builder.mutation<Template, number>({
       query: (id) => ({
-        url: `/lawyer/templates/${id}/publish`,
+        url: `/my-templates/${id}/publish`,
         method: "POST",
       }),
       invalidatesTags: ["Template"],

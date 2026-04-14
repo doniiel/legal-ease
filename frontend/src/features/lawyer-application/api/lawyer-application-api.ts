@@ -30,14 +30,14 @@ export const lawyerApplicationApi = createApi({
   endpoints: (builder) => ({
     submitApplication: builder.mutation<LawyerApplication, { licenseNum: string }>({
       query: (body) => ({
-        url: "/user/lawyer-applications",
+        url: "/lawyer-applications",
         method: "POST",
         body,
       }),
       invalidatesTags: ["MyApplication"],
     }),
     getMyApplication: builder.query<LawyerApplication, void>({
-      query: () => "/user/lawyer-applications/my",
+      query: () => "/lawyer-applications/my",
       providesTags: ["MyApplication"],
     }),
   }),

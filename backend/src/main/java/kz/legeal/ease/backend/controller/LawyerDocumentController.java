@@ -1,9 +1,7 @@
-package kz.legeal.ease.backend.controller.lawyer;
+package kz.legeal.ease.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
 import kz.legeal.ease.backend.dto.document.DocumentDto;
@@ -16,26 +14,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/lawyer/documents")
-@PreAuthorize("hasRole('LAWYER')")
-@Tag(
-        name = "Lawyer - Document View",
-        description = "Read-only access to documents created from the lawyer's templates"
-)
+@RequestMapping("/api/lawyer-documents")
+@Tag(name = "Lawyer - Document View")
 @RequiredArgsConstructor
 public class LawyerDocumentController {
 
     private final LawyerDocumentService lawyerDocumentService;
 
-    @Operation(
-            summary = "List all documents from my templates",
-            description = "Returns all non-deleted documents created from any template owned by the current lawyer."
-    )
-    @ApiResponse(responseCode = "200", description = "Documents returned")
+    @Operation(summary = "List all documents from my templates (LAWYER only)")
     @GetMapping
     public ResponseEntity<Page<DocumentPreviewDto>> getAll(
             @ParameterObject @PageableDefault(size = 10, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable
@@ -43,14 +32,7 @@ public class LawyerDocumentController {
         return ResponseEntity.ok(lawyerDocumentService.getDocumentsByMyTemplates(pageable));
     }
 
-    @Operation(
-            summary = "List documents for a specific template",
-            description = "Returns documents scoped to a single template. The template must belong to the current lawyer."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Documents returned"),
-            @ApiResponse(responseCode = "403", description = "Template does not belong to the current lawyer")
-    })
+    @Operation(summary = "List documents for a specific template (LAWYER only)")
     @GetMapping("/by-template/{templateId}")
     public ResponseEntity<Page<DocumentPreviewDto>> getByTemplate(
             @Parameter(description = "Template ID", required = true) @NotNull @PathVariable Long templateId,
@@ -59,15 +41,7 @@ public class LawyerDocumentController {
         return ResponseEntity.ok(lawyerDocumentService.getDocumentsByTemplate(templateId, pageable));
     }
 
-    @Operation(
-            summary = "Get document detail",
-            description = "Returns full document detail. The document must have been created from one of the lawyer's templates."
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Document found"),
-            @ApiResponse(responseCode = "403", description = "Access denied"),
-            @ApiResponse(responseCode = "404", description = "Document not found")
-    })
+    @Operation(summary = "Get document detail (LAWYER only)")
     @GetMapping("/{id}")
     public ResponseEntity<DocumentDto> getById(
             @Parameter(description = "Document ID", required = true) @NotNull @PathVariable Long id

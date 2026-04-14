@@ -96,8 +96,9 @@ public class LegalClauseServiceImpl implements LegalClauseService {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private kz.legeal.ease.backend.domain.User currentLawyer() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new BusinessRuleException("Not authenticated"));
+        final var user = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(user, "LAWYER");
+        return user;
     }
 
     private LegalClause findOwned(Long id, Long lawyerId) {

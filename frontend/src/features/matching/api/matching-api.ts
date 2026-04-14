@@ -19,7 +19,7 @@ export const matchingApi = createApi({
   endpoints: (builder) => ({
     matchTemplate: builder.mutation<AnalysisResult, MatchingRequest>({
       query: (body) => ({
-        url: "/user/matching",
+        url: "/matching",
         method: "POST",
         body,
       }),

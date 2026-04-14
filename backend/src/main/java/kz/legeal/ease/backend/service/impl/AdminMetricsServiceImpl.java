@@ -8,6 +8,7 @@ import kz.legeal.ease.backend.repository.LawyerApplicationRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.repository.UserRepository;
 import kz.legeal.ease.backend.service.AdminMetricsService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ public class AdminMetricsServiceImpl implements AdminMetricsService {
     @Override
     @Transactional(readOnly = true)
     public SystemMetricsDto getMetrics() {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         return new SystemMetricsDto(
                 userRepository.countByDeletedFalse(),
                 userRepository.countActiveByRoleCode("LAWYER"),

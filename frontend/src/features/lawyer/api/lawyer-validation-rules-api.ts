@@ -45,19 +45,19 @@ export const lawyerValidationRulesApi = createApi({
   tagTypes: ["ValidationRule"],
   endpoints: (builder) => ({
     getValidationRulesByTemplate: builder.query<ValidationRule[], number>({
-      query: (templateId) => `/lawyer/validation-rules/template/${templateId}`,
+      query: (templateId) => `/validation-rules/template/${templateId}`,
       providesTags: ["ValidationRule"],
     }),
     createValidationRule: builder.mutation<ValidationRule, ValidationRuleRequest>({
-      query: (body) => ({ url: "/lawyer/validation-rules", method: "POST", body }),
+      query: (body) => ({ url: "/validation-rules", method: "POST", body }),
       invalidatesTags: ["ValidationRule"],
     }),
     updateValidationRule: builder.mutation<ValidationRule, { id: number; body: ValidationRuleRequest }>({
-      query: ({ id, body }) => ({ url: `/lawyer/validation-rules/${id}`, method: "PUT", body }),
+      query: ({ id, body }) => ({ url: `/validation-rules/${id}`, method: "PUT", body }),
       invalidatesTags: ["ValidationRule"],
     }),
     deleteValidationRule: builder.mutation<void, number>({
-      query: (id) => ({ url: `/lawyer/validation-rules/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/validation-rules/${id}`, method: "DELETE" }),
       invalidatesTags: ["ValidationRule"],
     }),
   }),

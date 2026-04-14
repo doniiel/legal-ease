@@ -10,6 +10,7 @@ import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.repository.ValidationRuleRepository;
 import kz.legeal.ease.backend.request.ValidationRuleRequest;
 import kz.legeal.ease.backend.service.ValidationRuleService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,6 +31,7 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheConfig.VALIDATION_RULES, key = "#templateId")
     public List<ValidationRuleDto> getAllByTemplate(Long templateId) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         return repository.findAllByTemplateIdAndActiveTrue(templateId).stream()
                 .map(mapper::toDto)
                 .toList();
@@ -39,6 +41,7 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.VALIDATION_RULES, key = "#request.templateId")
     public ValidationRuleDto create(ValidationRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var template = findTemplate(request.getTemplateId());
         final var rule = ValidationRule.builder()
                 .template(template)
@@ -56,6 +59,7 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.VALIDATION_RULES, allEntries = true)
     public ValidationRuleDto update(Long id, ValidationRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
 
         rule.setFieldKey(request.getFieldKey());
@@ -71,6 +75,7 @@ public class ValidationRuleServiceImpl implements ValidationRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.VALIDATION_RULES, allEntries = true)
     public void delete(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
         rule.setActive(false);
         repository.save(rule);

@@ -51,18 +51,18 @@ export const adminCategoryApi = createApi({
   endpoints: (builder) => ({
     getCategories: builder.query<CategoriesPage, GetCategoriesParams>({
       query: ({ page = 0, size = 20, sort = "name,ASC" } = {}) => ({
-        url: "/admin/categories",
+        url: "/categories",
         params: { page, size, sort },
       }),
       providesTags: ["Category"],
     }),
     getCategoryById: builder.query<Category, number>({
-      query: (id) => `/admin/categories/${id}`,
+      query: (id) => `/categories/${id}`,
       providesTags: (_result, _error, id) => [{ type: "Category", id }],
     }),
     createCategory: builder.mutation<Category, CreateCategoryRequest>({
       query: (body) => ({
-        url: "/admin/categories",
+        url: "/categories",
         method: "POST",
         body,
       }),
@@ -70,7 +70,7 @@ export const adminCategoryApi = createApi({
     }),
     updateCategory: builder.mutation<Category, { id: number; body: UpdateCategoryRequest }>({
       query: ({ id, body }) => ({
-        url: `/admin/categories/${id}`,
+        url: `/categories/${id}`,
         method: "PUT",
         body,
       }),
@@ -78,7 +78,7 @@ export const adminCategoryApi = createApi({
     }),
     deactivateCategory: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/admin/categories/${id}`,
+        url: `/categories/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Category"],

@@ -36,8 +36,8 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Override
     @Transactional(readOnly = true)
     public LawyerApplicationPreviewDto getMyApplication() {
-        final var currentUser = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentUser = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentUser, "USER");
 
         final var application = repository.findTopByUserOrderByCreatedDateDesc(currentUser)
                 .orElseThrow(() -> new NotFoundException("LawyerApplication", currentUser.getEmail()));
@@ -114,8 +114,8 @@ public class LawyerApplicationServiceImpl implements LawyerApplicationService {
     @Override
     @Transactional
     public LawyerApplicationPreviewDto submitApplication(LawyerApplicationRequest request) {
-        final var currentUser = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentUser = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentUser, "USER");
 
         final var alreadyExists = repository.existsByUserAndStatusIn(
                 currentUser, List.of(Status.PENDING, Status.APPROVED)

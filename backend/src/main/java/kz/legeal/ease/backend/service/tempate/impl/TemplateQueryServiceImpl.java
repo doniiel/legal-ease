@@ -3,7 +3,6 @@ package kz.legeal.ease.backend.service.tempate.impl;
 import kz.legeal.ease.backend.dto.template.TemplateDto;
 import kz.legeal.ease.backend.exception.ForbiddenException;
 import kz.legeal.ease.backend.exception.NotFoundException;
-import kz.legeal.ease.backend.exception.UnauthorizedException;
 import kz.legeal.ease.backend.mapper.TemplateMapper;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.service.tempate.TemplateQueryService;
@@ -25,8 +24,8 @@ public class TemplateQueryServiceImpl implements TemplateQueryService {
     @Override
     @Transactional(readOnly = true)
     public Page<TemplateDto> getMyTemplates(Pageable pageable) {
-        final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentLawyer = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentLawyer, "LAWYER");
         return templateRepository.findAllByLawyerId(currentLawyer.getId(), pageable)
                 .map(templateMapper::toDto);
     }
@@ -34,8 +33,8 @@ public class TemplateQueryServiceImpl implements TemplateQueryService {
     @Override
     @Transactional(readOnly = true)
     public TemplateDto getMyTemplateById(Long templateId) {
-        final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentLawyer = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentLawyer, "LAWYER");
 
         final var template = templateRepository.findByIdAndActive(templateId)
                 .orElseThrow(() -> new NotFoundException("Template", templateId));

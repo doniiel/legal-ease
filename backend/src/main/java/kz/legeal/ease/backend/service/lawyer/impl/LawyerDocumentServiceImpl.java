@@ -55,8 +55,8 @@ public class LawyerDocumentServiceImpl implements LawyerDocumentService {
     }
 
     private Long currentLawyerId() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new BusinessRuleException("Not authenticated"))
-                .getId();
+        final var user = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(user, "LAWYER");
+        return user.getId();
     }
 }

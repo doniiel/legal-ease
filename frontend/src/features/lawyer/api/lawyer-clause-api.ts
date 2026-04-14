@@ -52,7 +52,7 @@ export const lawyerClauseApi = createApi({
   endpoints: (builder) => ({
     getClauses: builder.query<LegalClausesPage, GetClausesParams>({
       query: ({ categoryId, keyword, page = 0, size = 10, sort = "createdDate,DESC" } = {}) => ({
-        url: "/lawyer/clauses",
+        url: "/clauses",
         params: {
           ...(categoryId !== undefined && { categoryId }),
           ...(keyword !== undefined && { keyword }),
@@ -64,19 +64,19 @@ export const lawyerClauseApi = createApi({
       providesTags: ["Clause"],
     }),
     getClauseById: builder.query<LegalClause, number>({
-      query: (id) => `/lawyer/clauses/${id}`,
+      query: (id) => `/clauses/${id}`,
       providesTags: (_result, _error, id) => [{ type: "Clause", id }],
     }),
     createClause: builder.mutation<LegalClause, LegalClauseRequest>({
-      query: (body) => ({ url: "/lawyer/clauses", method: "POST", body }),
+      query: (body) => ({ url: "/clauses", method: "POST", body }),
       invalidatesTags: ["Clause"],
     }),
     updateClause: builder.mutation<LegalClause, { id: number; body: LegalClauseRequest }>({
-      query: ({ id, body }) => ({ url: `/lawyer/clauses/${id}`, method: "PUT", body }),
+      query: ({ id, body }) => ({ url: `/clauses/${id}`, method: "PUT", body }),
       invalidatesTags: ["Clause"],
     }),
     deleteClause: builder.mutation<void, number>({
-      query: (id) => ({ url: `/lawyer/clauses/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/clauses/${id}`, method: "DELETE" }),
       invalidatesTags: ["Clause"],
     }),
   }),

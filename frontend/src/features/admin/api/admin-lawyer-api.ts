@@ -45,23 +45,23 @@ export const adminLawyerApi = createApi({
   tagTypes: ["AdminApplication"],
   endpoints: (builder) => ({
     getApplications: builder.query<ApplicationsPage, GetApplicationsParams>({
-      query: (params) => ({ url: "/admin/lawyer-applications", params }),
+      query: (params) => ({ url: "/lawyer-applications", params }),
       providesTags: ["AdminApplication"],
     }),
     getApplicationById: builder.query<AdminLawyerApplication, number>({
-      query: (id) => `/admin/lawyer-applications/${id}`,
+      query: (id) => `/lawyer-applications/${id}`,
       providesTags: ["AdminApplication"],
     }),
     approveApplication: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/admin/lawyer-applications/${id}/approve`,
+        url: `/lawyer-applications/${id}/approve`,
         method: "POST",
       }),
       invalidatesTags: ["AdminApplication"],
     }),
     rejectApplication: builder.mutation<void, { id: number; reason: string }>({
       query: ({ id, reason }) => ({
-        url: `/admin/lawyer-applications/${id}/reject`,
+        url: `/lawyer-applications/${id}/reject`,
         method: "POST",
         body: { reason },
       }),
@@ -69,7 +69,7 @@ export const adminLawyerApi = createApi({
     }),
     deleteApplication: builder.mutation<void, number>({
       query: (id) => ({
-        url: `/admin/lawyer-applications/${id}`,
+        url: `/lawyer-applications/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["AdminApplication"],

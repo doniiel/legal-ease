@@ -145,62 +145,62 @@ export const documentApi = createApi({
   tagTypes: ["Document"],
   endpoints: (builder) => ({
     getDocuments: builder.query<DocumentsPage, GetDocumentsParams>({
-      query: (params) => ({ url: "/user/documents", params }),
+      query: (params) => ({ url: "/documents", params }),
       providesTags: ["Document"],
     }),
     getAllDocuments: builder.query<DocumentsPage, GetDocumentsParams>({
-      query: (params) => ({ url: "/user/documents/all", params }),
+      query: (params) => ({ url: "/documents/all", params }),
       providesTags: ["Document"],
     }),
     getDocumentById: builder.query<DocumentDetail, number>({
-      query: (id) => `/user/documents/${id}`,
+      query: (id) => `/documents/${id}`,
       providesTags: ["Document"],
     }),
     createDocument: builder.mutation<DocumentDetail, CreateDocumentRequest>({
-      query: (body) => ({ url: "/user/documents", method: "POST", body }),
+      query: (body) => ({ url: "/documents", method: "POST", body }),
       invalidatesTags: ["Document"],
     }),
     updateDocument: builder.mutation<DocumentDetail, { id: number } & UpdateDocumentRequest>({
-      query: ({ id, ...body }) => ({ url: `/user/documents/${id}`, method: "PUT", body }),
+      query: ({ id, ...body }) => ({ url: `/documents/${id}`, method: "PUT", body }),
       invalidatesTags: ["Document"],
     }),
     deleteDocument: builder.mutation<void, number>({
-      query: (id) => ({ url: `/user/documents/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/documents/${id}`, method: "DELETE" }),
       invalidatesTags: ["Document"],
     }),
     completeDocument: builder.mutation<CompleteDocumentResponse, number>({
-      query: (id) => ({ url: `/user/documents/${id}/complete`, method: "POST" }),
+      query: (id) => ({ url: `/documents/${id}/complete`, method: "POST" }),
       invalidatesTags: ["Document"],
     }),
     validateDocument: builder.mutation<AnalysisResult, number>({
-      query: (id) => ({ url: `/user/documents/${id}/validate`, method: "POST" }),
+      query: (id) => ({ url: `/documents/${id}/validate`, method: "POST" }),
     }),
     analyzeDocument: builder.mutation<AnalysisResult, number>({
-      query: (id) => ({ url: `/user/documents/${id}/analyze`, method: "POST" }),
+      query: (id) => ({ url: `/documents/${id}/analyze`, method: "POST" }),
     }),
     archiveDocument: builder.mutation<DocumentDetail, number>({
-      query: (id) => ({ url: `/user/documents/${id}/archive`, method: "POST" }),
+      query: (id) => ({ url: `/documents/${id}/archive`, method: "POST" }),
       invalidatesTags: ["Document"],
     }),
     restoreDocument: builder.mutation<DocumentDetail, number>({
-      query: (id) => ({ url: `/user/documents/${id}/restore`, method: "POST" }),
+      query: (id) => ({ url: `/documents/${id}/restore`, method: "POST" }),
       invalidatesTags: ["Document"],
     }),
     getDocumentUrl: builder.query<PresignedUrlResponse, number>({
-      query: (id) => `/user/documents/${id}/url`,
+      query: (id) => `/documents/${id}/url`,
     }),
     shareDocument: builder.mutation<DocumentShareResponse, number>({
-      query: (id) => ({ url: `/user/documents/${id}/share`, method: "POST" }),
+      query: (id) => ({ url: `/documents/${id}/share`, method: "POST" }),
     }),
     getDocumentVersions: builder.query<DocumentVersion[], number>({
-      query: (id) => `/user/documents/${id}/versions`,
+      query: (id) => `/documents/${id}/versions`,
     }),
     getDocumentSuggestions: builder.query<AnalysisResult, number>({
-      query: (id) => `/user/documents/${id}/suggestions`,
+      query: (id) => `/documents/${id}/suggestions`,
     }),
     downloadDocumentVersion: builder.query<string, { id: number; version: number }>({
       query: ({ id, version }) => ({
-        url: `/user/documents/${id}/versions/${version}/download`,
+        url: `/documents/${id}/versions/${version}/download`,
         responseHandler: async (response) => {
           const blob = await response.blob();
           return URL.createObjectURL(blob);

@@ -8,6 +8,7 @@ import kz.legeal.ease.backend.exception.NotFoundException;
 import kz.legeal.ease.backend.mapper.TemplateMapper;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.service.tempate.TemplatePublicQueryService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ public class TemplatePublicQueryServiceImpl implements TemplatePublicQueryServic
     @Override
     @Transactional(readOnly = true)
     public Page<TemplatePreviewDto> getPublishedTemplates(Long categoryId, Pageable pageable) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "USER");
         return templateRepository.findAllPublished(TemplateStatus.PUBLISHED, categoryId, pageable)
                 .map(templateMapper::toPreviewDto);
     }
@@ -33,6 +35,7 @@ public class TemplatePublicQueryServiceImpl implements TemplatePublicQueryServic
     @Override
     @Transactional(readOnly = true)
     public TemplateDto getPublishedTemplateById(Long templateId) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "USER");
         final var template = templateRepository.findByIdAndActive(templateId)
                 .orElseThrow(() -> new NotFoundException("Template", templateId));
 

@@ -10,6 +10,7 @@ import kz.legeal.ease.backend.repository.RequiredDocRuleRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.RequiredDocRuleRequest;
 import kz.legeal.ease.backend.service.RequiredDocRuleService;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,6 +31,7 @@ public class RequiredDocRuleServiceImpl implements RequiredDocRuleService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheConfig.REQUIRED_DOC_RULES, key = "#templateId")
     public List<RequiredDocRuleDto> getAllByTemplate(Long templateId) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         return repository.findAllByTemplateIdAndActiveTrue(templateId).stream()
                 .map(mapper::toDto)
                 .toList();
@@ -39,6 +41,7 @@ public class RequiredDocRuleServiceImpl implements RequiredDocRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.REQUIRED_DOC_RULES, key = "#request.templateId")
     public RequiredDocRuleDto create(RequiredDocRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var template = findTemplate(request.getTemplateId());
         final var rule = RequiredDocRule.builder()
                 .template(template)
@@ -57,6 +60,7 @@ public class RequiredDocRuleServiceImpl implements RequiredDocRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.REQUIRED_DOC_RULES, allEntries = true)
     public RequiredDocRuleDto update(Long id, RequiredDocRuleRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule     = findOrThrow(id);
         final var template = findTemplate(request.getTemplateId());
 
@@ -75,6 +79,7 @@ public class RequiredDocRuleServiceImpl implements RequiredDocRuleService {
     @Transactional
     @CacheEvict(value = CacheConfig.REQUIRED_DOC_RULES, allEntries = true)
     public void delete(Long id) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "LAWYER");
         final var rule = findOrThrow(id);
         rule.setActive(false);
         repository.save(rule);

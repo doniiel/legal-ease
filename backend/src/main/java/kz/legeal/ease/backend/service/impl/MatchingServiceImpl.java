@@ -5,6 +5,7 @@ import kz.legeal.ease.backend.service.MatchingService;
 import kz.legeal.ease.backend.service.rule.context.RuleContext;
 import kz.legeal.ease.backend.service.rule.engine.RuleEngine;
 import kz.legeal.ease.backend.service.rule.result.RuleEngineResult;
+import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ public class MatchingServiceImpl implements MatchingService {
     @Override
     @Transactional
     public RuleEngineResult match(MatchingRequest request) {
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "USER");
         final var context = RuleContext.builder()
                 .inputText(request.getInputText())
                 .categoryId(request.getCategoryId())

@@ -37,19 +37,19 @@ export const lawyerRequiredDocRulesApi = createApi({
   tagTypes: ["RequiredDocRule"],
   endpoints: (builder) => ({
     getRequiredDocRulesByTemplate: builder.query<RequiredDocRule[], number>({
-      query: (templateId) => `/lawyer/required-doc-rules/template/${templateId}`,
+      query: (templateId) => `/required-doc-rules/template/${templateId}`,
       providesTags: ["RequiredDocRule"],
     }),
     createRequiredDocRule: builder.mutation<RequiredDocRule, RequiredDocRuleRequest>({
-      query: (body) => ({ url: "/lawyer/required-doc-rules", method: "POST", body }),
+      query: (body) => ({ url: "/required-doc-rules", method: "POST", body }),
       invalidatesTags: ["RequiredDocRule"],
     }),
     updateRequiredDocRule: builder.mutation<RequiredDocRule, { id: number; body: RequiredDocRuleRequest }>({
-      query: ({ id, body }) => ({ url: `/lawyer/required-doc-rules/${id}`, method: "PUT", body }),
+      query: ({ id, body }) => ({ url: `/required-doc-rules/${id}`, method: "PUT", body }),
       invalidatesTags: ["RequiredDocRule"],
     }),
     deleteRequiredDocRule: builder.mutation<void, number>({
-      query: (id) => ({ url: `/lawyer/required-doc-rules/${id}`, method: "DELETE" }),
+      query: (id) => ({ url: `/required-doc-rules/${id}`, method: "DELETE" }),
       invalidatesTags: ["RequiredDocRule"],
     }),
   }),

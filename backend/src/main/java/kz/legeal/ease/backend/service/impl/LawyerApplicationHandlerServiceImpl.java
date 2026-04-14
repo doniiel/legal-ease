@@ -12,10 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
 @Service
@@ -32,7 +30,7 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Transactional(readOnly = true)
     public LawyerApplicationDto getById(Long id) {
         log.debug("Fetching lawyer request by id={}", id);
-
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
         final var application = lawyerApplicationService.findById(id);
         return mapper.toDto(application);
     }
@@ -41,6 +39,7 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Transactional(readOnly = true)
     public Page<LawyerApplicationDto> getRequestsHistory(Pageable pageable, LawyerRequestSearchCriteria criteria) {
         log.debug("Fetching lawyer requests history with filters: {}", criteria);
+        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "ADMIN");
 
         final var specification = new GenericSpecificationBuilder<LawyerApplication>()
                 .eq("status", criteria.getStatus())
@@ -60,8 +59,8 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Override
     @Transactional
     public void approveRequest(Long requestId) {
-        final var admin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+        final var admin = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(admin, "ADMIN");
 
         log.info("Admin id={} approving lawyer request id={}", admin.getId(), requestId);
 
@@ -79,8 +78,8 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Override
     @Transactional
     public void rejectRequest(Long requestId, String reason) {
-        final var admin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+        final var admin = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(admin, "ADMIN");
 
         log.info("Admin id={} rejecting lawyer request id={}", admin.getId(), requestId);
 
@@ -95,8 +94,8 @@ public class LawyerApplicationHandlerServiceImpl implements LawyerApplicationHan
     @Override
     @Transactional
     public void deleteRequest(Long requestId) {
-        final var admin = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+        final var admin = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(admin, "ADMIN");
 
         log.warn("Admin id={} deleting lawyer request id={}", admin.getId(), requestId);
 

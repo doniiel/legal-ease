@@ -23,20 +23,20 @@ export const lawyerDocumentApi = createApi({
   endpoints: (builder) => ({
     getLawyerDocuments: builder.query<DocumentsPage, GetLawyerDocumentsParams>({
       query: ({ page = 0, size = 10, sort = "createdDate,DESC" } = {}) => ({
-        url: "/lawyer/documents",
+        url: "/lawyer-documents",
         params: { page, size, sort },
       }),
       providesTags: ["LawyerDocument"],
     }),
     getLawyerDocumentsByTemplate: builder.query<DocumentsPage, { templateId: number } & GetLawyerDocumentsParams>({
       query: ({ templateId, page = 0, size = 10, sort = "createdDate,DESC" }) => ({
-        url: `/lawyer/documents/by-template/${templateId}`,
+        url: `/lawyer-documents/by-template/${templateId}`,
         params: { page, size, sort },
       }),
       providesTags: ["LawyerDocument"],
     }),
     getLawyerDocumentById: builder.query<DocumentDetail, number>({
-      query: (id) => `/lawyer/documents/${id}`,
+      query: (id) => `/lawyer-documents/${id}`,
       providesTags: (_result, _error, id) => [{ type: "LawyerDocument", id }],
     }),
   }),

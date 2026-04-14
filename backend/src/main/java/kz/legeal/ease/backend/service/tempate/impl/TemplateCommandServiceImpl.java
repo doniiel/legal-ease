@@ -7,7 +7,6 @@ import kz.legeal.ease.backend.dto.template.TemplateDto;
 import kz.legeal.ease.backend.exception.BusinessRuleException;
 import kz.legeal.ease.backend.exception.ForbiddenException;
 import kz.legeal.ease.backend.exception.NotFoundException;
-import kz.legeal.ease.backend.exception.UnauthorizedException;
 import kz.legeal.ease.backend.mapper.TemplateMapper;
 import kz.legeal.ease.backend.repository.CategoryRepository;
 import kz.legeal.ease.backend.repository.TemplateFieldRepository;
@@ -36,8 +35,8 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Override
     @Transactional
     public TemplateDto create(TemplateRequest request) {
-        final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentLawyer = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentLawyer, "LAWYER");
 
         final var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
@@ -61,8 +60,8 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Override
     @Transactional
     public TemplateDto update(Long templateId, TemplateRequest request) {
-        final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentLawyer = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentLawyer, "LAWYER");
         final var template = getOwnedDraftTemplate(templateId, currentLawyer.getId());
         final var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
@@ -86,8 +85,8 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Override
     @Transactional
     public TemplateDto publish(Long templateId) {
-        final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentLawyer = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentLawyer, "LAWYER");
         final var template = getOwnedTemplate(templateId, currentLawyer.getId());
 
         if (template.isPublished()) {
@@ -102,8 +101,8 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     @Override
     @Transactional
     public void delete(Long templateId) {
-        final var currentLawyer = SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        final var currentLawyer = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(currentLawyer, "LAWYER");
         final var template = getOwnedDraftTemplate(templateId, currentLawyer.getId());
         template.setActive(false);
         templateRepository.save(template);

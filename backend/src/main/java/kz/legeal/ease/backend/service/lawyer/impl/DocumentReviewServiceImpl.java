@@ -93,8 +93,9 @@ public class DocumentReviewServiceImpl implements DocumentReviewService {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private kz.legeal.ease.backend.domain.User currentLawyer() {
-        return SecurityUtils.getCurrentUser()
-                .orElseThrow(() -> new BusinessRuleException("Not authenticated"));
+        final var user = SecurityUtils.requireCurrentUser();
+        SecurityUtils.requireRole(user, "LAWYER");
+        return user;
     }
 
     private Document findDocument(Long documentId) {

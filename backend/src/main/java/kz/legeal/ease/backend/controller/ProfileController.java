@@ -1,4 +1,4 @@
-package kz.legeal.ease.backend.controller.user;
+package kz.legeal.ease.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,19 +8,17 @@ import kz.legeal.ease.backend.request.UpdateProfileRequest;
 import kz.legeal.ease.backend.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/user/profile")
-@PreAuthorize("isAuthenticated()")
-@Tag(name = "User - Profile")
+@RequestMapping("/api/profile")
+@Tag(name = "Profile")
 @RequiredArgsConstructor
-public class UserProfileController {
+public class ProfileController {
 
     private final UserProfileService userProfileService;
 
-    @Operation(summary = "Get current user profile")
+    @Operation(summary = "Get current user profile (all roles)")
     @GetMapping
     public ResponseEntity<UserProfileDto> getProfile() {
         return ResponseEntity.ok(userProfileService.getProfile());
