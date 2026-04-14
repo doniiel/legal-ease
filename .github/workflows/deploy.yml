@@ -62,6 +62,7 @@ jobs:
       - name: Pull & Deploy
         run: |
           set -e
+          git config --global --add safe.directory /opt/legalease/legal-ease
           cd /opt/legalease/legal-ease
 
           echo "▶ Pulling latest code..."
