@@ -1,13 +1,34 @@
-name: CI/CD — Build & Deploy
+name: CI/CD — Test, Build & Deploy
 
 on:
   push:
     branches: [ main ]
 
+env:
+  IMAGE_BACKEND: ghcr.io/${{ github.repository }}/backend
+  IMAGE_FRONTEND: ghcr.io/${{ github.repository }}/frontend
+
+# ─── BACKEND ──────────────────────────────────────────────────────────────────
+
 jobs:
-  build-backend:
-    name: Build Backend
+  backend-test:
+    name: Backend — Test
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: legalease_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout
@@ -20,12 +41,26 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Build with Gradle
+      - name: Run tests
         working-directory: backend
-        run: ./gradlew bootJar --no-daemon -q
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/legalease_db
+          SPRING_DATASOURCE_USERNAME: postgres
+          SPRING_DATASOURCE_PASSWORD: postgres
+        run: ./gradlew test --no-daemon -q
 
-  build-frontend:
-    name: Build Frontend
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/build/test-results/
+          retention-days: 7
+
+# ─── FRONTEND ─────────────────────────────────────────────────────────────────
+
+  frontend-test:
+    name: Frontend — Test
     runs-on: ubuntu-latest
 
     steps:
@@ -39,39 +74,115 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install & Build
+      - name: Install & Lint & Build
         working-directory: frontend
         run: |
-          npm ci
+          npm ci --prefer-offline
+          npm run lint
           npm run build
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 1
+
+# ─── BUILD IMAGES ─────────────────────────────────────────────────────────────
+
+  backend-build:
+    name: Backend — Build & Push Image
+    runs-on: ubuntu-latest
+    needs: backend-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_BACKEND }}:${{ github.sha }}
+            ${{ env.IMAGE_BACKEND }}:latest
+          cache-from: type=registry,ref=${{ env.IMAGE_BACKEND }}:latest
+          cache-to: type=inline
+
+  frontend-build:
+    name: Frontend — Build & Push Image
+    runs-on: ubuntu-latest
+    needs: frontend-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_FRONTEND }}:${{ github.sha }}
+            ${{ env.IMAGE_FRONTEND }}:latest
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+          cache-from: type=registry,ref=${{ env.IMAGE_FRONTEND }}:latest
+          cache-to: type=inline
+
+# ─── DEPLOY ───────────────────────────────────────────────────────────────────
 
   deploy:
     name: Deploy to Server
     runs-on: self-hosted
-    needs: [ build-backend, build-frontend ]
+    needs: [ backend-build, frontend-build ]
 
     steps:
       - name: Check .env
         run: |
-          cd /opt/legalease/legal-ease
-          if [ ! -f .env ]; then
-            echo "❌ .env file not found!"
+          if [ ! -f /opt/legalease/legal-ease/.env ]; then
+            echo ".env file not found!"
             exit 1
           fi
 
-      - name: Pull & Deploy
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Pull latest images
+        run: |
+          docker pull ${{ env.IMAGE_BACKEND }}:latest
+          docker pull ${{ env.IMAGE_FRONTEND }}:latest
+
+      - name: Deploy with docker compose
         run: |
           set -e
-          sudo git config --global --add safe.directory /opt/legalease/legal-ease
           cd /opt/legalease/legal-ease
 
-          echo "▶ Pulling latest code..."
-          sudo git pull origin main
+          export BACKEND_IMAGE=${{ env.IMAGE_BACKEND }}:latest
+          export FRONTEND_IMAGE=${{ env.IMAGE_FRONTEND }}:latest
 
-          echo "▶ Rebuilding containers..."
-          sudo docker compose up --build -d
+          docker compose -f docker-compose.prod.yml up -d postgres minio
+          until docker exec legalease-postgres pg_isready -U postgres; do sleep 2; done
 
-          echo "▶ Cleaning up unused images..."
-          sudo docker image prune -f
+          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker image prune -f
 
-          echo "✅ Deploy complete!"
+          echo "Deploy complete!"
