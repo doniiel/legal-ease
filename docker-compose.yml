@@ -86,8 +86,6 @@ services:
       STORAGE_S3_BUCKET: ${STORAGE_S3_BUCKET}
     volumes:
       - backend_logs:/app/logs
-    ports:
-      - "${BACKEND_PORT}:9191"
     networks:
       - legalease-network
     healthcheck:
@@ -105,8 +103,6 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    ports:
-      - "${FRONTEND_PORT}:80"
     networks:
       - legalease-network
     healthcheck:
@@ -123,6 +119,25 @@ services:
           path: ./frontend/index.html
         - action: rebuild
           path: ./frontend/package.json
+
+  nginx:
+    image: nginx:alpine
+    container_name: legalease-nginx
+    restart: unless-stopped
+    depends_on:
+      - frontend
+      - backend
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - legalease-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 networks:
   legalease-network:
