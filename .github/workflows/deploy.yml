@@ -187,6 +187,8 @@ jobs:
 
           cp /opt/legalease/legal-ease/.env .env
 
+          docker rm -f legalease-nginx legalease-frontend legalease-backend 2>/dev/null || true
+
           docker compose -f docker-compose.prod.yml up -d postgres minio
           until docker exec legalease-postgres pg_isready -U postgres; do sleep 2; done
 
