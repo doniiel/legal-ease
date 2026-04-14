@@ -27,30 +27,30 @@ class AdminApiTest extends BaseIntegrationTest {
     class Authorization {
 
         @Test
-        @DisplayName("GET /api/admin/metrics returns 403 for USER role")
+        @DisplayName("GET /api/metrics returns 403 for USER role")
         void metrics_userRole_returns403() throws Exception {
-            perform(authGet("/api/admin/metrics", userToken))
+            perform(authGet("/api/metrics", userToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GET /api/admin/metrics returns 403 for LAWYER role")
+        @DisplayName("GET /api/metrics returns 403 for LAWYER role")
         void metrics_lawyerRole_returns403() throws Exception {
-            perform(authGet("/api/admin/metrics", lawyerToken))
+            perform(authGet("/api/metrics", lawyerToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GET /api/admin/metrics returns 401 for unauthenticated request")
+        @DisplayName("GET /api/metrics returns 401 for unauthenticated request")
         void metrics_noAuth_returns401() throws Exception {
-            mvc.perform(get("/api/admin/metrics"))
+            mvc.perform(get("/api/metrics"))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
-        @DisplayName("GET /api/admin/users returns 403 for USER role")
+        @DisplayName("GET /api/users returns 403 for USER role")
         void users_userRole_returns403() throws Exception {
-            perform(authGet("/api/admin/users", userToken))
+            perform(authGet("/api/users", userToken))
                     .andExpect(status().isForbidden());
         }
     }
@@ -58,13 +58,13 @@ class AdminApiTest extends BaseIntegrationTest {
     // ── Metrics ───────────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("GET /api/admin/metrics")
+    @DisplayName("GET /api/metrics")
     class Metrics {
 
         @Test
         @DisplayName("returns 200 with platform metrics for ADMIN")
         void getMetrics_admin_returns200() throws Exception {
-            perform(authGet("/api/admin/metrics", adminToken))
+            perform(authGet("/api/metrics", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isMap());
         }
@@ -73,7 +73,7 @@ class AdminApiTest extends BaseIntegrationTest {
     // ── Category Management ───────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/admin/categories")
+    @DisplayName("/api/categories")
     class Categories {
 
         @Test
@@ -84,7 +84,7 @@ class AdminApiTest extends BaseIntegrationTest {
                     "description", "Category for testing"
             );
 
-            perform(authPost("/api/admin/categories", adminToken, body))
+            perform(authPost("/api/categories", adminToken, body))
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(jsonPath("$.name").value((String) body.get("name")));
         }
@@ -94,7 +94,7 @@ class AdminApiTest extends BaseIntegrationTest {
         void createCategory_shortName_returns400() throws Exception {
             final var body = Map.of("name", "X"); // < 2 chars
 
-            perform(authPost("/api/admin/categories", adminToken, body))
+            perform(authPost("/api/categories", adminToken, body))
                     .andExpect(status().isBadRequest());
         }
 
@@ -103,14 +103,14 @@ class AdminApiTest extends BaseIntegrationTest {
         void createCategory_missingName_returns400() throws Exception {
             final var body = Map.of("description", "No name provided");
 
-            perform(authPost("/api/admin/categories", adminToken, body))
+            perform(authPost("/api/categories", adminToken, body))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("GET returns paginated list of categories")
         void getCategories_admin_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/admin/categories", adminToken))
+            perform(authGet("/api/categories", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.totalElements").isNumber());
@@ -119,7 +119,7 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent category")
         void getCategory_nonExistent_returns404() throws Exception {
-            perform(authGet("/api/admin/categories/999999", adminToken))
+            perform(authGet("/api/categories/999999", adminToken))
                     .andExpect(status().isNotFound());
         }
 
@@ -128,7 +128,7 @@ class AdminApiTest extends BaseIntegrationTest {
         void updateCategory_validRequest_returns200() throws Exception {
             // Create a category first
             final var createBody = Map.of("name", "UpdateMe " + System.nanoTime(), "description", "");
-            final var createResult = perform(authPost("/api/admin/categories", adminToken, createBody))
+            final var createResult = perform(authPost("/api/categories", adminToken, createBody))
                     .andExpect(status().is2xxSuccessful())
                     .andReturn();
 
@@ -141,7 +141,7 @@ class AdminApiTest extends BaseIntegrationTest {
                     "active", true
             );
 
-            perform(authPut("/api/admin/categories/" + categoryId, adminToken, updateBody))
+            perform(authPut("/api/categories/" + categoryId, adminToken, updateBody))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.name").value("Updated Category"));
         }
@@ -150,14 +150,14 @@ class AdminApiTest extends BaseIntegrationTest {
         @DisplayName("DELETE soft-deletes category")
         void deleteCategory_exists_returns204Or200() throws Exception {
             final var createBody = Map.of("name", "DeleteMe " + System.nanoTime(), "description", "");
-            final var createResult = perform(authPost("/api/admin/categories", adminToken, createBody))
+            final var createResult = perform(authPost("/api/categories", adminToken, createBody))
                     .andExpect(status().is2xxSuccessful())
                     .andReturn();
 
             final var categoryId = objectMapper.readTree(
                     createResult.getResponse().getContentAsString()).get("id").asLong();
 
-            perform(authDelete("/api/admin/categories/" + categoryId, adminToken))
+            perform(authDelete("/api/categories/" + categoryId, adminToken))
                     .andExpect(status().is2xxSuccessful());
         }
 
@@ -166,7 +166,7 @@ class AdminApiTest extends BaseIntegrationTest {
         void createCategory_userRole_returns403() throws Exception {
             final var body = Map.of("name", "Unauthorized", "description", "");
 
-            perform(authPost("/api/admin/categories", userToken, body))
+            perform(authPost("/api/categories", userToken, body))
                     .andExpect(status().isForbidden());
         }
     }
@@ -174,13 +174,13 @@ class AdminApiTest extends BaseIntegrationTest {
     // ── User Management ───────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/admin/users")
+    @DisplayName("/api/users")
     class UserManagement {
 
         @Test
         @DisplayName("GET returns paginated user list")
         void getUsers_admin_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/admin/users", adminToken))
+            perform(authGet("/api/users", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.totalElements").isNumber());
@@ -189,7 +189,7 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns user details")
         void getUserById_exists_returns200() throws Exception {
-            perform(authGet("/api/admin/users/" + testUser.getId(), adminToken))
+            perform(authGet("/api/users/" + testUser.getId(), adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(testUser.getId()));
         }
@@ -197,14 +197,14 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent user")
         void getUserById_notFound_returns404() throws Exception {
-            perform(authGet("/api/admin/users/999999999", adminToken))
+            perform(authGet("/api/users/999999999", adminToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("POST /{id}/block blocks user")
         void blockUser_validId_returns200() throws Exception {
-            perform(authPost("/api/admin/users/" + testUser2.getId() + "/block", adminToken, Map.of()))
+            perform(authPost("/api/users/" + testUser2.getId() + "/block", adminToken, Map.of()))
                     .andExpect(status().is2xxSuccessful());
         }
 
@@ -212,16 +212,16 @@ class AdminApiTest extends BaseIntegrationTest {
         @DisplayName("POST /{id}/unblock unblocks user")
         void unblockUser_validId_returns200() throws Exception {
             // Block first
-            perform(authPost("/api/admin/users/" + testUser2.getId() + "/block", adminToken, Map.of()));
+            perform(authPost("/api/users/" + testUser2.getId() + "/block", adminToken, Map.of()));
 
-            perform(authPost("/api/admin/users/" + testUser2.getId() + "/unblock", adminToken, Map.of()))
+            perform(authPost("/api/users/" + testUser2.getId() + "/unblock", adminToken, Map.of()))
                     .andExpect(status().is2xxSuccessful());
         }
 
         @Test
         @DisplayName("GET returns paginated list with pagination params")
         void getUsers_withPageAndSize_returns200() throws Exception {
-            perform(authGet("/api/admin/users?page=0&size=5", adminToken))
+            perform(authGet("/api/users?page=0&size=5", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.size").value(5));
@@ -231,13 +231,13 @@ class AdminApiTest extends BaseIntegrationTest {
     // ── Lawyer Applications ───────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/admin/lawyer-applications")
+    @DisplayName("/api/lawyer-applications")
     class LawyerApplications {
 
         @Test
         @DisplayName("GET returns paginated list")
         void listApplications_admin_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/admin/lawyer-applications", adminToken))
+            perform(authGet("/api/lawyer-applications", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
@@ -245,21 +245,21 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent application")
         void getApplication_notFound_returns404() throws Exception {
-            perform(authGet("/api/admin/lawyer-applications/999999", adminToken))
+            perform(authGet("/api/lawyer-applications/999999", adminToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("POST /{id}/approve returns 404 for non-existent application")
         void approveApplication_notFound_returns404() throws Exception {
-            perform(authPost("/api/admin/lawyer-applications/999999/approve", adminToken, Map.of()))
+            perform(authPost("/api/lawyer-applications/999999/approve", adminToken, Map.of()))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("POST /{id}/reject returns 400 when reason is missing")
         void rejectApplication_missingReason_returns400() throws Exception {
-            perform(authPost("/api/admin/lawyer-applications/1/reject", adminToken, Map.of()))
+            perform(authPost("/api/lawyer-applications/1/reject", adminToken, Map.of()))
                     .andExpect(status().isBadRequest());
         }
     }
@@ -267,13 +267,13 @@ class AdminApiTest extends BaseIntegrationTest {
     // ── Audit Logs ────────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/admin/audit-logs")
+    @DisplayName("/api/audit-logs")
     class AuditLogs {
 
         @Test
         @DisplayName("GET returns paginated audit log list")
         void getAuditLogs_admin_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/admin/audit-logs", adminToken))
+            perform(authGet("/api/audit-logs", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
@@ -281,14 +281,14 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent audit log")
         void getAuditLog_notFound_returns404() throws Exception {
-            perform(authGet("/api/admin/audit-logs/999999", adminToken))
+            perform(authGet("/api/audit-logs/999999", adminToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("GET returns 403 for USER role")
         void getAuditLogs_userRole_returns403() throws Exception {
-            perform(authGet("/api/admin/audit-logs", userToken))
+            perform(authGet("/api/audit-logs", userToken))
                     .andExpect(status().isForbidden());
         }
     }
@@ -296,13 +296,13 @@ class AdminApiTest extends BaseIntegrationTest {
     // ── Rule Management ───────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/admin/rules")
+    @DisplayName("/api/rules")
     class Rules {
 
         @Test
         @DisplayName("GET /validation returns list of validation rules")
         void getValidationRules_admin_returns200() throws Exception {
-            perform(authGet("/api/admin/rules/validation", adminToken))
+            perform(authGet("/api/rules/validation", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray());
         }
@@ -310,7 +310,7 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /risk returns list of risk rules")
         void getRiskRules_admin_returns200() throws Exception {
-            perform(authGet("/api/admin/rules/risk", adminToken))
+            perform(authGet("/api/rules/risk", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray());
         }
@@ -318,7 +318,7 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /matching returns list of matching rules")
         void getMatchingRules_admin_returns200() throws Exception {
-            perform(authGet("/api/admin/rules/matching", adminToken))
+            perform(authGet("/api/rules/matching", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray());
         }
@@ -326,7 +326,7 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /conditional returns list of conditional rules")
         void getConditionalRules_admin_returns200() throws Exception {
-            perform(authGet("/api/admin/rules/conditional", adminToken))
+            perform(authGet("/api/rules/conditional", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray());
         }
@@ -334,7 +334,7 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /required-docs returns list of required-docs rules")
         void getRequiredDocsRules_admin_returns200() throws Exception {
-            perform(authGet("/api/admin/rules/required-docs", adminToken))
+            perform(authGet("/api/rules/required-docs", adminToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray());
         }
@@ -342,14 +342,14 @@ class AdminApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("PATCH /validation/{id}/toggle returns 404 for non-existent rule")
         void toggleValidationRule_notFound_returns404() throws Exception {
-            perform(authPatch("/api/admin/rules/validation/999999/toggle", adminToken))
+            perform(authPatch("/api/rules/validation/999999/toggle", adminToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("GET /validation returns 403 for USER role")
         void getValidationRules_userRole_returns403() throws Exception {
-            perform(authGet("/api/admin/rules/validation", userToken))
+            perform(authGet("/api/rules/validation", userToken))
                     .andExpect(status().isForbidden());
         }
     }

@@ -28,7 +28,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
     void setUpTemplateAndCategory() throws Exception {
         // Create a category (needs admin)
         final var catBody = Map.of("name", "Doc Test Cat " + System.nanoTime(), "description", "");
-        final var catResult = perform(authPost("/api/admin/categories", adminToken, catBody))
+        final var catResult = perform(authPost("/api/categories", adminToken, catBody))
                 .andReturn();
         categoryId = objectMapper.readTree(catResult.getResponse().getContentAsString()).get("id").asLong();
 
@@ -44,11 +44,11 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                                 "fieldType", "TEXT", "required", true, "orderNum", 1)
                 )
         );
-        final var tplResult = perform(authPost("/api/lawyer/templates", lawyerToken, tplBody))
+        final var tplResult = perform(authPost("/api/my-templates", lawyerToken, tplBody))
                 .andReturn();
         templateId = objectMapper.readTree(tplResult.getResponse().getContentAsString()).get("id").asLong();
 
-        perform(authPost("/api/lawyer/templates/" + templateId + "/publish", lawyerToken, Map.of()));
+        perform(authPost("/api/my-templates/" + templateId + "/publish", lawyerToken, Map.of()));
     }
 
     // ── Authorization ─────────────────────────────────────────────────────────
@@ -58,23 +58,23 @@ class UserDocumentApiTest extends BaseIntegrationTest {
     class Authorization {
 
         @Test
-        @DisplayName("GET /api/user/documents returns 403 for LAWYER role")
+        @DisplayName("GET /api/documents returns 403 for LAWYER role")
         void documents_lawyerRole_returns403() throws Exception {
-            perform(authGet("/api/user/documents", lawyerToken))
+            perform(authGet("/api/documents", lawyerToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GET /api/user/documents returns 403 for ADMIN role")
+        @DisplayName("GET /api/documents returns 403 for ADMIN role")
         void documents_adminRole_returns403() throws Exception {
-            perform(authGet("/api/user/documents", adminToken))
+            perform(authGet("/api/documents", adminToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GET /api/user/documents returns 401 for unauthenticated")
+        @DisplayName("GET /api/documents returns 401 for unauthenticated")
         void documents_noAuth_returns401() throws Exception {
-            mvc.perform(get("/api/user/documents"))
+            mvc.perform(get("/api/documents"))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -82,13 +82,13 @@ class UserDocumentApiTest extends BaseIntegrationTest {
     // ── Template Browsing ─────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/user/templates")
+    @DisplayName("/api/templates")
     class TemplateBrowsing {
 
         @Test
         @DisplayName("GET returns list of published templates")
         void getTemplates_user_returns200() throws Exception {
-            perform(authGet("/api/user/templates", userToken))
+            perform(authGet("/api/templates", userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
@@ -96,7 +96,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET with categoryId filter returns filtered list")
         void getTemplates_withCategoryFilter_returns200() throws Exception {
-            perform(authGet("/api/user/templates?categoryId=" + categoryId, userToken))
+            perform(authGet("/api/templates?categoryId=" + categoryId, userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
@@ -104,7 +104,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns template details")
         void getTemplate_exists_returns200() throws Exception {
-            perform(authGet("/api/user/templates/" + templateId, userToken))
+            perform(authGet("/api/templates/" + templateId, userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(templateId));
         }
@@ -112,7 +112,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent template")
         void getTemplate_notFound_returns404() throws Exception {
-            perform(authGet("/api/user/templates/999999999", userToken))
+            perform(authGet("/api/templates/999999999", userToken))
                     .andExpect(status().isNotFound());
         }
     }
@@ -135,7 +135,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     )
             );
 
-            perform(authPost("/api/user/documents", userToken, body))
+            perform(authPost("/api/documents", userToken, body))
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(jsonPath("$.status").value("DRAFT"))
                     .andExpect(jsonPath("$.id").isNumber());
@@ -149,7 +149,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "fieldValues", Map.of()
             );
 
-            perform(authPost("/api/user/documents", userToken, body))
+            perform(authPost("/api/documents", userToken, body))
                     .andExpect(status().isBadRequest());
         }
 
@@ -162,7 +162,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "fieldValues", Map.of()
             );
 
-            perform(authPost("/api/user/documents", userToken, body))
+            perform(authPost("/api/documents", userToken, body))
                     .andExpect(status().isBadRequest());
         }
 
@@ -178,7 +178,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                             "date", "28.03.2026"
                     )
             );
-            final var createResult = perform(authPost("/api/user/documents", userToken, createBody))
+            final var createResult = perform(authPost("/api/documents", userToken, createBody))
                     .andExpect(status().is2xxSuccessful())
                     .andReturn();
 
@@ -186,25 +186,25 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     createResult.getResponse().getContentAsString()).get("id").asLong();
 
             // 2. Validate document
-            perform(authPost("/api/user/documents/" + docId + "/validate", userToken, Map.of()))
+            perform(authPost("/api/documents/" + docId + "/validate", userToken, Map.of()))
                     .andExpect(status().is2xxSuccessful());
 
             // 3. Complete (generate PDF)
-            perform(authPost("/api/user/documents/" + docId + "/complete", userToken, Map.of()))
+            perform(authPost("/api/documents/" + docId + "/complete", userToken, Map.of()))
                     .andExpect(status().is2xxSuccessful());
         }
 
         @Test
         @DisplayName("POST /validate returns 404 for non-existent document")
         void validateDocument_notFound_returns404() throws Exception {
-            perform(authPost("/api/user/documents/999999999/validate", userToken, Map.of()))
+            perform(authPost("/api/documents/999999999/validate", userToken, Map.of()))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("POST /complete returns 404 for non-existent document")
         void completeDocument_notFound_returns404() throws Exception {
-            perform(authPost("/api/user/documents/999999999/complete", userToken, Map.of()))
+            perform(authPost("/api/documents/999999999/complete", userToken, Map.of()))
                     .andExpect(status().isNotFound());
         }
     }
@@ -212,7 +212,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
     // ── Document Retrieval ────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("GET /api/user/documents")
+    @DisplayName("GET /api/documents")
     class DocumentRetrieval {
 
         private Long createDocument(String title) throws Exception {
@@ -221,7 +221,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", title,
                     "fieldValues", Map.of("client_name", "Aliya", "date", "01.01.2026")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body))
+            final var result = perform(authPost("/api/documents", userToken, body))
                     .andExpect(status().is2xxSuccessful())
                     .andReturn();
             return objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
@@ -230,7 +230,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET returns paginated list of user's documents")
         void getDocuments_user_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/user/documents", userToken))
+            perform(authGet("/api/documents", userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray())
                     .andExpect(jsonPath("$.totalElements").isNumber());
@@ -239,7 +239,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /all returns all documents including archived")
         void getAllDocuments_user_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/user/documents/all", userToken))
+            perform(authGet("/api/documents/all", userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
@@ -249,7 +249,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         void getDocumentById_exists_returns200() throws Exception {
             final Long docId = createDocument("Get By ID " + System.nanoTime());
 
-            perform(authGet("/api/user/documents/" + docId, userToken))
+            perform(authGet("/api/documents/" + docId, userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(docId));
         }
@@ -257,14 +257,14 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent document")
         void getDocumentById_notFound_returns404() throws Exception {
-            perform(authGet("/api/user/documents/999999999", userToken))
+            perform(authGet("/api/documents/999999999", userToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("GET with pagination params respects page size")
         void getDocuments_withPagination_returnsCorrectPageSize() throws Exception {
-            perform(authGet("/api/user/documents?page=0&size=3", userToken))
+            perform(authGet("/api/documents?page=0&size=3", userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.size").value(3));
         }
@@ -273,7 +273,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
     // ── Document Update ───────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("PUT /api/user/documents/{id}")
+    @DisplayName("PUT /api/documents/{id}")
     class DocumentUpdate {
 
         @Test
@@ -284,7 +284,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", "To Update " + System.nanoTime(),
                     "fieldValues", Map.of("client_name", "Old Name", "date", "01.01.2026")
             );
-            final var createResult = perform(authPost("/api/user/documents", userToken, createBody))
+            final var createResult = perform(authPost("/api/documents", userToken, createBody))
                     .andReturn();
             final Long docId = objectMapper.readTree(
                     createResult.getResponse().getContentAsString()).get("id").asLong();
@@ -294,14 +294,14 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "fieldValues", Map.of("client_name", "New Name", "date", "15.06.2026")
             );
 
-            perform(authPut("/api/user/documents/" + docId, userToken, updateBody))
+            perform(authPut("/api/documents/" + docId, userToken, updateBody))
                     .andExpect(status().isOk());
         }
 
         @Test
         @DisplayName("returns 404 for non-existent document")
         void updateDocument_notFound_returns404() throws Exception {
-            perform(authPut("/api/user/documents/999999999", userToken, Map.of("title", "Test Upd")))
+            perform(authPut("/api/documents/999999999", userToken, Map.of("title", "Test Upd")))
                     .andExpect(status().isNotFound());
         }
     }
@@ -320,21 +320,21 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", "To Delete " + System.nanoTime(),
                     "fieldValues", Map.of("client_name", "Test", "date", "01.01.2026")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
-            perform(authDelete("/api/user/documents/" + docId, userToken))
+            perform(authDelete("/api/documents/" + docId, userToken))
                     .andExpect(status().is2xxSuccessful());
 
             // Document should no longer be accessible
-            perform(authGet("/api/user/documents/" + docId, userToken))
+            perform(authGet("/api/documents/" + docId, userToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("DELETE returns 404 for non-existent document")
         void deleteDocument_notFound_returns404() throws Exception {
-            perform(authDelete("/api/user/documents/999999999", userToken))
+            perform(authDelete("/api/documents/999999999", userToken))
                     .andExpect(status().isNotFound());
         }
 
@@ -346,11 +346,11 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", "To Archive " + System.nanoTime(),
                     "fieldValues", Map.of("client_name", "Test", "date", "01.01.2026")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
             // Only COMPLETED documents can be archived
-            perform(authPost("/api/user/documents/" + docId + "/archive", userToken, Map.of()))
+            perform(authPost("/api/documents/" + docId + "/archive", userToken, Map.of()))
                     .andExpect(status().is4xxClientError());
         }
 
@@ -362,10 +362,10 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", "Cannot Restore " + System.nanoTime(),
                     "fieldValues", Map.of("client_name", "Test", "date", "01.01.2026")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
-            perform(authPost("/api/user/documents/" + docId + "/restore", userToken, Map.of()))
+            perform(authPost("/api/documents/" + docId + "/restore", userToken, Map.of()))
                     .andExpect(status().is4xxClientError());
         }
     }
@@ -384,10 +384,10 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", "Suggestions Test " + System.nanoTime(),
                     "fieldValues", Map.of("client_name", "Test", "date", "01.01.2026")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
-            perform(authGet("/api/user/documents/" + docId + "/suggestions", userToken))
+            perform(authGet("/api/documents/" + docId + "/suggestions", userToken))
                     .andExpect(status().isOk());
         }
     }
@@ -406,11 +406,11 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", "Share Test " + System.nanoTime(),
                     "fieldValues", Map.of("client_name", "Test", "date", "01.01.2026")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
             // Cannot share a DRAFT document
-            perform(authPost("/api/user/documents/" + docId + "/share", userToken, Map.of()))
+            perform(authPost("/api/documents/" + docId + "/share", userToken, Map.of()))
                     .andExpect(status().is4xxClientError());
         }
 
@@ -422,10 +422,10 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "title", "Version Test " + System.nanoTime(),
                     "fieldValues", Map.of("client_name", "Test", "date", "01.01.2026")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
-            perform(authGet("/api/user/documents/" + docId + "/versions", userToken))
+            perform(authGet("/api/documents/" + docId + "/versions", userToken))
                     .andExpect(status().isOk());
         }
     }
@@ -433,13 +433,13 @@ class UserDocumentApiTest extends BaseIntegrationTest {
     // ── User Profile ──────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/user/profile")
+    @DisplayName("/api/profile")
     class UserProfile {
 
         @Test
         @DisplayName("GET returns current user's profile")
         void getProfile_user_returns200() throws Exception {
-            perform(authGet("/api/user/profile", userToken))
+            perform(authGet("/api/profile", userToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.email").value(testUser.getEmail()));
         }
@@ -451,7 +451,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "fio", "Updated Full Name"
             );
 
-            perform(authPut("/api/user/profile", userToken, body))
+            perform(authPut("/api/profile", userToken, body))
                     .andExpect(status().isOk());
         }
 
@@ -460,22 +460,22 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         void updateProfile_blankFio_returns400() throws Exception {
             final var body = Map.of("fio", "");
 
-            perform(authPut("/api/user/profile", userToken, body))
+            perform(authPut("/api/profile", userToken, body))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
-        @DisplayName("GET returns 403 for LAWYER role")
-        void getProfile_lawyerRole_returns403() throws Exception {
-            perform(authGet("/api/user/profile", lawyerToken))
-                    .andExpect(status().isForbidden());
+        @DisplayName("GET returns 200 for LAWYER role (profile is accessible to all authenticated users)")
+        void getProfile_lawyerRole_returns200() throws Exception {
+            perform(authGet("/api/profile", lawyerToken))
+                    .andExpect(status().isOk());
         }
     }
 
     // ── Lawyer Application ────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/user/lawyer-applications")
+    @DisplayName("/api/lawyer-applications")
     class LawyerApplication {
 
         @Test
@@ -483,7 +483,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         void submitApplication_validRequest_returns2xx() throws Exception {
             final var body = Map.of("licenseNum", "LICENSE-12345");
 
-            perform(authPost("/api/user/lawyer-applications", userToken, body))
+            perform(authPost("/api/lawyer-applications", userToken, body))
                     .andExpect(status().is2xxSuccessful());
         }
 
@@ -491,10 +491,10 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         @DisplayName("GET /my returns user's own applications")
         void getMyApplications_user_returns200() throws Exception {
             // Endpoint returns 404 when no application exists; submit one first
-            perform(authPost("/api/user/lawyer-applications", userToken,
+            perform(authPost("/api/lawyer-applications", userToken,
                     Map.of("licenseNum", "LICENSE-12345")));
 
-            perform(authGet("/api/user/lawyer-applications/my", userToken))
+            perform(authGet("/api/lawyer-applications/my", userToken))
                     .andExpect(status().isOk());
         }
 
@@ -503,7 +503,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         void submitApplication_shortLicense_returns400() throws Exception {
             final var body = Map.of("licenseNum", "AB");  // < 5 chars
 
-            perform(authPost("/api/user/lawyer-applications", userToken, body))
+            perform(authPost("/api/lawyer-applications", userToken, body))
                     .andExpect(status().isBadRequest());
         }
     }
@@ -511,7 +511,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
     // ── Matching ──────────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/user/matching")
+    @DisplayName("/api/matching")
     class Matching {
 
         @Test
@@ -521,7 +521,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
                     "inputText", "I need to sell my car and need a purchase agreement"
             );
 
-            perform(authPost("/api/user/matching", userToken, body))
+            perform(authPost("/api/matching", userToken, body))
                     .andExpect(status().isOk());
         }
 
@@ -530,7 +530,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         void matching_blankText_returns400() throws Exception {
             final var body = Map.of("inputText", "");
 
-            perform(authPost("/api/user/matching", userToken, body))
+            perform(authPost("/api/matching", userToken, body))
                     .andExpect(status().isBadRequest());
         }
 
@@ -539,7 +539,7 @@ class UserDocumentApiTest extends BaseIntegrationTest {
         void matching_lawyerRole_returns403() throws Exception {
             final var body = Map.of("inputText", "test");
 
-            perform(authPost("/api/user/matching", lawyerToken, body))
+            perform(authPost("/api/matching", lawyerToken, body))
                     .andExpect(status().isForbidden());
         }
     }

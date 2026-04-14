@@ -29,23 +29,23 @@ class LawyerApiTest extends BaseIntegrationTest {
     class Authorization {
 
         @Test
-        @DisplayName("GET /api/lawyer/templates returns 403 for USER role")
+        @DisplayName("GET /api/my-templates returns 403 for USER role")
         void templates_userRole_returns403() throws Exception {
-            perform(authGet("/api/lawyer/templates", userToken))
+            perform(authGet("/api/my-templates", userToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GET /api/lawyer/templates returns 403 for ADMIN role")
+        @DisplayName("GET /api/my-templates returns 403 for ADMIN role")
         void templates_adminRole_returns403() throws Exception {
-            perform(authGet("/api/lawyer/templates", adminToken))
+            perform(authGet("/api/my-templates", adminToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GET /api/lawyer/templates returns 401 for unauthenticated")
+        @DisplayName("GET /api/my-templates returns 401 for unauthenticated")
         void templates_noAuth_returns401() throws Exception {
-            mvc.perform(get("/api/lawyer/templates"))
+            mvc.perform(get("/api/my-templates"))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -53,12 +53,12 @@ class LawyerApiTest extends BaseIntegrationTest {
     // ── Template CRUD ─────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/lawyer/templates")
+    @DisplayName("/api/my-templates")
     class Templates {
 
         private Long createCategory() throws Exception {
             final var body = Map.of("name", "LT Cat " + System.nanoTime(), "description", "");
-            final var result = perform(authPost("/api/admin/categories", adminToken, body))
+            final var result = perform(authPost("/api/categories", adminToken, body))
                     .andExpect(status().is2xxSuccessful())
                     .andReturn();
             return objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
@@ -74,7 +74,7 @@ class LawyerApiTest extends BaseIntegrationTest {
                                     "fieldType", "TEXT", "required", true, "orderNum", 0)
                     )
             );
-            final var result = perform(authPost("/api/lawyer/templates", lawyerToken, body))
+            final var result = perform(authPost("/api/my-templates", lawyerToken, body))
                     .andExpect(status().is2xxSuccessful())
                     .andReturn();
             return objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
@@ -94,7 +94,7 @@ class LawyerApiTest extends BaseIntegrationTest {
                     )
             );
 
-            perform(authPost("/api/lawyer/templates", lawyerToken, body))
+            perform(authPost("/api/my-templates", lawyerToken, body))
                     .andExpect(status().is2xxSuccessful())
                     .andExpect(jsonPath("$.status").value("DRAFT"))
                     .andExpect(jsonPath("$.id").isNumber());
@@ -110,7 +110,7 @@ class LawyerApiTest extends BaseIntegrationTest {
                     "fields", List.of()
             );
 
-            perform(authPost("/api/lawyer/templates", lawyerToken, body))
+            perform(authPost("/api/my-templates", lawyerToken, body))
                     .andExpect(status().isBadRequest());
         }
 
@@ -122,14 +122,14 @@ class LawyerApiTest extends BaseIntegrationTest {
                     "fields", List.of()
             );
 
-            perform(authPost("/api/lawyer/templates", lawyerToken, body))
+            perform(authPost("/api/my-templates", lawyerToken, body))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("GET returns paginated templates for current lawyer")
         void getTemplates_lawyer_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/lawyer/templates", lawyerToken))
+            perform(authGet("/api/my-templates", lawyerToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
@@ -140,7 +140,7 @@ class LawyerApiTest extends BaseIntegrationTest {
             final Long catId = createCategory();
             final Long templateId = createTemplate(catId);
 
-            perform(authGet("/api/lawyer/templates/" + templateId, lawyerToken))
+            perform(authGet("/api/my-templates/" + templateId, lawyerToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(templateId));
         }
@@ -148,7 +148,7 @@ class LawyerApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent template")
         void getTemplateById_notFound_returns404() throws Exception {
-            perform(authGet("/api/lawyer/templates/999999999", lawyerToken))
+            perform(authGet("/api/my-templates/999999999", lawyerToken))
                     .andExpect(status().isNotFound());
         }
 
@@ -165,7 +165,7 @@ class LawyerApiTest extends BaseIntegrationTest {
                     "fields", List.of()
             );
 
-            perform(authPut("/api/lawyer/templates/" + templateId, lawyerToken, updateBody))
+            perform(authPut("/api/my-templates/" + templateId, lawyerToken, updateBody))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.title").isString());
         }
@@ -176,7 +176,7 @@ class LawyerApiTest extends BaseIntegrationTest {
             final Long catId = createCategory();
             final Long templateId = createTemplate(catId);
 
-            perform(authPost("/api/lawyer/templates/" + templateId + "/publish", lawyerToken, Map.of()))
+            perform(authPost("/api/my-templates/" + templateId + "/publish", lawyerToken, Map.of()))
                     .andExpect(status().is2xxSuccessful());
         }
 
@@ -186,7 +186,7 @@ class LawyerApiTest extends BaseIntegrationTest {
             final Long catId = createCategory();
             final Long templateId = createTemplate(catId);
 
-            perform(authDelete("/api/lawyer/templates/" + templateId, lawyerToken))
+            perform(authDelete("/api/my-templates/" + templateId, lawyerToken))
                     .andExpect(status().is2xxSuccessful());
         }
 
@@ -201,7 +201,7 @@ class LawyerApiTest extends BaseIntegrationTest {
             final Long templateId = createTemplate(catId);
 
             // Other lawyer tries to access this lawyer's template
-            perform(authGet("/api/lawyer/templates/" + templateId, otherToken))
+            perform(authGet("/api/my-templates/" + templateId, otherToken))
                     .andExpect(status().is4xxClientError());
 
             // Cleanup
@@ -212,13 +212,13 @@ class LawyerApiTest extends BaseIntegrationTest {
     // ── Matching Rules ────────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/lawyer/matching-rules")
+    @DisplayName("/api/matching-rules")
     class MatchingRules {
 
         @Test
         @DisplayName("GET returns list of matching rules")
         void getMatchingRules_lawyer_returns200() throws Exception {
-            perform(authGet("/api/lawyer/matching-rules", lawyerToken))
+            perform(authGet("/api/matching-rules", lawyerToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$").isArray());
         }
@@ -226,21 +226,21 @@ class LawyerApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /template/{id} returns rules for a template")
         void getMatchingRulesByTemplate_lawyer_returns200() throws Exception {
-            perform(authGet("/api/lawyer/matching-rules/template/1", lawyerToken))
+            perform(authGet("/api/matching-rules/template/1", lawyerToken))
                     .andExpect(status().isOk());
         }
 
         @Test
         @DisplayName("GET returns 403 for USER role")
         void getMatchingRules_userRole_returns403() throws Exception {
-            perform(authGet("/api/lawyer/matching-rules", userToken))
+            perform(authGet("/api/matching-rules", userToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         @DisplayName("DELETE /{id} returns 404 for non-existent rule")
         void deleteMatchingRule_notFound_returns404() throws Exception {
-            perform(authDelete("/api/lawyer/matching-rules/999999", lawyerToken))
+            perform(authDelete("/api/matching-rules/999999", lawyerToken))
                     .andExpect(status().isNotFound());
         }
     }
@@ -252,29 +252,29 @@ class LawyerApiTest extends BaseIntegrationTest {
     class DocumentReviews {
 
         @Test
-        @DisplayName("GET /api/lawyer/reviews returns paginated reviews")
+        @DisplayName("GET /api/reviews returns paginated reviews")
         void getReviews_lawyer_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/lawyer/reviews", lawyerToken))
+            perform(authGet("/api/reviews", lawyerToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
 
         @Test
-        @DisplayName("GET /api/lawyer/reviews returns 403 for USER role")
+        @DisplayName("GET /api/reviews returns 403 for USER role")
         void getReviews_userRole_returns403() throws Exception {
-            perform(authGet("/api/lawyer/reviews", userToken))
+            perform(authGet("/api/reviews", userToken))
                     .andExpect(status().isForbidden());
         }
 
         @Test
-        @DisplayName("GET /api/lawyer/documents/{id}/reviews returns 404 for non-existent document")
+        @DisplayName("GET /api/documents/{id}/reviews returns 404 for non-existent document")
         void getDocumentReviews_notFound_returns404() throws Exception {
-            perform(authGet("/api/lawyer/documents/999999/reviews", lawyerToken))
+            perform(authGet("/api/documents/999999/reviews", lawyerToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
-        @DisplayName("POST /api/lawyer/documents/{id}/review returns 400 when notes are too short")
+        @DisplayName("POST /api/documents/{id}/reviews returns 400 when notes are too short")
         void createReview_shortNotes_returns400() throws Exception {
             final var body = Map.of(
                     "notes", "short",    // < 10 chars
@@ -282,14 +282,14 @@ class LawyerApiTest extends BaseIntegrationTest {
                     "recommended", true
             );
 
-            perform(authPost("/api/lawyer/documents/1/review", lawyerToken, body))
+            perform(authPost("/api/documents/1/reviews", lawyerToken, body))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
-        @DisplayName("DELETE /api/lawyer/reviews/{id} returns 404 for non-existent review")
+        @DisplayName("DELETE /api/reviews/{id} returns 404 for non-existent review")
         void deleteReview_notFound_returns404() throws Exception {
-            perform(authDelete("/api/lawyer/reviews/999999", lawyerToken))
+            perform(authDelete("/api/reviews/999999", lawyerToken))
                     .andExpect(status().isNotFound());
         }
     }
@@ -297,13 +297,13 @@ class LawyerApiTest extends BaseIntegrationTest {
     // ── Lawyer Documents ──────────────────────────────────────────────────────
 
     @Nested
-    @DisplayName("/api/lawyer/documents")
+    @DisplayName("/api/lawyer-documents")
     class LawyerDocuments {
 
         @Test
         @DisplayName("GET returns paginated list of documents for lawyer's templates")
         void getDocuments_lawyer_returnsPaginatedList() throws Exception {
-            perform(authGet("/api/lawyer/documents", lawyerToken))
+            perform(authGet("/api/lawyer-documents", lawyerToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content").isArray());
         }
@@ -311,14 +311,14 @@ class LawyerApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("GET /{id} returns 404 for non-existent document")
         void getDocumentById_notFound_returns404() throws Exception {
-            perform(authGet("/api/lawyer/documents/999999", lawyerToken))
+            perform(authGet("/api/lawyer-documents/999999", lawyerToken))
                     .andExpect(status().isNotFound());
         }
 
         @Test
         @DisplayName("GET returns 403 for USER role")
         void getDocuments_userRole_returns403() throws Exception {
-            perform(authGet("/api/lawyer/documents", userToken))
+            perform(authGet("/api/lawyer-documents", userToken))
                     .andExpect(status().isForbidden());
         }
     }

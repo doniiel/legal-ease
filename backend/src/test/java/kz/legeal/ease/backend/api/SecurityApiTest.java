@@ -29,7 +29,7 @@ class SecurityApiTest extends BaseIntegrationTest {
     void setUpData() throws Exception {
         // Create a category and published template for document tests
         final var catBody = Map.of("name", "Security Cat " + System.nanoTime(), "description", "");
-        final var catResult = perform(authPost("/api/admin/categories", adminToken, catBody)).andReturn();
+        final var catResult = perform(authPost("/api/categories", adminToken, catBody)).andReturn();
         categoryId = objectMapper.readTree(catResult.getResponse().getContentAsString()).get("id").asLong();
 
         final var tplBody = Map.of(
@@ -41,9 +41,9 @@ class SecurityApiTest extends BaseIntegrationTest {
                                 "fieldType", "TEXT", "required", true, "orderNum", 0)
                 )
         );
-        final var tplResult = perform(authPost("/api/lawyer/templates", lawyerToken, tplBody)).andReturn();
+        final var tplResult = perform(authPost("/api/my-templates", lawyerToken, tplBody)).andReturn();
         templateId = objectMapper.readTree(tplResult.getResponse().getContentAsString()).get("id").asLong();
-        perform(authPost("/api/lawyer/templates/" + templateId + "/publish", lawyerToken, Map.of()));
+        perform(authPost("/api/my-templates/" + templateId + "/publish", lawyerToken, Map.of()));
     }
 
     // ── No Token / Invalid Token ──────────────────────────────────────────────
@@ -55,28 +55,28 @@ class SecurityApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("request without token to user endpoint returns 401")
         void userEndpoint_noToken_returns401() throws Exception {
-            mvc.perform(get("/api/user/documents"))
+            mvc.perform(get("/api/documents"))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
         @DisplayName("request without token to lawyer endpoint returns 401")
         void lawyerEndpoint_noToken_returns401() throws Exception {
-            mvc.perform(get("/api/lawyer/templates"))
+            mvc.perform(get("/api/my-templates"))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
         @DisplayName("request without token to admin endpoint returns 401")
         void adminEndpoint_noToken_returns401() throws Exception {
-            mvc.perform(get("/api/admin/users"))
+            mvc.perform(get("/api/users"))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
         @DisplayName("request with malformed JWT returns 401")
         void malformedJwt_returns401() throws Exception {
-            mvc.perform(get("/api/user/documents")
+            mvc.perform(get("/api/documents")
                             .header("Authorization", "Bearer not.a.real.jwt"))
                     .andExpect(status().isUnauthorized());
         }
@@ -84,7 +84,7 @@ class SecurityApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("request with garbage token returns 401")
         void garbageToken_returns401() throws Exception {
-            mvc.perform(get("/api/user/profile")
+            mvc.perform(get("/api/profile")
                             .header("Authorization", "Bearer AAABBBCCC"))
                     .andExpect(status().isUnauthorized());
         }
@@ -92,7 +92,7 @@ class SecurityApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("request with empty Bearer returns 401")
         void emptyBearer_returns401() throws Exception {
-            mvc.perform(get("/api/user/profile")
+            mvc.perform(get("/api/profile")
                             .header("Authorization", "Bearer "))
                     .andExpect(status().isUnauthorized());
         }
@@ -113,12 +113,12 @@ class SecurityApiTest extends BaseIntegrationTest {
                     "title", "Private Doc " + System.nanoTime(),
                     "fieldValues", Map.of("name", "Secret")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body))
+            final var result = perform(authPost("/api/documents", userToken, body))
                     .andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
             // user2 tries to access it → should be 403 or 404
-            perform(authGet("/api/user/documents/" + docId, user2Token))
+            perform(authGet("/api/documents/" + docId, user2Token))
                     .andExpect(status().is4xxClientError());
         }
 
@@ -130,10 +130,10 @@ class SecurityApiTest extends BaseIntegrationTest {
                     "title", "Delete IDOR " + System.nanoTime(),
                     "fieldValues", Map.of("name", "Secret")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
-            perform(authDelete("/api/user/documents/" + docId, user2Token))
+            perform(authDelete("/api/documents/" + docId, user2Token))
                     .andExpect(status().is4xxClientError());
         }
 
@@ -145,11 +145,11 @@ class SecurityApiTest extends BaseIntegrationTest {
                     "title", "Update IDOR " + System.nanoTime(),
                     "fieldValues", Map.of("name", "Original")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
             final var updateBody = Map.of("title", "Hijacked", "fieldValues", Map.of("name", "Hijacked"));
-            perform(authPut("/api/user/documents/" + docId, user2Token, updateBody))
+            perform(authPut("/api/documents/" + docId, user2Token, updateBody))
                     .andExpect(status().is4xxClientError());
         }
 
@@ -161,10 +161,10 @@ class SecurityApiTest extends BaseIntegrationTest {
                     "title", "Validate IDOR " + System.nanoTime(),
                     "fieldValues", Map.of("name", "Data")
             );
-            final var result = perform(authPost("/api/user/documents", userToken, body)).andReturn();
+            final var result = perform(authPost("/api/documents", userToken, body)).andReturn();
             final Long docId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asLong();
 
-            perform(authPost("/api/user/documents/" + docId + "/validate", user2Token, Map.of()))
+            perform(authPost("/api/documents/" + docId + "/validate", user2Token, Map.of()))
                     .andExpect(status().is4xxClientError());
         }
     }
@@ -175,22 +175,23 @@ class SecurityApiTest extends BaseIntegrationTest {
     @DisplayName("Role isolation — all three roles")
     class RoleIsolation {
 
-        // Admin cannot access user endpoints
+        // Admin cannot access user-only endpoints
         @Test
-        @DisplayName("ADMIN cannot access /api/user/** endpoints")
+        @DisplayName("ADMIN cannot access user-only endpoints")
         void admin_cannotAccess_userEndpoints() throws Exception {
-            perform(authGet("/api/user/documents", adminToken))
+            perform(authGet("/api/documents", adminToken))
                     .andExpect(status().isForbidden());
 
-            perform(authGet("/api/user/profile", adminToken))
-                    .andExpect(status().isForbidden());
+            // Profile is accessible to all authenticated users
+            perform(authGet("/api/profile", adminToken))
+                    .andExpect(status().isOk());
         }
 
         // Admin cannot access lawyer endpoints
         @Test
         @DisplayName("ADMIN cannot access /api/lawyer/** endpoints")
         void admin_cannotAccess_lawyerEndpoints() throws Exception {
-            perform(authGet("/api/lawyer/templates", adminToken))
+            perform(authGet("/api/my-templates", adminToken))
                     .andExpect(status().isForbidden());
         }
 
@@ -198,13 +199,13 @@ class SecurityApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("USER cannot access /api/admin/** endpoints")
         void user_cannotAccess_adminEndpoints() throws Exception {
-            perform(authGet("/api/admin/users", userToken))
+            perform(authGet("/api/users", userToken))
                     .andExpect(status().isForbidden());
 
-            perform(authGet("/api/admin/audit-logs", userToken))
+            perform(authGet("/api/audit-logs", userToken))
                     .andExpect(status().isForbidden());
 
-            perform(authGet("/api/admin/metrics", userToken))
+            perform(authGet("/api/metrics", userToken))
                     .andExpect(status().isForbidden());
         }
 
@@ -212,13 +213,13 @@ class SecurityApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("USER cannot access /api/lawyer/** endpoints")
         void user_cannotAccess_lawyerEndpoints() throws Exception {
-            perform(authGet("/api/lawyer/templates", userToken))
+            perform(authGet("/api/my-templates", userToken))
                     .andExpect(status().isForbidden());
 
-            perform(authGet("/api/lawyer/documents", userToken))
+            perform(authGet("/api/lawyer-documents", userToken))
                     .andExpect(status().isForbidden());
 
-            perform(authGet("/api/lawyer/reviews", userToken))
+            perform(authGet("/api/reviews", userToken))
                     .andExpect(status().isForbidden());
         }
 
@@ -226,22 +227,23 @@ class SecurityApiTest extends BaseIntegrationTest {
         @Test
         @DisplayName("LAWYER cannot access /api/admin/** endpoints")
         void lawyer_cannotAccess_adminEndpoints() throws Exception {
-            perform(authGet("/api/admin/users", lawyerToken))
+            perform(authGet("/api/users", lawyerToken))
                     .andExpect(status().isForbidden());
 
-            perform(authGet("/api/admin/categories", lawyerToken))
+            perform(authGet("/api/categories", lawyerToken))
                     .andExpect(status().isForbidden());
         }
 
-        // Lawyer cannot access user endpoints
+        // Lawyer cannot access user-only endpoints
         @Test
-        @DisplayName("LAWYER cannot access /api/user/** endpoints")
+        @DisplayName("LAWYER cannot access user-only endpoints")
         void lawyer_cannotAccess_userEndpoints() throws Exception {
-            perform(authGet("/api/user/documents", lawyerToken))
+            perform(authGet("/api/documents", lawyerToken))
                     .andExpect(status().isForbidden());
 
-            perform(authGet("/api/user/profile", lawyerToken))
-                    .andExpect(status().isForbidden());
+            // Profile is accessible to all authenticated users
+            perform(authGet("/api/profile", lawyerToken))
+                    .andExpect(status().isOk());
         }
     }
 
