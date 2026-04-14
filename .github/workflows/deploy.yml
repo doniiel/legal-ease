@@ -62,16 +62,16 @@ jobs:
       - name: Pull & Deploy
         run: |
           set -e
-          git config --global --add safe.directory /opt/legalease/legal-ease
+          sudo git config --global --add safe.directory /opt/legalease/legal-ease
           cd /opt/legalease/legal-ease
 
           echo "▶ Pulling latest code..."
-          git pull origin main
+          sudo git pull origin main
 
           echo "▶ Rebuilding containers..."
-          docker compose up --build -d
+          sudo docker compose up --build -d
 
           echo "▶ Cleaning up unused images..."
-          docker image prune -f
+          sudo docker image prune -f
 
           echo "✅ Deploy complete!"
