@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import { Empty, Table } from "antd";
 import {
   FileText,
@@ -60,6 +61,7 @@ function getInitials(fio: string) {
 
 export default function DashboardHomePanel() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { data: profile, isLoading: profileLoading } = useGetProfileQuery();
   const { data: docsPage, isLoading: docsLoading } = useGetDocumentsQuery({ page: 0, size: 1000 });
 
@@ -136,14 +138,14 @@ export default function DashboardHomePanel() {
   ];
 
   return (
-    <div style={{ padding: "0 32px 32px" }}>
+    <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
       {/* ── Full-bleed hero ── */}
       <div
         style={{
           background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-          padding: "40px 40px 56px",
-          marginLeft: -32,
-          marginRight: -32,
+          padding: isMobile ? "24px 20px 48px" : "40px 40px 56px",
+          marginLeft: isMobile ? -16 : -32,
+          marginRight: isMobile ? -16 : -32,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -238,8 +240,8 @@ export default function DashboardHomePanel() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 16,
+          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
+          gap: isMobile ? 10 : 16,
           marginTop: -28,
           position: "relative",
           zIndex: 2,
@@ -256,8 +258,8 @@ export default function DashboardHomePanel() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `repeat(${quickCards.length}, 1fr)`,
-          gap: 16,
+          gridTemplateColumns: isMobile ? "1fr" : `repeat(${quickCards.length}, 1fr)`,
+          gap: isMobile ? 10 : 16,
           marginBottom: 28,
         }}
       >

@@ -1,4 +1,5 @@
 import { Spin } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
   Users,
   Scale,
@@ -263,6 +264,7 @@ function formatEventTitle(log: AuditLog): string {
 // ─── Main Panel ───────────────────────────────────────────────
 export default function AdminDashboardPanel() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { data: metrics, isLoading } = useGetSystemMetricsQuery();
   const { data: auditData } = useGetAuditLogsQuery({ page: 0, size: 5, sort: "createdDate,DESC" });
   const recentLogs = auditData?.content ?? [];
@@ -335,7 +337,7 @@ export default function AdminDashboardPanel() {
       <div style={{ padding: "0 40px 48px", marginTop: -32, position: "relative", zIndex: 2 }}>
 
         {/* Row 1: 4 main stats */}
-        <div style={{ display: "flex", gap: 24, marginBottom: 24 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 12 : 24, marginBottom: isMobile ? 12 : 24 }}>
           <StatCard label="Всего пользователей" value={metrics?.totalUsers} color="#0F2A44" icon={<Users size={28} />} loading={isLoading} />
           <StatCard label="Юристов" value={metrics?.totalLawyers} color="#1677ff" icon={<Scale size={28} />} loading={isLoading} />
           <StatCard label="Документов" value={metrics?.totalDocuments} color="#7c3aed" icon={<FileText size={28} />} loading={isLoading} />
@@ -343,7 +345,7 @@ export default function AdminDashboardPanel() {
         </div>
 
         {/* Row 2: 3 action stats */}
-        <div style={{ display: "flex", gap: 24, marginBottom: 40 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(1, 1fr)" : "repeat(3, 1fr)", gap: isMobile ? 12 : 24, marginBottom: isMobile ? 24 : 40 }}>
           <StatCard
             label="Ожидают заявки"
             value={metrics?.pendingLawyerApplications}
@@ -370,7 +372,7 @@ export default function AdminDashboardPanel() {
         </div>
 
         {/* Quick Access Bento */}
-        <div style={{ display: "flex", gap: 24, marginBottom: 48 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: isMobile ? 12 : 24, marginBottom: isMobile ? 24 : 48 }}>
           <QuickCard
             title="Управление заявками"
             desc="Просмотр и модерация новых запросов от пользователей. Требует внимания."

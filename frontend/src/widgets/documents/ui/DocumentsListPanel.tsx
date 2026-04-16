@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import { useNavigate } from "react-router-dom";
 import {
   App, Table, Button, Form, Input, Select, Typography, Tooltip,
@@ -53,6 +54,7 @@ function IconBtn({ icon, tooltip, onClick, hoverBg, hoverColor }: {
 export default function DocumentsListPanel() {
   const { message } = App.useApp();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
@@ -158,23 +160,25 @@ export default function DocumentsListPanel() {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "24px 20px 48px" : "40px 40px 56px", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "flex-end", gap: isMobile ? 16 : 0, position: "relative", zIndex: 1 }}>
           <div>
-            <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Мои документы</h1>
-            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>Создавайте, редактируйте и анализируйте юридические документы с помощью AI</p>
+            <h1 style={{ fontSize: isMobile ? 26 : 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Мои документы</h1>
+            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 13, margin: 0 }}>Создавайте, редактируйте и анализируйте юридические документы с помощью AI</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
-              <div style={{ padding: "12px 20px" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{data?.totalElements ?? 0}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            {!isMobile && (
+              <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
+                <div style={{ padding: "12px 20px" }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{data?.totalElements ?? 0}</div>
+                </div>
+                <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
+                <div style={{ padding: "12px 20px" }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Завершённых</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: "#34d399", fontFamily: "Manrope, sans-serif" }}>{completedCount}</div>
+                </div>
               </div>
-              <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
-              <div style={{ padding: "12px 20px" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Завершённых</div>
-                <div style={{ fontSize: 22, fontWeight: 800, color: "#34d399", fontFamily: "Manrope, sans-serif" }}>{completedCount}</div>
-              </div>
-            </div>
+            )}
             <Button icon={<Plus size={15} />} onClick={() => setCreateOpen(true)}
               style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 10, height: 42, fontWeight: 600, paddingLeft: 20, paddingRight: 20 }}>
               Создать документ
@@ -183,9 +187,9 @@ export default function DocumentsListPanel() {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
-        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 10 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Всего документов" value={data?.totalElements ?? 0} color="#0F2A44" icon={<FileText size={26} />} loading={isLoading} />
           <StatCard label="Черновики"         value={draftCount}              color="#f59e0b" icon={<FilePen size={26} />} />
           <StatCard label="Завершённые"       value={completedCount}          color="#059669" icon={<CheckCircle2 size={26} />} />
@@ -194,7 +198,7 @@ export default function DocumentsListPanel() {
 
         {/* ── Filter toolbar ── */}
         <div style={{ background: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", borderRadius: 16, padding: "20px 24px", marginBottom: 20, boxShadow: "0 1px 4px rgba(11,28,48,0.06)", border: "1px solid rgba(197,198,210,0.15)" }}>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "flex-end", gap: 12 }}>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#757682", marginBottom: 8 }}>Поиск</div>
               <Input prefix={<Search size={15} color="#757682" />} placeholder="По названию, шаблону или категории..." allowClear value={search} onChange={e => setSearch(e.target.value)}
@@ -236,7 +240,7 @@ export default function DocumentsListPanel() {
       {/* ── Create modal ── */}
       {createOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#fff", borderRadius: 16, width: 500, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
+          <div style={{ background: "#fff", borderRadius: 16, width: isMobile ? "92vw" : 500, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
             <div style={{ background: "linear-gradient(135deg, #0F2A44, #1a4070)", padding: "20px 28px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -274,7 +278,7 @@ export default function DocumentsListPanel() {
       {/* ── Delete modal ── */}
       {deleteModal.open && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div style={{ background: "#fff", borderRadius: 16, width: 420, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
+          <div style={{ background: "#fff", borderRadius: 16, width: isMobile ? "92vw" : 420, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
             <div style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)", padding: "20px 28px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>

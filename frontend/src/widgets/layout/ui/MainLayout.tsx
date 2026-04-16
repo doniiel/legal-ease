@@ -17,9 +17,12 @@ import {
   Scale,
   BookOpen,
   Sparkles,
+  Menu,
+  X,
 } from "lucide-react";
 import { ROUTES } from "../../../app/router/router";
 import { useAuth } from "../../../features/auth/model/use-auth";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 
 const { Sider, Content, Header } = Layout;
 
@@ -42,25 +45,10 @@ const NAV_ITEMS = [
 ];
 
 const getDropdownItems = (navigate: NavigateFunction, logout: () => void): MenuProps["items"] => [
-  {
-    key: "profile",
-    label: "Профиль",
-    onClick: () => navigate(ROUTES.PROFILE),
-  },
-  {
-    key: "settings",
-    label: "Настройки",
-    onClick: () => navigate(ROUTES.SETTINGS),
-  },
-  {
-    type: "divider",
-  },
-  {
-    key: "logout",
-    label: "Выйти",
-    danger: true,
-    onClick: logout,
-  },
+  { key: "profile",   label: "Профиль",   onClick: () => navigate(ROUTES.PROFILE) },
+  { key: "settings",  label: "Настройки", onClick: () => navigate(ROUTES.SETTINGS) },
+  { type: "divider" },
+  { key: "logout",    label: "Выйти",     danger: true, onClick: logout },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
@@ -121,32 +109,6 @@ function NavItem({
   );
 }
 
-// ─── Icon Button (header) ─────────────────────────────────────
-// function IconBtn({ icon, onClick }: { icon: React.ReactNode; onClick?: () => void }) {
-//   return (
-//     <button
-//       onClick={onClick}
-//       style={{
-//         width: 36,
-//         height: 36,
-//         borderRadius: "50%",
-//         border: "none",
-//         background: "transparent",
-//         cursor: "pointer",
-//         color: "#64748b",
-//         display: "flex",
-//         alignItems: "center",
-//         justifyContent: "center",
-//         transition: "background 0.2s",
-//       }}
-//       onMouseEnter={(e) => (e.currentTarget.style.background = "#f1f5f9")}
-//       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-//     >
-//       {icon}
-//     </button>
-//   );
-// }
-
 // ─── Main Layout ──────────────────────────────────────────────
 interface MainLayoutProps {
   children: ReactNode;
@@ -157,6 +119,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const { pathname } = useLocation();
   const { role, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const visibleNavItems = NAV_ITEMS.filter((item) =>
     role ? item.roles.includes(role) : false
@@ -169,7 +133,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   const dropdownItems = getDropdownItems(navigate, handleLogout);
 
-  // Dashboard gets zero padding — hero section goes edge-to-edge
   const isFullBleed =
     pathname.startsWith(ROUTES.DOCUMENTS) ||
     [
@@ -183,13 +146,30 @@ export default function MainLayout({ children }: MainLayoutProps) {
       ROUTES.LAWYER_CLAUSES, ROUTES.MATCHING,
     ].includes(pathname);
 
+  const siderWidth = 260;
+  const collapsedWidth = 72;
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
+      {/* ── Mobile backdrop ── */}
+      {isMobile && mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 150,
+            backdropFilter: "blur(2px)",
+          }}
+        />
+      )}
+
       {/* ── Sidebar ── */}
       <Sider
-        collapsed={collapsed}
-        width={260}
-        collapsedWidth={72}
+        collapsed={isMobile ? false : collapsed}
+        width={siderWidth}
+        collapsedWidth={collapsedWidth}
         trigger={null}
         style={{
           background: "#f8fafc",
@@ -197,21 +177,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
           position: "fixed",
           height: "100vh",
           overflow: "hidden",
-          left: 0,
           top: 0,
           bottom: 0,
-          zIndex: 100,
+          zIndex: 200,
           display: "flex",
           flexDirection: "column",
+          left: isMobile ? (mobileOpen ? 0 : -siderWidth) : 0,
+          transition: "left 0.3s ease",
+          boxShadow: isMobile && mobileOpen ? "4px 0 24px rgba(0,0,0,0.15)" : "none",
         }}
       >
-        {/* Logo */}
+        {/* Logo + close button on mobile */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 12,
-            padding: collapsed ? "28px 16px 24px" : "28px 20px 24px",
+            padding: "28px 20px 24px",
             borderBottom: "1px solid #e2e8f0",
             marginBottom: 8,
           }}
@@ -231,31 +213,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
           >
             <Scale size={20} color="#fff" />
           </div>
-          {!collapsed && (
-            <div>
-              <div
-                style={{
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: "#0F2A44",
-                  lineHeight: 1.2,
-                  fontFamily: "Manrope, sans-serif",
-                }}
-              >
-                LegalEase
-              </div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "#7790bd",
-                }}
-              >
-                {ROLE_LABELS[role ?? ""] ?? "Portal"}
-              </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: "#0F2A44", lineHeight: 1.2, fontFamily: "Manrope, sans-serif" }}>
+              LegalEase
             </div>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#7790bd" }}>
+              {ROLE_LABELS[role ?? ""] ?? "Portal"}
+            </div>
+          </div>
+          {isMobile && (
+            <button
+              onClick={() => setMobileOpen(false)}
+              style={{ background: "transparent", border: "none", cursor: "pointer", color: "#64748b", display: "flex", padding: 4 }}
+            >
+              <X size={20} />
+            </button>
           )}
         </div>
 
@@ -267,20 +239,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
               icon={item.icon}
               label={item.label}
               isActive={pathname === item.key}
-              collapsed={collapsed}
-              onClick={() => navigate(item.key)}
+              collapsed={!isMobile && collapsed}
+              onClick={() => {
+                navigate(item.key);
+                if (isMobile) setMobileOpen(false);
+              }}
             />
           ))}
         </nav>
-
-        {/* Bottom: logout */}
-      
       </Sider>
 
       {/* ── Main area ── */}
       <Layout
         style={{
-          marginLeft: collapsed ? 72 : 260,
+          marginLeft: isMobile ? 0 : (collapsed ? collapsedWidth : siderWidth),
           transition: "margin-left 0.2s",
         }}
       >
@@ -288,7 +260,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Header
           style={{
             background: "#fff",
-            padding: "0 32px",
+            padding: isMobile ? "0 16px" : "0 32px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -300,10 +272,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
             boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
           }}
         >
-          {/* Left: toggle + search */}
+          {/* Left: toggle */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <button
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => isMobile ? setMobileOpen(true) : setCollapsed(!collapsed)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -320,35 +292,21 @@ export default function MainLayout({ children }: MainLayoutProps) {
               onMouseEnter={(e) => (e.currentTarget.style.background = "#f5f7fa")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+              {isMobile
+                ? <Menu size={18} />
+                : collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />
+              }
             </button>
           </div>
 
-          {/* Right: icons + user */}
+          {/* Right: user */}
           <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* <IconBtn icon={<Bell size={18} />} />
-            <IconBtn icon={<HelpCircle size={18} />} />
-            <IconBtn icon={<Settings size={18} />} onClick={() => navigate(ROUTES.SETTINGS)} /> */}
-
             <div style={{ width: 1, height: 32, background: "#e2e8f0", margin: "0 12px" }} />
-            
-            <Dropdown trigger={["click"]}  menu={{ items: dropdownItems}}>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  cursor: "pointer",
-                }}
-              >
+            <Dropdown trigger={["click"]} menu={{ items: dropdownItems }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
                 <Avatar
                   size={34}
-                  style={{
-                    background: "#0F2A44",
-                    fontWeight: 700,
-                    borderRadius: 8,
-                    fontSize: 13,
-                  }}
+                  style={{ background: "#0F2A44", fontWeight: 700, borderRadius: 8, fontSize: 13 }}
                 >
                   {role?.[0] ?? "U"}
                 </Avatar>
@@ -360,7 +318,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         {/* Content */}
         <Content
           style={{
-            padding: isFullBleed ? 0 : 32,
+            padding: isFullBleed ? 0 : (isMobile ? 16 : 32),
             background: "#f8f9ff",
             minHeight: "calc(100vh - 64px)",
           }}
