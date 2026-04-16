@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
   App,
   Card,
@@ -90,6 +91,7 @@ const FAQ = [
 ];
 
 export default function LawyerApplicationPanel() {
+  const isMobile = useIsMobile();
   const { message } = App.useApp();
   const [form] = Form.useForm();
   const [showForm, setShowForm] = useState(false);

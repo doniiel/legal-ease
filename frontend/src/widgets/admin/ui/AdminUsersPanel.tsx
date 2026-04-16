@@ -2,6 +2,7 @@ import { Table, Tag, Space, Typography, Input, Avatar, Tooltip, Popconfirm, Sele
 import type { ColumnsType } from "antd/es/table";
 import { Users, Search, ShieldOff, Eye, Scale, Activity, Lock, Unlock } from "lucide-react";
 import { useAdminUsers } from "../../../features/admin/model/use-admin-users";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import { isAdmin, isLawyer, getRoleLabel, getRoleColor } from "../../../features/admin/lib/user-role";
 import BlockConfirmModal from "../../../features/admin/ui/BlockConfirmModal";
 import UserDetailDrawer from "../../../features/admin/ui/UserDetailDrawer";
@@ -12,6 +13,7 @@ import type { AdminUser } from "../../../features/admin/api/admin-user-api";
 const { Text } = Typography;
 
 export default function AdminUsersPanel() {
+  const isMobile = useIsMobile();
   const {
     data, metrics, filtered,
     isLoading, isMetricsLoading, isBlocking, isUnblocking, isRevoking,
@@ -147,7 +149,7 @@ export default function AdminUsersPanel() {
     <div style={{ overflowX: "hidden" }}>
       {/* ── Hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+        <div style={{ padding: isMobile ? "24px 16px 40px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexDirection: isMobile ? "column" : undefined }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
               Управление пользователями
@@ -160,9 +162,9 @@ export default function AdminUsersPanel() {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
-        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: 20, flexWrap: "wrap", marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Всего пользователей" value={data?.totalElements} color="#0F2A44" icon={<Users size={26} />} loading={isLoading} />
           <StatCard label="Юристов"              value={metrics?.totalLawyers}  color="#1677ff"  icon={<Scale size={26} />}    loading={isMetricsLoading} />
           <StatCard label="Активных"             value={metrics?.activeUsers}   color="#059669"  icon={<Activity size={26} />} loading={isMetricsLoading} />
@@ -170,7 +172,7 @@ export default function AdminUsersPanel() {
 
         {/* ── Filters ── */}
         <div style={{ background: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "0 1px 4px rgba(11,28,48,0.06)", border: "1px solid rgba(197,198,210,0.15)" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 200px", gap: 20, alignItems: "end" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 200px", gap: 20, alignItems: "end" }}>
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#757682", marginBottom: 8 }}>Поиск</div>
               <div style={{ position: "relative" }}>

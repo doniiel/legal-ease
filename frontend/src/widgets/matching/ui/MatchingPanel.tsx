@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { App, Select, Empty, Progress, Spin } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
   Sparkles, Search, FileText, FolderOpen, ArrowRight, Zap,
   BrainCircuit, AlertTriangle, ShieldAlert,

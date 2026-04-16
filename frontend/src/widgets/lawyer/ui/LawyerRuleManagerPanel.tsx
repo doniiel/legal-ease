@@ -3,6 +3,7 @@ import {
   App, Table, Button, Modal, Form, Input, Select,
   Space, Typography, Tabs, Switch, Badge, Empty, InputNumber,
 } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import type { ColumnsType } from "antd/es/table";
 import {
   ShieldAlert, GitBranch, FileCheck2, FileBadge2,
@@ -581,6 +582,7 @@ function MatchingTab({ templateId }: { templateId: number }) {
 
 // ─── Main Panel ───────────────────────────────
 export default function LawyerRuleManagerPanel() {
+  const isMobile = useIsMobile();
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("validation");
 
@@ -628,7 +630,7 @@ export default function LawyerRuleManagerPanel() {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "24px 16px 48px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Rule Engine</h1>
             <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>Управление правилами валидации, рисков, условий и матчинга</p>
@@ -655,7 +657,7 @@ export default function LawyerRuleManagerPanel() {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Валидация"     value={validationRules.length}  color="#1677ff" icon={<FileCheck2 size={26} />} />

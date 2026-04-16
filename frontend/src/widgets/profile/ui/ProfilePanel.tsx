@@ -1,4 +1,5 @@
 import { Form, Input, Button, Skeleton, Select, Divider, Tooltip } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
   User, Mail, Phone, CreditCard,
   Shield, ShieldCheck, Crown, Pencil, X, Save, Lock,
@@ -59,6 +60,7 @@ const inputStyle = (editable: boolean): React.CSSProperties => ({
 
 // ─── Main panel ───────────────────────────────────────────────
 export default function ProfilePanel() {
+  const isMobile = useIsMobile();
   const { form, profile, isLoading, isSaving, editing, startEdit, cancelEdit, handleSave } = useProfile();
 
   if (isLoading) {
@@ -93,9 +95,9 @@ export default function ProfilePanel() {
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+    <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "0 16px" : 0 }}>
       {/* ── Page header ── */}
-      <div style={{ marginBottom: 32 }}>
+      <div style={{ marginBottom: isMobile ? 20 : 32 }}>
         <h1 style={{ fontSize: 32, fontWeight: 800, color: "#0F2A44", margin: "0 0 6px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
           Настройки профиля
         </h1>
@@ -105,7 +107,7 @@ export default function ProfilePanel() {
       </div>
 
       {/* ── Hero grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 24, marginBottom: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "280px 1fr", gap: 24, marginBottom: 20 }}>
         {/* Avatar col */}
         <div style={{ background: "linear-gradient(135deg, #f8fafc 0%, #eff4ff 100%)", borderRadius: 20, padding: "36px 24px", display: "flex", flexDirection: "column", alignItems: "center", border: "1px solid rgba(197,198,210,0.25)", boxShadow: "0 4px 24px rgba(11,28,48,0.04)" }}>
           <div style={{ width: 96, height: 96, borderRadius: "50%", background: avatarBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif", boxShadow: "0 8px 32px rgba(11,28,48,0.18)", marginBottom: 18, border: "4px solid #fff" }}>
@@ -173,7 +175,7 @@ export default function ProfilePanel() {
               />
             </Form.Item>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 24px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 0 : "0 24px" }}>
               {/* Phone */}
               <Form.Item
                 name="phone"
@@ -248,7 +250,7 @@ export default function ProfilePanel() {
             </div>
           </div>
           <Divider style={{ margin: "0 0 20px" }} />
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${profile.role === "ADMIN" ? 3 : 2}, 1fr)`, gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : `repeat(${profile.role === "ADMIN" ? 3 : 2}, 1fr)`, gap: 12 }}>
             {(ACCESS_ITEMS[profile.role] ?? []).map((item) => (
               <div key={item.label} style={{ padding: "14px 18px", borderRadius: 12, background: "#f8fafc", border: "1px solid #f1f5f9", borderLeft: `3px solid ${roleCfg.color}` }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: "#0b1c30", marginBottom: 3 }}>{item.label}</div>

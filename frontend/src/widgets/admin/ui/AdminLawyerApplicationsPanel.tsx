@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useAdminApplications, EMPTY_FILTERS } from "../../../features/admin/model/use-admin-applications";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import type { AdminLawyerApplication } from "../../../features/admin/api/admin-lawyer-api";
 import StatCard from "../../../shared/ui/StatCard";
 import editorialTableComponents from "../../../shared/ui/table-components";
@@ -93,6 +94,7 @@ const fmtDate = (v: string) => new Date(v).toLocaleDateString("ru-KZ", { day: "2
 
 // ─── Main panel ───────────────────────────────────────────────
 export default function AdminLawyerApplicationsPanel() {
+  const isMobile = useIsMobile();
   const { message } = App.useApp();
   void message;
 
@@ -184,7 +186,7 @@ export default function AdminLawyerApplicationsPanel() {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "24px 16px 40px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", flexDirection: isMobile ? "column" : ("row" as React.CSSProperties["flexDirection"]), alignItems: isMobile ? "flex-start" : "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
               Заявки на статус адвоката
@@ -207,9 +209,9 @@ export default function AdminLawyerApplicationsPanel() {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
-        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 12 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Всего заявок"       value={stats.total}    color="#0F2A44" icon={<Users size={26} />} />
           <StatCard label="На рассмотрении"    value={stats.pending}  color="#1d4ed8" icon={<Clock size={26} />} />
           <StatCard label="Одобрено"           value={stats.approved} color="#059669" icon={<ShieldCheck size={26} />} />

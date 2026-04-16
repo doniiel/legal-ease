@@ -1,6 +1,7 @@
 import {
   Table, Button, Drawer, Form, Select, Input, Typography, Tooltip, Divider,
 } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import type { ColumnsType } from "antd/es/table";
 import {
   FileText, CheckCircle2, Clock, AlertCircle,
@@ -50,6 +51,7 @@ function IconBtn({ icon, tooltip, onClick, hoverBg, hoverColor, disabled = false
 
 // ─── Main panel ───────────────────────────────────────────────
 export default function LawyerDocumentsPanel() {
+  const isMobile = useIsMobile();
   const {
     form, page, setPage, search, setSearch, statusFilter, setStatusFilter,
     reviewModal, detailDrawer,
@@ -116,7 +118,7 @@ export default function LawyerDocumentsPanel() {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "24px 16px 48px" : "40px 40px 56px", display: "flex", flexDirection: isMobile ? "column" as React.CSSProperties["flexDirection"] : "row" as React.CSSProperties["flexDirection"], justifyContent: "space-between", alignItems: "flex-end", gap: isMobile ? 16 : undefined, position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Документы клиентов</h1>
             <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>Документы на основе ваших шаблонов — просмотр и добавление ревью</p>
@@ -135,9 +137,9 @@ export default function LawyerDocumentsPanel() {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
-        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+        <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : undefined, gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Всего документов" value={data?.totalElements ?? 0} color="#0F2A44" icon={<FileText size={26} />} loading={isLoading} />
           <StatCard label="В работе"          value={processingCount}          color="#f59e0b" icon={<Clock size={26} />} />
           <StatCard label="Завершённые"       value={completedCount}           color="#059669" icon={<CheckCircle2 size={26} />} />

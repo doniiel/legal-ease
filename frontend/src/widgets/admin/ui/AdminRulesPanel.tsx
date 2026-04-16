@@ -3,6 +3,7 @@ import { Table, Switch, Tag, Typography, Input, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { Search } from "lucide-react";
 import { useRules } from "../../../features/admin/model/use-rules";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import editorialTableComponents from "../../../shared/ui/table-components";
 import type {
   AdminValidationRule,
@@ -141,6 +142,7 @@ function SummaryCard({ label, value, total, color, description }: { label: strin
 
 // ─── Main Panel ───────────────────────────────────────────────
 export default function AdminRulesPanel() {
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabKey>("validation");
   const [search, setSearch] = useState("");
 
@@ -179,7 +181,7 @@ export default function AdminRulesPanel() {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "48px 48px 96px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "24px 16px 80px" : "48px 48px 96px", display: "flex", justifyContent: "space-between", flexDirection: isMobile ? "column" : ("row" as React.CSSProperties["flexDirection"]), alignItems: isMobile ? "flex-start" : "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: 0, fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
               Управление правилами
@@ -201,7 +203,7 @@ export default function AdminRulesPanel() {
       </div>
 
       {/* ── Overlapping content card ── */}
-      <div style={{ padding: "0 48px 48px", marginTop: -48, position: "relative", zIndex: 10 }}>
+      <div style={{ padding: isMobile ? "0 16px 24px" : "0 48px 48px", marginTop: -48, position: "relative", zIndex: 10 }}>
         <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 20px 60px rgba(11,28,48,0.12)", overflow: "hidden" }}>
 
           {/* Filter bar */}
@@ -269,7 +271,7 @@ export default function AdminRulesPanel() {
 
           {/* Summary stat cards */}
           <div style={{ padding: "28px 24px", borderTop: "1px solid #f1f5f9" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 16 }}>
               <SummaryCard
                 label="Валидация"
                 value={validationRules.filter((r) => r.active).length}

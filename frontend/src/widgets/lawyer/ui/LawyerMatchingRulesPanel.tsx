@@ -2,6 +2,7 @@ import {
   Table, Button, Modal, Form, Input, InputNumber, Select,
   Typography, Tooltip,
 } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import type { ColumnsType } from "antd/es/table";
 import {
   GitMerge, Search, Plus, Pencil, Trash2, RotateCcw,
@@ -49,6 +50,7 @@ function IconBtn({ icon, tooltip, onClick, hoverBg, hoverColor, disabled = false
 
 // ─── Main panel ───────────────────────────────────────────────
 export default function LawyerMatchingRulesPanel() {
+  const isMobile = useIsMobile();
   const {
     form, search, setSearch, modalOpen,
     editingRule, isLoading, isCreating, isUpdating, isDeleting,
@@ -133,7 +135,7 @@ export default function LawyerMatchingRulesPanel() {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "24px 16px 48px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Правила матчинга</h1>
             <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>Настройка логики подбора шаблонов для клиентских запросов</p>
@@ -158,7 +160,7 @@ export default function LawyerMatchingRulesPanel() {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Всего правил"   value={rules.length}      color="#0F2A44" icon={<GitMerge size={26} />} loading={isLoading} />

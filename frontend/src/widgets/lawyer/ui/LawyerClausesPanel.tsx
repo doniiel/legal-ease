@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   App, Table, Input, Select, Tooltip, Form,
 } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import type { ColumnsType } from "antd/es/table";
 import {
   BookOpen, Plus, Search, RotateCcw, Pencil, Trash2, Tag, FolderOpen,
@@ -40,6 +41,7 @@ function IconBtn({ icon, tooltip, onClick, hoverColor }: { icon: React.ReactNode
 }
 
 export default function LawyerClausesPanel() {
+  const isMobile = useIsMobile();
   const { message } = App.useApp();
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState("");
@@ -162,12 +164,12 @@ export default function LawyerClausesPanel() {
   ];
 
   return (
-    <div style={{ padding: "0 32px 32px" }}>
+    <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
       {/* ── Full-bleed hero ── */}
       <div style={{
         background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-        padding: "40px 40px 56px",
-        marginLeft: -32, marginRight: -32,
+        padding: isMobile ? "24px 16px 48px" : "40px 40px 56px",
+        marginLeft: isMobile ? -12 : -32, marginRight: isMobile ? -12 : -32,
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>

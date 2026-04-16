@@ -9,6 +9,7 @@ import {
   ShieldCheck, ShieldX, Lock, Unlock, FileSearch, Users,
 } from "lucide-react";
 import { useAdminAudit } from "../../../features/admin/model/use-admin-audit";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import type { AuditLog } from "../../../features/admin/api/admin-audit-api";
 import StatCard from "../../../shared/ui/StatCard";
 import editorialTableComponents from "../../../shared/ui/table-components";
@@ -76,6 +77,7 @@ const fmtDate = (v: string) =>
 
 // ─── Main panel ───────────────────────────────────────────────
 export default function AdminAuditPanel() {
+  const isMobile = useIsMobile();
   const {
     page, setPage,
     emailSearch, setEmailSearch,
@@ -165,7 +167,7 @@ export default function AdminAuditPanel() {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "24px 16px 40px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", flexDirection: isMobile ? "column" : ("row" as React.CSSProperties["flexDirection"]), alignItems: isMobile ? "flex-start" : "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
               Аудит логи
@@ -188,9 +190,9 @@ export default function AdminAuditPanel() {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
-        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: isMobile ? 12 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Всего записей"       value={data?.totalElements} color="#0F2A44" icon={<ScrollText size={26} />} loading={isLoading} />
           <StatCard label="На странице"         value={filtered.length}     color="#1677ff" icon={<FileSearch size={26} />} />
           <StatCard label="Уникальных польз."   value={uniqueUsers}         color="#7c3aed" icon={<Users size={26} />} />

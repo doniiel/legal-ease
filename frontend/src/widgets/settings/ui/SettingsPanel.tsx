@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { App, Card, Input, Col, Row, Spin } from "antd";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
   Settings,
   KeyRound,
@@ -81,6 +82,7 @@ function StepDots({ step }: { step: number }) {
 
 export default function SettingsPanel() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { message } = App.useApp();
   const { logout } = useAuth();
 
@@ -147,14 +149,14 @@ export default function SettingsPanel() {
   };
 
   return (
-    <div style={{ padding: "0 32px 32px" }}>
+    <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
       {/* ── Full-bleed hero ── */}
       <div
         style={{
           background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-          padding: "40px 40px 56px",
-          marginLeft: -32,
-          marginRight: -32,
+          padding: isMobile ? "24px 16px 40px" : "40px 40px 56px",
+          marginLeft: isMobile ? -16 : -32,
+          marginRight: isMobile ? -16 : -32,
           display: "flex",
           alignItems: "center",
           gap: 20,
