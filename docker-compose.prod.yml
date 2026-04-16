@@ -79,7 +79,7 @@ services:
     networks:
       - legalease-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9191/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "nc -z localhost 9191 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -94,7 +94,7 @@ services:
     networks:
       - legalease-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      test: ["CMD-SHELL", "test -f /var/run/nginx.pid"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -114,7 +114,7 @@ services:
     networks:
       - legalease-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      test: ["CMD-SHELL", "test -f /var/run/nginx.pid"]
       interval: 30s
       timeout: 5s
       retries: 3
