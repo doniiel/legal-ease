@@ -1,0 +1,1588 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Demo seed data for investor presentation.
+
+        Passwords (BCrypt, same hash as admin accounts):
+          All demo accounts → Admin@1234
+
+        Lawyers:
+          aidos.bekzhanov@legalease.kz
+          aliya.nurlanova@legalease.kz
+          marat.seitkali@legalease.kz
+
+        Regular users:
+          asel.zhaksybekova@mail.kz
+          nurlan.akhmetov@mail.kz
+          zhanara.kasymova@mail.kz
+          serik.tulegenov@mail.kz
+          gulnar.sabitova@mail.kz
+    -->
+
+    <!-- ═══════════════════════════════════════════════════════
+         1. LAWYERS
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-001-demo-lawyers" author="daniyal">
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="900101350001"/>
+            <column name="email" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="phone" value="+77011234501"/>
+            <column name="fio" value="Бекжанов Айдос Серикович"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="1990-01-01"/>
+            <column name="gender" value="MALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'LAWYER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="850515450002"/>
+            <column name="email" value="aliya.nurlanova@legalease.kz"/>
+            <column name="phone" value="+77011234502"/>
+            <column name="fio" value="Нурланова Алия Маратовна"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="1985-05-15"/>
+            <column name="gender" value="FEMALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'aliya.nurlanova@legalease.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'LAWYER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="780220350003"/>
+            <column name="email" value="marat.seitkali@legalease.kz"/>
+            <column name="phone" value="+77011234503"/>
+            <column name="fio" value="Сейткали Марат Аманович"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="1978-02-20"/>
+            <column name="gender" value="MALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'LAWYER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         2. REGULAR USERS
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-002-demo-users" author="daniyal">
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="950312350101"/>
+            <column name="email" value="asel.zhaksybekova@mail.kz"/>
+            <column name="phone" value="+77021110101"/>
+            <column name="fio" value="Жаксыбекова Асель Нурлановна"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="1995-03-12"/>
+            <column name="gender" value="FEMALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'USER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="880607450102"/>
+            <column name="email" value="nurlan.akhmetov@mail.kz"/>
+            <column name="phone" value="+77021110102"/>
+            <column name="fio" value="Ахметов Нурлан Бейбутович"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="1988-06-07"/>
+            <column name="gender" value="MALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'USER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="920914550103"/>
+            <column name="email" value="zhanara.kasymova@mail.kz"/>
+            <column name="phone" value="+77021110103"/>
+            <column name="fio" value="Касымова Жанара Ермековна"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="1992-09-14"/>
+            <column name="gender" value="FEMALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'zhanara.kasymova@mail.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'USER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="010101600104"/>
+            <column name="email" value="serik.tulegenov@mail.kz"/>
+            <column name="phone" value="+77021110104"/>
+            <column name="fio" value="Тулегенов Серик Болатович"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="2001-01-01"/>
+            <column name="gender" value="MALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'serik.tulegenov@mail.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'USER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="users">
+            <column name="id" valueSequenceNext="user_seq_gen"/>
+            <column name="iin" value="850330250105"/>
+            <column name="email" value="gulnar.sabitova@mail.kz"/>
+            <column name="phone" value="+77021110105"/>
+            <column name="fio" value="Сабитова Гульнар Асановна"/>
+            <column name="password" value="$2a$12$CZe5EJDWi6c0qWD7oqFFRu/w4YfHQ26ov5usaSb2y.vXj2z4.bKoq"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="date_of_birth" value="1985-03-30"/>
+            <column name="gender" value="FEMALE"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="user_role">
+            <column name="id" valueSequenceNext="user_role_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'gulnar.sabitova@mail.kz')"/>
+            <column name="role_id" valueComputed="(SELECT id FROM role WHERE code = 'USER')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="assigned_at" valueComputed="NOW()"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         3. CATEGORIES (5)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-003-demo-categories" author="daniyal">
+
+        <insert tableName="categories">
+            <column name="id" valueSequenceNext="category_seq_gen"/>
+            <column name="name" value="Аренда недвижимости"/>
+            <column name="description" value="Договоры аренды жилых и коммерческих помещений, земельных участков"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="id" valueSequenceNext="category_seq_gen"/>
+            <column name="name" value="Трудовые отношения"/>
+            <column name="description" value="Трудовые договоры, приказы, соглашения о неразглашении и материальной ответственности"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="id" valueSequenceNext="category_seq_gen"/>
+            <column name="name" value="Купля-продажа"/>
+            <column name="description" value="Договоры купли-продажи недвижимости, транспортных средств и иного имущества"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="id" valueSequenceNext="category_seq_gen"/>
+            <column name="name" value="Услуги и подряд"/>
+            <column name="description" value="Договоры оказания услуг, подряда, агентские и дистрибьюторские соглашения"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="categories">
+            <column name="id" valueSequenceNext="category_seq_gen"/>
+            <column name="name" value="Займы и кредиты"/>
+            <column name="description" value="Договоры займа, беспроцентного займа, залога и поручительства"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         4. TEMPLATES — Аренда недвижимости
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-004-demo-templates-rental" author="daniyal">
+
+        <!-- T1: Договор аренды квартиры -->
+        <insert tableName="templates">
+            <column name="id" valueSequenceNext="template_seq_gen"/>
+            <column name="title" value="Договор аренды жилого помещения (квартиры)"/>
+            <column name="description" value="Стандартный договор аренды квартиры между физическими лицами. Включает условия оплаты, срок аренды, права и обязанности сторон."/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Аренда недвижимости')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="body" value="ДОГОВОР АРЕНДЫ ЖИЛОГО ПОМЕЩЕНИЯ №{{contract_number}}
+
+г. Алматы, {{contract_date}}
+
+{{landlord_fio}} (ИИН: {{landlord_iin}}), именуемый(ая) в дальнейшем «Арендодатель», с одной стороны, и {{tenant_fio}} (ИИН: {{tenant_iin}}), именуемый(ая) в дальнейшем «Арендатор», с другой стороны, заключили настоящий договор о нижеследующем:
+
+1. ПРЕДМЕТ ДОГОВОРА
+1.1. Арендодатель передаёт Арендатору во временное возмездное пользование жилое помещение (квартиру), расположенное по адресу: {{property_address}}, общей площадью {{property_area}} кв.м.
+
+2. СРОК АРЕНДЫ
+2.1. Договор заключён на срок с {{start_date}} по {{end_date}}.
+
+3. АРЕНДНАЯ ПЛАТА И ПОРЯДОК РАСЧЁТОВ
+3.1. Ежемесячная арендная плата составляет {{monthly_rent}} тенге.
+3.2. Оплата производится не позднее {{payment_day}}-го числа каждого месяца.
+3.3. Депозит в размере {{deposit_amount}} тенге вносится при подписании настоящего договора и возвращается при выезде.
+
+4. ОБЯЗАННОСТИ АРЕНДОДАТЕЛЯ
+4.1. Передать помещение в состоянии, пригодном для проживания.
+4.2. Обеспечить бесперебойное предоставление коммунальных услуг.
+
+5. ОБЯЗАННОСТИ АРЕНДАТОРА
+5.1. Использовать помещение исключительно для проживания.
+5.2. Своевременно вносить арендную плату.
+5.3. Содержать помещение в надлежащем санитарном состоянии.
+5.4. Не производить перепланировку без письменного согласия Арендодателя.
+
+6. ДОСРОЧНОЕ РАСТОРЖЕНИЕ
+6.1. Каждая из сторон вправе расторгнуть договор, уведомив другую сторону не позднее чем за 30 (тридцать) дней.
+
+7. РЕКВИЗИТЫ И ПОДПИСИ СТОРОН
+
+Арендодатель: {{landlord_fio}}                    Арендатор: {{tenant_fio}}"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '15 days'"/>
+        </insert>
+        <!-- Fields for T1 -->
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="label" value="Номер договора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="0"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="contract_date"/>
+            <column name="label" value="Дата заключения договора"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="landlord_fio"/>
+            <column name="label" value="ФИО Арендодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="landlord_iin"/>
+            <column name="label" value="ИИН Арендодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="tenant_fio"/>
+            <column name="label" value="ФИО Арендатора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="tenant_iin"/>
+            <column name="label" value="ИИН Арендатора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="property_address"/>
+            <column name="label" value="Адрес квартиры"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="6"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="property_area"/>
+            <column name="label" value="Площадь (кв.м)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="7"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="label" value="Дата начала аренды"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="8"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="end_date"/>
+            <column name="label" value="Дата окончания аренды"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="9"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="label" value="Ежемесячная арендная плата (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="10"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="payment_day"/>
+            <column name="label" value="День оплаты (число месяца)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="11"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="deposit_amount"/>
+            <column name="label" value="Сумма депозита (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="12"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- T2: Договор аренды коммерческого помещения -->
+        <insert tableName="templates">
+            <column name="id" valueSequenceNext="template_seq_gen"/>
+            <column name="title" value="Договор аренды коммерческого помещения"/>
+            <column name="description" value="Договор аренды офиса, магазина или склада между юридическим лицом и арендатором. Содержит условия целевого использования и ответственности."/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Аренда недвижимости')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aliya.nurlanova@legalease.kz')"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="body" value="ДОГОВОР АРЕНДЫ НЕЖИЛОГО (КОММЕРЧЕСКОГО) ПОМЕЩЕНИЯ №{{contract_number}}
+
+г. {{city}}, {{contract_date}}
+
+{{landlord_name}} (БИН/ИИН: {{landlord_bin}}), именуемое(ый) в дальнейшем «Арендодатель», в лице {{landlord_representative}}, действующего на основании {{authority_document}}, с одной стороны, и {{tenant_name}} (БИН/ИИН: {{tenant_bin}}), именуемое(ый) в дальнейшем «Арендатор», с другой стороны, заключили настоящий договор:
+
+1. ПРЕДМЕТ ДОГОВОРА
+1.1. Арендодатель предоставляет Арендатору нежилое помещение, расположенное по адресу: {{property_address}}, площадью {{property_area}} кв.м., для использования в качестве {{intended_use}}.
+
+2. СРОК АРЕНДЫ
+2.1. Срок аренды: с {{start_date}} по {{end_date}}.
+
+3. АРЕНДНАЯ ПЛАТА
+3.1. Ежемесячная арендная плата: {{monthly_rent}} тенге (без НДС).
+3.2. НДС ({{vat_rate}}%): {{vat_amount}} тенге. Итого с НДС: {{total_rent}} тенге.
+3.3. Оплата производится не позднее {{payment_day}}-го числа текущего месяца.
+
+4. КОММУНАЛЬНЫЕ ПЛАТЕЖИ
+4.1. Коммунальные услуги оплачиваются Арендатором самостоятельно на основании показаний счётчиков.
+
+5. ОТВЕТСТВЕННОСТЬ СТОРОН
+5.1. За просрочку оплаты Арендатор уплачивает пеню в размере {{penalty_rate}}% от суммы задолженности за каждый день просрочки.
+
+Арендодатель: {{landlord_name}}               Арендатор: {{tenant_name}}"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '12 days'"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="label" value="Номер договора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="0"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="city"/>
+            <column name="label" value="Город"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="landlord_name"/>
+            <column name="label" value="Наименование Арендодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="tenant_name"/>
+            <column name="label" value="Наименование Арендатора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="property_address"/>
+            <column name="label" value="Адрес помещения"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="label" value="Ежемесячная аренда (тенге, без НДС)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="intended_use"/>
+            <column name="label" value="Целевое использование помещения"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="6"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         5. TEMPLATES — Трудовые отношения
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-005-demo-templates-labor" author="daniyal">
+
+        <!-- T3: Трудовой договор -->
+        <insert tableName="templates">
+            <column name="id" valueSequenceNext="template_seq_gen"/>
+            <column name="title" value="Трудовой договор (стандартный)"/>
+            <column name="description" value="Трудовой договор в соответствии с Трудовым кодексом РК. Охватывает условия труда, оплату, режим работы и ответственность сторон."/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Трудовые отношения')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="body" value="ТРУДОВОЙ ДОГОВОР №{{contract_number}}
+
+г. {{city}}, {{contract_date}}
+
+{{employer_name}} (БИН: {{employer_bin}}), именуемый в дальнейшем «Работодатель», в лице {{employer_representative}}, действующего на основании {{authority_document}}, с одной стороны, и {{employee_fio}} (ИИН: {{employee_iin}}), именуемый(ая) в дальнейшем «Работник», с другой стороны, заключили настоящий трудовой договор:
+
+1. ПРЕДМЕТ ДОГОВОРА
+1.1. Работодатель принимает Работника на должность «{{position}}» в подразделение «{{department}}».
+1.2. Место работы: {{workplace_address}}.
+1.3. Характер работы: {{work_type}}.
+
+2. СРОК ДОГОВОРА
+2.1. Договор является {{contract_type}} (срочным/бессрочным).
+2.2. Дата начала работы: {{start_date}}.
+{{#if end_date}}2.3. Дата окончания: {{end_date}}.{{/if}}
+
+3. ОПЛАТА ТРУДА
+3.1. Должностной оклад Работника составляет {{monthly_salary}} тенге в месяц.
+3.2. Выплата заработной платы производится {{payroll_day}}-го числа каждого месяца.
+
+4. РЕЖИМ РАБОЧЕГО ВРЕМЕНИ
+4.1. Рабочая неделя: {{work_schedule}}.
+4.2. Продолжительность рабочего дня: {{work_hours}} часов.
+
+5. ОБЯЗАННОСТИ СТОРОН
+5.1. Работодатель обязуется обеспечить Работника необходимым оборудованием и безопасными условиями труда.
+5.2. Работник обязуется добросовестно исполнять должностные обязанности, соблюдать трудовую дисциплину.
+
+6. ОТПУСК
+6.1. Ежегодный оплачиваемый отпуск: {{vacation_days}} календарных дней.
+
+Работодатель: {{employer_name}}               Работник: {{employee_fio}}"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '20 days'"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="employer_name"/>
+            <column name="label" value="Наименование работодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="0"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="employee_fio"/>
+            <column name="label" value="ФИО работника"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="position"/>
+            <column name="label" value="Должность"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="monthly_salary"/>
+            <column name="label" value="Должностной оклад (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="label" value="Дата начала работы"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="vacation_days"/>
+            <column name="label" value="Дней ежегодного отпуска"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         6. TEMPLATES — Купля-продажа & Услуги & Займы
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-006-demo-templates-other" author="daniyal">
+
+        <!-- T4: Договор купли-продажи автомобиля -->
+        <insert tableName="templates">
+            <column name="id" valueSequenceNext="template_seq_gen"/>
+            <column name="title" value="Договор купли-продажи транспортного средства"/>
+            <column name="description" value="Договор между физическими лицами о продаже автомобиля. Включает описание ТС, цену, порядок передачи и гарантии."/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Купля-продажа')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="body" value="ДОГОВОР КУПЛИ-ПРОДАЖИ ТРАНСПОРТНОГО СРЕДСТВА
+
+г. {{city}}, {{contract_date}}
+
+{{seller_fio}} (ИИН: {{seller_iin}}), именуемый(ая) в дальнейшем «Продавец», и {{buyer_fio}} (ИИН: {{buyer_iin}}), именуемый(ая) в дальнейшем «Покупатель», заключили настоящий договор:
+
+1. ПРЕДМЕТ ДОГОВОРА
+1.1. Продавец продаёт, а Покупатель покупает транспортное средство:
+  - Марка/модель: {{vehicle_make_model}}
+  - Год выпуска: {{vehicle_year}}
+  - Государственный номер: {{vehicle_plate}}
+  - VIN-код: {{vehicle_vin}}
+  - Цвет: {{vehicle_color}}
+
+2. ЦЕНА И ПОРЯДОК РАСЧЁТОВ
+2.1. Стоимость автомобиля составляет {{sale_price}} тенге.
+2.2. Оплата производится {{payment_method}}.
+
+3. ПЕРЕДАЧА ТРАНСПОРТНОГО СРЕДСТВА
+3.1. Продавец передаёт автомобиль в течение {{transfer_days}} рабочих дней с момента оплаты.
+3.2. Передача оформляется актом приёма-передачи.
+
+4. ГАРАНТИИ ПРОДАВЦА
+4.1. Продавец гарантирует, что ТС не заложено, не арестовано, не является предметом споров.
+4.2. Пробег на момент продажи: {{mileage}} км.
+
+Продавец: {{seller_fio}}                    Покупатель: {{buyer_fio}}"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '10 days'"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="seller_fio"/>
+            <column name="label" value="ФИО Продавца"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="0"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="buyer_fio"/>
+            <column name="label" value="ФИО Покупателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_make_model"/>
+            <column name="label" value="Марка и модель ТС"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_year"/>
+            <column name="label" value="Год выпуска"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="sale_price"/>
+            <column name="label" value="Стоимость ТС (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- T5: Договор оказания услуг -->
+        <insert tableName="templates">
+            <column name="id" valueSequenceNext="template_seq_gen"/>
+            <column name="title" value="Договор оказания услуг"/>
+            <column name="description" value="Договор между исполнителем и заказчиком об оказании профессиональных услуг. Подходит для консалтинга, IT, дизайна и других услуг."/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Услуги и подряд')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aliya.nurlanova@legalease.kz')"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="body" value="ДОГОВОР ОКАЗАНИЯ УСЛУГ №{{contract_number}}
+
+г. {{city}}, {{contract_date}}
+
+{{customer_name}} (ИИН/БИН: {{customer_bin}}), именуемый(ая) в дальнейшем «Заказчик», и {{provider_name}} (ИИН/БИН: {{provider_bin}}), именуемый(ая) в дальнейшем «Исполнитель», заключили настоящий договор:
+
+1. ПРЕДМЕТ ДОГОВОРА
+1.1. Исполнитель обязуется по заданию Заказчика оказать следующие услуги: {{service_description}}.
+1.2. Результат услуг: {{service_result}}.
+
+2. СРОКИ ОКАЗАНИЯ УСЛУГ
+2.1. Начало оказания услуг: {{start_date}}.
+2.2. Окончание: {{end_date}}.
+
+3. СТОИМОСТЬ УСЛУГ И ПОРЯДОК РАСЧЁТОВ
+3.1. Стоимость услуг составляет {{total_price}} тенге.
+3.2. Авансовый платёж: {{advance_payment}} тенге ({{advance_percent}}% от общей стоимости) — в течение 3 рабочих дней с момента подписания.
+3.3. Окончательный расчёт: в течение 5 рабочих дней после подписания акта приёмки-сдачи.
+
+4. ПОРЯДОК ПРИЁМКИ
+4.1. По завершении Исполнитель передаёт Заказчику результат и акт приёмки-сдачи.
+4.2. Заказчик обязан принять результат или направить мотивированный отказ в течение 5 рабочих дней.
+
+5. ОТВЕТСТВЕННОСТЬ
+5.1. За просрочку оказания услуг Исполнитель уплачивает пеню {{penalty_rate}}% от стоимости за каждый день просрочки.
+
+Заказчик: {{customer_name}}               Исполнитель: {{provider_name}}"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '8 days'"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="customer_name"/>
+            <column name="label" value="Наименование Заказчика"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="0"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="provider_name"/>
+            <column name="label" value="Наименование Исполнителя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="service_description"/>
+            <column name="label" value="Описание услуг"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="total_price"/>
+            <column name="label" value="Общая стоимость услуг (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="label" value="Дата начала услуг"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="end_date"/>
+            <column name="label" value="Дата окончания услуг"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- T6: Договор займа -->
+        <insert tableName="templates">
+            <column name="id" valueSequenceNext="template_seq_gen"/>
+            <column name="title" value="Договор займа между физическими лицами"/>
+            <column name="description" value="Договор займа денежных средств между физическими лицами с указанием суммы, процентной ставки и срока возврата."/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Займы и кредиты')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="status" value="PUBLISHED"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="body" value="ДОГОВОР ЗАЙМА №{{contract_number}}
+
+г. {{city}}, {{contract_date}}
+
+{{lender_fio}} (ИИН: {{lender_iin}}), именуемый(ая) в дальнейшем «Займодавец», и {{borrower_fio}} (ИИН: {{borrower_iin}}), именуемый(ая) в дальнейшем «Заёмщик», заключили настоящий договор:
+
+1. ПРЕДМЕТ ДОГОВОРА
+1.1. Займодавец передаёт Заёмщику денежные средства в размере {{loan_amount}} тенге («Сумма займа»).
+1.2. Заёмщик обязуется возвратить Сумму займа в срок до {{repayment_date}}.
+
+2. ПРОЦЕНТЫ ЗА ПОЛЬЗОВАНИЕ ЗАЙМОМ
+2.1. За пользование займом Заёмщик уплачивает {{interest_rate}}% годовых.
+2.2. Проценты начисляются ежемесячно и уплачиваются вместе с возвратом основного долга.
+
+3. ПОРЯДОК ПЕРЕДАЧИ И ВОЗВРАТА
+3.1. Сумма займа передаётся {{transfer_method}}.
+3.2. Возврат осуществляется {{repayment_method}}.
+
+4. ОТВЕТСТВЕННОСТЬ ЗАЁМЩИКА
+4.1. При просрочке возврата Заёмщик уплачивает пеню {{penalty_rate}}% от суммы задолженности за каждый день просрочки.
+
+5. ДОСРОЧНЫЙ ВОЗВРАТ
+5.1. Заёмщик вправе вернуть заём досрочно, уведомив Займодавца за {{early_repayment_notice}} дней.
+
+Займодавец: {{lender_fio}}               Заёмщик: {{borrower_fio}}"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '5 days'"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="lender_fio"/>
+            <column name="label" value="ФИО Займодавца"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="0"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="borrower_fio"/>
+            <column name="label" value="ФИО Заёмщика"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="loan_amount"/>
+            <column name="label" value="Сумма займа (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="interest_rate"/>
+            <column name="label" value="Процентная ставка (% годовых)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="repayment_date"/>
+            <column name="label" value="Дата возврата займа"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required" valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         7. DOCUMENTS created by regular users
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-007-demo-documents" author="daniyal">
+
+        <!-- DOC-1: Asel rents an apartment (VALIDATED) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="title" value="Аренда квартиры на Достык, Асель"/>
+            <column name="status" value="VALIDATED"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="1"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '7 days'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="field_value" value="АА-2026-0001"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="contract_date"/>
+            <column name="field_value" value="15.04.2026"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="landlord_fio"/>
+            <column name="field_value" value="Иванов Александр Петрович"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="landlord_iin"/>
+            <column name="field_value" value="750318350210"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="tenant_fio"/>
+            <column name="field_value" value="Жаксыбекова Асель Нурлановна"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="tenant_iin"/>
+            <column name="field_value" value="950312350101"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="property_address"/>
+            <column name="field_value" value="г. Алматы, ул. Достык, д. 92, кв. 14"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="property_area"/>
+            <column name="field_value" value="65"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="field_value" value="01.05.2026"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="end_date"/>
+            <column name="field_value" value="30.04.2027"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="field_value" value="220000"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="payment_day"/>
+            <column name="field_value" value="5"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="field_key" value="deposit_amount"/>
+            <column name="field_value" value="440000"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- DOC-2: Nurlan employment contract (COMPLETED) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="title" value="Трудовой договор — ТОО «АльфаТех», Нурлан"/>
+            <column name="status" value="COMPLETED"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="1"/>
+            <column name="content_hash" value="a3f8c2d1e4b79506a1c8d3e7f2b04951a6c8d3e7f2b049510f1a2b3c4d5e6f7"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '14 days'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="field_key" value="employer_name"/>
+            <column name="field_value" value="ТОО «АльфаТех»"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="field_key" value="employee_fio"/>
+            <column name="field_value" value="Ахметов Нурлан Бейбутович"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="field_key" value="position"/>
+            <column name="field_value" value="Старший разработчик программного обеспечения"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="field_key" value="monthly_salary"/>
+            <column name="field_value" value="750000"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="field_value" value="01.04.2026"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="field_key" value="vacation_days"/>
+            <column name="field_value" value="24"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- DOC-3: Zhanara car purchase (DRAFT) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'zhanara.kasymova@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="title" value="Покупка Toyota Camry 2023, Жанара"/>
+            <column name="status" value="DRAFT"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="0"/>
+            <column name="created_by" value="zhanara.kasymova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '2 days'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Покупка Toyota Camry 2023, Жанара')"/>
+            <column name="field_key" value="seller_fio"/>
+            <column name="field_value" value="Досмагамбетов Ержан Каиргалиевич"/>
+            <column name="created_by" value="zhanara.kasymova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Покупка Toyota Camry 2023, Жанара')"/>
+            <column name="field_key" value="buyer_fio"/>
+            <column name="field_value" value="Касымова Жанара Ермековна"/>
+            <column name="created_by" value="zhanara.kasymova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Покупка Toyota Camry 2023, Жанара')"/>
+            <column name="field_key" value="vehicle_make_model"/>
+            <column name="field_value" value="Toyota Camry 3.5 Prestige"/>
+            <column name="created_by" value="zhanara.kasymova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Покупка Toyota Camry 2023, Жанара')"/>
+            <column name="field_key" value="vehicle_year"/>
+            <column name="field_value" value="2023"/>
+            <column name="created_by" value="zhanara.kasymova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Покупка Toyota Camry 2023, Жанара')"/>
+            <column name="field_key" value="sale_price"/>
+            <column name="field_value" value="18500000"/>
+            <column name="created_by" value="zhanara.kasymova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- DOC-4: Serik service agreement (VALIDATED) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'serik.tulegenov@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="title" value="Разработка сайта — ИП «DigitalStep», Серик"/>
+            <column name="status" value="VALIDATED"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="1"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '5 days'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Разработка сайта — ИП «DigitalStep», Серик')"/>
+            <column name="field_key" value="customer_name"/>
+            <column name="field_value" value="ТОО «NovaMart»"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Разработка сайта — ИП «DigitalStep», Серик')"/>
+            <column name="field_key" value="provider_name"/>
+            <column name="field_value" value="ИП «DigitalStep» (Тулегенов С.Б.)"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Разработка сайта — ИП «DigitalStep», Серик')"/>
+            <column name="field_key" value="service_description"/>
+            <column name="field_value" value="Разработка корпоративного веб-сайта с CMS и интеграцией с системой 1С"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Разработка сайта — ИП «DigitalStep», Серик')"/>
+            <column name="field_key" value="total_price"/>
+            <column name="field_value" value="1500000"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Разработка сайта — ИП «DigitalStep», Серик')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="field_value" value="20.04.2026"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Разработка сайта — ИП «DigitalStep», Серик')"/>
+            <column name="field_key" value="end_date"/>
+            <column name="field_value" value="20.07.2026"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- DOC-5: Gulnar loan agreement (COMPLETED) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'gulnar.sabitova@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="title" value="Займ 5 000 000 тенге — Гульнар и Асет"/>
+            <column name="status" value="COMPLETED"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="1"/>
+            <column name="content_hash" value="b7d9e2f4c1a056781b9e2f4c1a056781b9e2f4c1a0567810f2b3d4e5f6a7c8d"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '20 days'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Займ 5 000 000 тенге — Гульнар и Асет')"/>
+            <column name="field_key" value="lender_fio"/>
+            <column name="field_value" value="Сабитова Гульнар Асановна"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Займ 5 000 000 тенге — Гульнар и Асет')"/>
+            <column name="field_key" value="borrower_fio"/>
+            <column name="field_value" value="Оспанов Асет Нурмагамбетович"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Займ 5 000 000 тенге — Гульнар и Асет')"/>
+            <column name="field_key" value="loan_amount"/>
+            <column name="field_value" value="5000000"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Займ 5 000 000 тенге — Гульнар и Асет')"/>
+            <column name="field_key" value="interest_rate"/>
+            <column name="field_value" value="12"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Займ 5 000 000 тенге — Гульнар и Асет')"/>
+            <column name="field_key" value="repayment_date"/>
+            <column name="field_value" value="01.04.2027"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         8. DOCUMENT REVIEWS by lawyers
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-008-demo-reviews" author="daniyal">
+
+        <!-- Review of Asel's apartment lease — APPROVED by Aidos -->
+        <insert tableName="document_reviews">
+            <column name="id" valueSequenceNext="document_review_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="notes" value="Договор составлен корректно. Все существенные условия соблюдены: стороны идентифицированы по ИИН, указан точный адрес объекта, срок аренды и порядок расчётов чётко прописаны. Размер депозита соответствует двухмесячной арендной плате — стандартная практика. Рекомендую к подписанию."/>
+            <column name="risk_level" value="LOW"/>
+            <column name="recommended" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '6 days'"/>
+        </insert>
+
+        <!-- Review of Nurlan's employment contract — APPROVED by Aliya -->
+        <insert tableName="document_reviews">
+            <column name="id" valueSequenceNext="document_review_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aliya.nurlanova@legalease.kz')"/>
+            <column name="notes" value="Трудовой договор полностью соответствует Трудовому кодексу РК. Условия оплаты труда и режим работы сформулированы однозначно. Срок ежегодного отпуска (24 дня) превышает установленный законом минимум, что является преимуществом для работника. Замечаний нет. Рекомендую к подписанию обеими сторонами."/>
+            <column name="risk_level" value="LOW"/>
+            <column name="recommended" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '13 days'"/>
+        </insert>
+
+        <!-- Review of Serik's service agreement — NEEDS REVISION by Marat -->
+        <insert tableName="document_reviews">
+            <column name="id" valueSequenceNext="document_review_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Разработка сайта — ИП «DigitalStep», Серик')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="notes" value="Договор требует доработки. Выявлены следующие недостатки: 1) Не указан механизм разрешения споров (суд или арбитраж). 2) Отсутствует пункт о конфиденциальности и принадлежности интеллектуальной собственности на разработанный сайт. 3) Не определён порядок внесения изменений в техническое задание и влияние изменений на стоимость. Рекомендую доработать до подписания."/>
+            <column name="risk_level" value="MEDIUM"/>
+            <column name="recommended" valueBoolean="false"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '4 days'"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         9. LEGAL CLAUSES (lawyer knowledge base)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-009-demo-legal-clauses" author="daniyal">
+
+        <insert tableName="legal_clauses">
+            <column name="id" valueSequenceNext="legal_clause_seq"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="title" value="Стандартный депозит при аренде жилья"/>
+            <column name="content" value="Арендатор вносит обеспечительный депозит в размере ежемесячной арендной платы. Депозит возвращается в течение 10 (десяти) рабочих дней с момента освобождения помещения и подписания акта приёма-передачи при отсутствии задолженности по арендной плате и ущерба имуществу. Арендодатель вправе удержать из депозита суммы в счёт погашения долга по аренде и возмещения ущерба."/>
+            <column name="tags" value="аренда,депозит,жилье,обеспечение"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Аренда недвижимости')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '30 days'"/>
+        </insert>
+
+        <insert tableName="legal_clauses">
+            <column name="id" valueSequenceNext="legal_clause_seq"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="title" value="Ответственность за нецелевое использование коммерческой недвижимости"/>
+            <column name="content" value="В случае использования арендованного помещения не в соответствии с указанным в договоре целевым назначением Арендодатель вправе в одностороннем порядке расторгнуть договор с уведомлением Арендатора за 3 (три) рабочих дня. При этом убытки, причинённые нецелевым использованием, возмещаются Арендатором в полном объёме."/>
+            <column name="tags" value="аренда,коммерческая недвижимость,нецелевое использование,ответственность"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Аренда недвижимости')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '25 days'"/>
+        </insert>
+
+        <insert tableName="legal_clauses">
+            <column name="id" valueSequenceNext="legal_clause_seq"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aliya.nurlanova@legalease.kz')"/>
+            <column name="title" value="Неразглашение коммерческой тайны (NDA) в трудовом договоре"/>
+            <column name="content" value="Работник обязуется не разглашать конфиденциальную информацию и коммерческую тайну Работодателя в течение срока действия настоящего договора и в течение 2 (двух) лет после его прекращения. За разглашение коммерческой тайны Работник несёт ответственность в соответствии с законодательством Республики Казахстан, включая возмещение убытков в полном объёме."/>
+            <column name="tags" value="труд,NDA,коммерческая тайна,конфиденциальность,работник"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Трудовые отношения')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '18 days'"/>
+        </insert>
+
+        <insert tableName="legal_clauses">
+            <column name="id" valueSequenceNext="legal_clause_seq"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="title" value="Права на интеллектуальную собственность в договоре оказания IT-услуг"/>
+            <column name="content" value="Все результаты интеллектуальной деятельности, созданные Исполнителем в рамках настоящего договора (программный код, дизайн-макеты, базы данных), являются собственностью Заказчика с момента полной оплаты по договору. Исполнитель передаёт Заказчику исключительные права на использование результатов в полном объёме, включая право на воспроизведение, распространение и переработку."/>
+            <column name="tags" value="IT,услуги,интеллектуальная собственность,авторские права,разработка"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Услуги и подряд')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '10 days'"/>
+        </insert>
+
+        <insert tableName="legal_clauses">
+            <column name="id" valueSequenceNext="legal_clause_seq"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="title" value="Пеня за просрочку возврата займа"/>
+            <column name="content" value="В случае нарушения Заёмщиком срока возврата суммы займа Заёмщик уплачивает Займодавцу пеню в размере 0,1% (ноль целых одна десятая процента) от невозвращённой суммы за каждый день просрочки. Начисление пени производится с первого дня просрочки до дня фактического погашения задолженности. Уплата пени не освобождает Заёмщика от исполнения основного обязательства."/>
+            <column name="tags" value="займ,кредит,пеня,просрочка,ответственность"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Займы и кредиты')"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '3 days'"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         10. MATCHING RULES (template recommendation engine)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-010-demo-matching-rules" author="daniyal">
+
+        <insert tableName="matching_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Аренда недвижимости')"/>
+            <column name="keywords" value="аренда,квартира,снять,жилье,комната,апартамент,жилое,помещение,найм"/>
+            <column name="base_score" valueNumeric="90"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="matching_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Аренда недвижимости')"/>
+            <column name="keywords" value="офис,магазин,склад,коммерческое,аренда,нежилое,бизнес,торговое,помещение"/>
+            <column name="base_score" valueNumeric="85"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="matching_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Трудовые отношения')"/>
+            <column name="keywords" value="трудовой,работа,зарплата,оклад,сотрудник,найм,должность,работодатель,трудоустройство"/>
+            <column name="base_score" valueNumeric="92"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="matching_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Купля-продажа')"/>
+            <column name="keywords" value="автомобиль,машина,купить,продать,транспорт,авто,ТС,продажа,покупка"/>
+            <column name="base_score" valueNumeric="88"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="matching_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Услуги и подряд')"/>
+            <column name="keywords" value="услуги,оказание,исполнитель,подряд,консалтинг,IT,дизайн,сервис,заказчик"/>
+            <column name="base_score" valueNumeric="80"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <insert tableName="matching_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="category_id" valueComputed="(SELECT id FROM categories WHERE name = 'Займы и кредиты')"/>
+            <column name="keywords" value="займ,кредит,долг,деньги,одолжить,процент,возврат,заем,ссуда"/>
+            <column name="base_score" valueNumeric="87"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

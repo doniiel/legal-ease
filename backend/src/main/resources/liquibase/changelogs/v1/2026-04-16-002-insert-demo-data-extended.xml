@@ -1,0 +1,1000 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Extended demo data — full entity coverage for investor presentation.
+        Covers: validation_rules, risk_rules, condition_rules, required_doc_rules,
+                lawyer (applications), additional documents, document_shares, audit_logs.
+    -->
+
+    <!-- ═══════════════════════════════════════════════════════
+         1. LAWYER APPLICATIONS (APPROVED for all 3 lawyers)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-011-demo-lawyer-applications" author="daniyal">
+
+        <!-- Бекжанов Айдос — APPROVED -->
+        <insert tableName="lawyer">
+            <column name="id" valueSequenceNext="lawyer_app_seq"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="license_number" value="KZ-ALA-2021-0441"/>
+            <column name="status" value="APPROVED"/>
+            <column name="submitted_at" valueComputed="NOW() - INTERVAL '60 days'"/>
+            <column name="reviewed_by" valueComputed="(SELECT id FROM users WHERE email = 'orynbekdanial8@gmail.com')"/>
+            <column name="reviewed_at" valueComputed="NOW() - INTERVAL '55 days'"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '60 days'"/>
+        </insert>
+
+        <!-- Нурланова Алия — APPROVED -->
+        <insert tableName="lawyer">
+            <column name="id" valueSequenceNext="lawyer_app_seq"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'aliya.nurlanova@legalease.kz')"/>
+            <column name="license_number" value="KZ-ALA-2018-0189"/>
+            <column name="status" value="APPROVED"/>
+            <column name="submitted_at" valueComputed="NOW() - INTERVAL '90 days'"/>
+            <column name="reviewed_by" valueComputed="(SELECT id FROM users WHERE email = 'yergazy.abdullayev@gmail.com')"/>
+            <column name="reviewed_at" valueComputed="NOW() - INTERVAL '85 days'"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '90 days'"/>
+        </insert>
+
+        <!-- Сейткали Марат — APPROVED -->
+        <insert tableName="lawyer">
+            <column name="id" valueSequenceNext="lawyer_app_seq"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="license_number" value="KZ-AST-2015-0067"/>
+            <column name="status" value="APPROVED"/>
+            <column name="submitted_at" valueComputed="NOW() - INTERVAL '120 days'"/>
+            <column name="reviewed_by" valueComputed="(SELECT id FROM users WHERE email = 'olzhasergali56@gmail.com')"/>
+            <column name="reviewed_at" valueComputed="NOW() - INTERVAL '115 days'"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '120 days'"/>
+        </insert>
+
+        <!-- Тулегенов Серик — PENDING (applying to become lawyer) -->
+        <insert tableName="lawyer">
+            <column name="id" valueSequenceNext="lawyer_app_seq"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'serik.tulegenov@mail.kz')"/>
+            <column name="license_number" value="KZ-ALA-2025-1102"/>
+            <column name="status" value="PENDING"/>
+            <column name="submitted_at" valueComputed="NOW() - INTERVAL '3 days'"/>
+            <column name="version" valueNumeric="0"/>
+            <column name="created_by" value="serik.tulegenov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '3 days'"/>
+        </insert>
+
+        <!-- Жаксыбекова Асель — REJECTED (previous attempt) -->
+        <insert tableName="lawyer">
+            <column name="id" valueSequenceNext="lawyer_app_seq"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="license_number" value="KZ-ALA-2024-0987"/>
+            <column name="status" value="REJECTED"/>
+            <column name="submitted_at" valueComputed="NOW() - INTERVAL '45 days'"/>
+            <column name="reviewed_by" valueComputed="(SELECT id FROM users WHERE email = 'orynbekdanial8@gmail.com')"/>
+            <column name="reviewed_at" valueComputed="NOW() - INTERVAL '40 days'"/>
+            <column name="rejection_reason" value="Предоставленный номер лицензии не прошёл проверку в реестре адвокатов. Просьба предоставить действующее удостоверение адвоката."/>
+            <column name="version" valueNumeric="1"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '45 days'"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         2. VALIDATION RULES (2–3 per template)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-012-demo-validation-rules" author="daniyal">
+
+        <!-- ── Аренда квартиры ── -->
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="field_label" value="Ежемесячная арендная плата"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="0"/>
+            <column name="error_message" value="Арендная плата должна быть больше нуля тенге"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="deposit_amount"/>
+            <column name="field_label" value="Сумма депозита"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="0"/>
+            <column name="error_message" value="Сумма депозита должна быть положительным числом"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="field_key" value="property_area"/>
+            <column name="field_label" value="Площадь помещения"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="10"/>
+            <column name="error_message" value="Площадь жилого помещения не может быть менее 10 кв.м."/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Аренда коммерческого ── -->
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="field_label" value="Ежемесячная аренда"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="0"/>
+            <column name="error_message" value="Арендная плата должна быть больше нуля тенге"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="tenant_name"/>
+            <column name="field_label" value="Наименование арендатора"/>
+            <column name="operator" value="IS_NOT_EMPTY"/>
+            <column name="error_message" value="Наименование арендатора обязательно для заполнения"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="intended_use"/>
+            <column name="field_label" value="Целевое использование"/>
+            <column name="operator" value="IS_NOT_EMPTY"/>
+            <column name="error_message" value="Укажите целевое назначение помещения (офис, склад, магазин и т.д.)"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Трудовой договор ── -->
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="monthly_salary"/>
+            <column name="field_label" value="Должностной оклад"/>
+            <column name="operator" value="GREATER_OR_EQUAL"/>
+            <column name="expected_value" value="85000"/>
+            <column name="error_message" value="Оклад не может быть ниже минимальной заработной платы по РК (85 000 тенге на 2026 год)"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="vacation_days"/>
+            <column name="field_label" value="Дней ежегодного отпуска"/>
+            <column name="operator" value="GREATER_OR_EQUAL"/>
+            <column name="expected_value" value="24"/>
+            <column name="error_message" value="Минимальный ежегодный оплачиваемый отпуск по Трудовому кодексу РК — 24 календарных дня"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="position"/>
+            <column name="field_label" value="Должность"/>
+            <column name="operator" value="IS_NOT_EMPTY"/>
+            <column name="error_message" value="Наименование должности работника обязательно"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Купля-продажа ТС ── -->
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="sale_price"/>
+            <column name="field_label" value="Стоимость ТС"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="0"/>
+            <column name="error_message" value="Стоимость транспортного средства должна быть больше нуля"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_year"/>
+            <column name="field_label" value="Год выпуска ТС"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="1990"/>
+            <column name="error_message" value="Год выпуска не может быть ранее 1990 года — такие ТС не подлежат регистрации в РК"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Договор услуг ── -->
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="total_price"/>
+            <column name="field_label" value="Стоимость услуг"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="0"/>
+            <column name="error_message" value="Стоимость услуг должна быть больше нуля тенге"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="service_description"/>
+            <column name="field_label" value="Описание услуг"/>
+            <column name="operator" value="IS_NOT_EMPTY"/>
+            <column name="error_message" value="Описание оказываемых услуг обязательно — укажите конкретный перечень работ"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Договор займа ── -->
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="loan_amount"/>
+            <column name="field_label" value="Сумма займа"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="0"/>
+            <column name="error_message" value="Сумма займа должна быть положительным числом"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="validation_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="interest_rate"/>
+            <column name="field_label" value="Процентная ставка"/>
+            <column name="operator" value="LESS_OR_EQUAL"/>
+            <column name="expected_value" value="56"/>
+            <column name="error_message" value="Процентная ставка не может превышать 56% годовых согласно ст. 718 ГК РК (кратно базовой ставке НБ РК × 2.5)"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         3. RISK RULES (2–3 per template)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-013-demo-risk-rules" author="daniyal">
+
+        <!-- ── Аренда квартиры ── -->
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="rule_code" value="RENTAL_HIGH_RENT_RISK"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="500000"/>
+            <column name="risk_message" value="Арендная плата существенно превышает среднерыночную стоимость аренды в данном сегменте. Рекомендуем провести независимую оценку рыночной стоимости перед подписанием."/>
+            <column name="risk_level" value="MEDIUM"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="rule_code" value="RENTAL_EXCESSIVE_DEPOSIT_RISK"/>
+            <column name="field_key" value="deposit_amount"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="1000000"/>
+            <column name="risk_message" value="Депозит превышает три месячных арендных платежа. Это нетипичная практика и может свидетельствовать о недобросовестности арендодателя. Убедитесь, что условия возврата депозита чётко прописаны."/>
+            <column name="risk_level" value="HIGH"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Аренда коммерческого ── -->
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="rule_code" value="COMMERCIAL_RENT_HIGH_RISK"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="2000000"/>
+            <column name="risk_message" value="Стоимость аренды коммерческого помещения высокая. Рекомендуем закрепить механизм индексации аренды в договоре, чтобы избежать резкого роста арендной платы."/>
+            <column name="risk_level" value="MEDIUM"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Трудовой договор ── -->
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="rule_code" value="LABOR_LOW_SALARY_RISK"/>
+            <column name="field_key" value="monthly_salary"/>
+            <column name="operator" value="LESS_THAN"/>
+            <column name="expected_value" value="200000"/>
+            <column name="risk_message" value="Указанный оклад ниже среднерыночного уровня оплаты труда для специалистов в данной сфере. Это может привести к высокой текучке кадров и судебным претензиям."/>
+            <column name="risk_level" value="MEDIUM"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="rule_code" value="LABOR_MIN_VACATION_RISK"/>
+            <column name="field_key" value="vacation_days"/>
+            <column name="operator" value="LESS_THAN"/>
+            <column name="expected_value" value="28"/>
+            <column name="risk_message" value="Рекомендуем установить ежегодный отпуск не менее 28 дней для повышения привлекательности условий и удержания квалифицированных кадров."/>
+            <column name="risk_level" value="LOW"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Купля-продажа ТС ── -->
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="rule_code" value="VEHICLE_HIGH_PRICE_RISK"/>
+            <column name="field_key" value="sale_price"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="50000000"/>
+            <column name="risk_message" value="Стоимость автомобиля превышает 50 млн тенге. Рекомендуется проведение независимой оценки ТС и нотариальное удостоверение сделки."/>
+            <column name="risk_level" value="HIGH"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="rule_code" value="VEHICLE_OLD_YEAR_RISK"/>
+            <column name="field_key" value="vehicle_year"/>
+            <column name="operator" value="LESS_THAN"/>
+            <column name="expected_value" value="2010"/>
+            <column name="risk_message" value="Автомобиль старше 15 лет несёт повышенный риск скрытых технических дефектов. Настоятельно рекомендуем провести независимую техническую экспертизу до подписания договора."/>
+            <column name="risk_level" value="MEDIUM"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Договор услуг ── -->
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="rule_code" value="SERVICES_HIGH_VALUE_RISK"/>
+            <column name="field_key" value="total_price"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="5000000"/>
+            <column name="risk_message" value="Стоимость услуг превышает 5 млн тенге. Рекомендуем разбить выплаты на этапы, привязав каждый платёж к конкретным результатам (milestones), и предусмотреть банковскую гарантию."/>
+            <column name="risk_level" value="MEDIUM"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Договор займа ── -->
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="rule_code" value="LOAN_HIGH_INTEREST_RISK"/>
+            <column name="field_key" value="interest_rate"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="24"/>
+            <column name="risk_message" value="Процентная ставка существенно превышает базовую ставку Национального банка РК. Такой договор может быть признан кабальной сделкой и оспорен в суде. Рекомендуем снизить ставку или нотариально удостоверить договор."/>
+            <column name="risk_level" value="HIGH"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="risk_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="rule_code" value="LOAN_LARGE_AMOUNT_RISK"/>
+            <column name="field_key" value="loan_amount"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="expected_value" value="10000000"/>
+            <column name="risk_message" value="Крупная сумма займа (свыше 10 млн тенге). Настоятельно рекомендуется нотариальное удостоверение договора и оформление залога в обеспечение возврата займа."/>
+            <column name="risk_level" value="MEDIUM"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         4. CONDITION RULES (conditional field display)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-014-demo-condition-rules" author="daniyal">
+
+        <!-- Трудовой договор: если срочный — показать поле end_date -->
+        <insert tableName="condition_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="condition_field_key" value="contract_type"/>
+            <column name="operator" value="EQUALS"/>
+            <column name="condition_value" value="срочный"/>
+            <column name="target_field_key" value="end_date"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- Договор аренды квартиры: если payment_day > 25 — показать late_payment_notice -->
+        <insert tableName="condition_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="condition_field_key" value="payment_day"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="condition_value" value="25"/>
+            <column name="target_field_key" value="late_payment_clause"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- Договор займа: если loan_amount > 5000000 — показать guarantor_name -->
+        <insert tableName="condition_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="condition_field_key" value="loan_amount"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="condition_value" value="5000000"/>
+            <column name="target_field_key" value="guarantor_name"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- Договор займа: если loan_amount > 5000000 — показать guarantor_iin -->
+        <insert tableName="condition_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="condition_field_key" value="loan_amount"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="condition_value" value="5000000"/>
+            <column name="target_field_key" value="guarantor_iin"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- Договор услуг: если total_price > 3000000 — показать advance_payment -->
+        <insert tableName="condition_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="condition_field_key" value="total_price"/>
+            <column name="operator" value="GREATER_THAN"/>
+            <column name="condition_value" value="3000000"/>
+            <column name="target_field_key" value="advance_payment"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         5. REQUIRED DOCUMENT RULES
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-015-demo-required-doc-rules" author="daniyal">
+
+        <!-- ── Аренда квартиры ── -->
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="required_doc_title" value="Удостоверение личности арендатора"/>
+            <column name="reason" value="Необходимо для идентификации личности арендатора и проверки соответствия ИИН, указанного в договоре"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="required_doc_title" value="Правоустанавливающий документ на недвижимость"/>
+            <column name="reason" value="Арендодатель должен подтвердить право собственности или полномочия на сдачу жилья в аренду (свидетельство, договор купли-продажи, доверенность)"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="required_doc_title" value="Справка об отсутствии задолженности по коммунальным платежам"/>
+            <column name="reason" value="Убедитесь, что арендуемое жильё не имеет долгов по ЖКУ, которые могут перейти на арендатора или стать причиной отключения услуг"/>
+            <column name="condition_field_key" value="monthly_rent"/>
+            <column name="condition_operator" value="GREATER_THAN"/>
+            <column name="condition_value" value="150000"/>
+            <column name="mandatory" valueBoolean="false"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Аренда коммерческого ── -->
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="required_doc_title" value="Свидетельство о государственной регистрации юридического лица / ИП"/>
+            <column name="reason" value="Подтверждение правоспособности арендатора как субъекта предпринимательской деятельности"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="required_doc_title" value="Технический паспорт помещения"/>
+            <column name="reason" value="Подтверждение площади помещения, его технических характеристик и разрешённого вида использования"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aliya.nurlanova@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Трудовой договор ── -->
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="required_doc_title" value="Удостоверение личности работника"/>
+            <column name="reason" value="Обязательный документ для заключения трудового договора согласно ст. 33 ТК РК"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="required_doc_title" value="Диплом или документ о профессиональной квалификации"/>
+            <column name="reason" value="Подтверждение соответствия работника квалификационным требованиям по должности"/>
+            <column name="mandatory" valueBoolean="false"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Купля-продажа ТС ── -->
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="required_doc_title" value="Техническийпаспорт (свидетельство о регистрации ТС)"/>
+            <column name="reason" value="Основной документ, подтверждающий право собственности и технические данные ТС (марка, VIN, год выпуска)"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="required_doc_title" value="Справка об отсутствии обременений на ТС"/>
+            <column name="reason" value="Подтверждение, что автомобиль не является залоговым имуществом и не числится в розыске — проверяется в информационных системах МВД РК"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- ── Договор займа ── -->
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="required_doc_title" value="Удостоверение личности заёмщика"/>
+            <column name="reason" value="Обязательный документ для идентификации заёмщика и проверки ИИН в договоре займа"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="required_doc_title" value="Справка о доходах заёмщика"/>
+            <column name="reason" value="При займе свыше 3 млн тенге необходимо подтверждение платёжеспособности заёмщика для минимизации риска невозврата"/>
+            <column name="condition_field_key" value="loan_amount"/>
+            <column name="condition_operator" value="GREATER_THAN"/>
+            <column name="condition_value" value="3000000"/>
+            <column name="mandatory" valueBoolean="true"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="required_doc_rules">
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="required_doc_title" value="Договор залога имущества"/>
+            <column name="reason" value="При займе свыше 10 млн тенге рекомендуется оформление залога в качестве обеспечения исполнения обязательства по возврату"/>
+            <column name="condition_field_key" value="loan_amount"/>
+            <column name="condition_operator" value="GREATER_THAN"/>
+            <column name="condition_value" value="10000000"/>
+            <column name="mandatory" valueBoolean="false"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         6. ADDITIONAL DOCUMENTS (3 more — full variety)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-016-demo-additional-documents" author="daniyal">
+
+        <!-- DOC-6: Asel rents commercial space (DRAFT) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="title" value="Аренда офиса под салон красоты, Асель"/>
+            <column name="status" value="DRAFT"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="0"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '1 day'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда офиса под салон красоты, Асель')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="field_value" value="КОМ-2026-0012"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда офиса под салон красоты, Асель')"/>
+            <column name="field_key" value="city"/>
+            <column name="field_value" value="Алматы"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда офиса под салон красоты, Асель')"/>
+            <column name="field_key" value="landlord_name"/>
+            <column name="field_value" value="ТОО «Алматы Коммерц Плаза»"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда офиса под салон красоты, Асель')"/>
+            <column name="field_key" value="tenant_name"/>
+            <column name="field_value" value="ИП Жаксыбекова А.Н. (Салон «Жемчуг»)"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда офиса под салон красоты, Асель')"/>
+            <column name="field_key" value="property_address"/>
+            <column name="field_value" value="г. Алматы, пр. Аль-Фараби, д. 17, БЦ «Forum», 3 этаж, блок B, пом. 305"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда офиса под салон красоты, Асель')"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="field_value" value="480000"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда офиса под салон красоты, Асель')"/>
+            <column name="field_key" value="intended_use"/>
+            <column name="field_value" value="Салон красоты (парикмахерские услуги, маникюр, косметология)"/>
+            <column name="created_by" value="asel.zhaksybekova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- DOC-7: Nurlan car purchase (VALIDATED) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="title" value="Продажа Kia Sportage 2021, Нурлан"/>
+            <column name="status" value="VALIDATED"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="1"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '3 days'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Продажа Kia Sportage 2021, Нурлан')"/>
+            <column name="field_key" value="seller_fio"/>
+            <column name="field_value" value="Ахметов Нурлан Бейбутович"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Продажа Kia Sportage 2021, Нурлан')"/>
+            <column name="field_key" value="buyer_fio"/>
+            <column name="field_value" value="Муратов Данияр Сапарович"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Продажа Kia Sportage 2021, Нурлан')"/>
+            <column name="field_key" value="vehicle_make_model"/>
+            <column name="field_value" value="Kia Sportage 2.0 AT Comfort"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Продажа Kia Sportage 2021, Нурлан')"/>
+            <column name="field_key" value="vehicle_year"/>
+            <column name="field_value" value="2021"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Продажа Kia Sportage 2021, Нурлан')"/>
+            <column name="field_key" value="sale_price"/>
+            <column name="field_value" value="12700000"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+        <!-- DOC-8: Gulnar employment contract (COMPLETED) -->
+        <insert tableName="documents">
+            <column name="id" valueSequenceNext="document_seq_gen"/>
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'gulnar.sabitova@mail.kz')"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="title" value="Трудовой договор — ТОО «MedPlus», Гульнар"/>
+            <column name="status" value="COMPLETED"/>
+            <column name="deleted" valueBoolean="false"/>
+            <column name="current_version" valueNumeric="1"/>
+            <column name="content_hash" value="c4e1f8b2d6a039472c4e1f8b2d6a039472c4e1f8b2d6a0394720e3f4a5b6c7d"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '10 days'"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="field_key" value="employer_name"/>
+            <column name="field_value" value="ТОО «MedPlus Diagnostics»"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="field_key" value="employee_fio"/>
+            <column name="field_value" value="Сабитова Гульнар Асановна"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="field_key" value="position"/>
+            <column name="field_value" value="Главный бухгалтер"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="field_key" value="monthly_salary"/>
+            <column name="field_value" value="620000"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="field_value" value="06.04.2026"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <insert tableName="document_field_values">
+            <column name="id" valueSequenceNext="document_field_value_seq_gen"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="field_key" value="vacation_days"/>
+            <column name="field_value" value="28"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         7. ADDITIONAL DOCUMENT REVIEWS
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-017-demo-additional-reviews" author="daniyal">
+
+        <!-- Review of Nurlan's car sale — APPROVED by Aidos -->
+        <insert tableName="document_reviews">
+            <column name="id" valueSequenceNext="document_review_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Продажа Kia Sportage 2021, Нурлан')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="notes" value="Договор купли-продажи ТС составлен в соответствии с требованиями гражданского законодательства. VIN-код и государственный номер обязательно должны быть внесены перед подписанием. Цена соответствует рыночной. Рекомендую также добавить пункт об ответственности за скрытые дефекты. В целом договор готов к подписанию."/>
+            <column name="risk_level" value="LOW"/>
+            <column name="recommended" valueBoolean="true"/>
+            <column name="created_by" value="aidos.bekzhanov@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '2 days'"/>
+        </insert>
+
+        <!-- Review of Gulnar's employment (MedPlus) — APPROVED by Marat -->
+        <insert tableName="document_reviews">
+            <column name="id" valueSequenceNext="document_review_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="lawyer_id" valueComputed="(SELECT id FROM users WHERE email = 'marat.seitkali@legalease.kz')"/>
+            <column name="notes" value="Трудовой договор соответствует нормам ТК РК. Оклад 620 000 тенге превышает минимальный уровень и соответствует рыночному для должности главного бухгалтера. Ежегодный отпуск 28 дней — выше минимального. Условия надлежащего выполнения трудовых обязанностей чётко сформулированы. Рекомендую к подписанию."/>
+            <column name="risk_level" value="LOW"/>
+            <column name="recommended" valueBoolean="true"/>
+            <column name="created_by" value="marat.seitkali@legalease.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '9 days'"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         8. DOCUMENT SHARES (for completed documents)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-018-demo-document-shares" author="daniyal">
+
+        <!-- Share: Nurlan employment contract -->
+        <insert tableName="document_shares">
+            <column name="id" valueSequenceNext="document_share_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="token" value="nrl-emp-a7f3c2d1e4b89506a1c8d3e7f2b04951"/>
+            <column name="expires_at" valueComputed="NOW() + INTERVAL '30 days'"/>
+            <column name="created_by" value="nurlan.akhmetov@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '12 days'"/>
+        </insert>
+
+        <!-- Share: Gulnar loan agreement -->
+        <insert tableName="document_shares">
+            <column name="id" valueSequenceNext="document_share_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Займ 5 000 000 тенге — Гульнар и Асет')"/>
+            <column name="token" value="gln-loan-b8e4d3c2f1a796015b8e4d3c2f1a7960"/>
+            <column name="expires_at" valueComputed="NOW() + INTERVAL '7 days'"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '18 days'"/>
+        </insert>
+
+        <!-- Share: Gulnar MedPlus employment (expired) -->
+        <insert tableName="document_shares">
+            <column name="id" valueSequenceNext="document_share_seq"/>
+            <column name="document_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «MedPlus», Гульнар')"/>
+            <column name="token" value="gln-med-c9f5e4d3b2a807126c9f5e4d3b2a8071"/>
+            <column name="expires_at" valueComputed="NOW() + INTERVAL '14 days'"/>
+            <column name="created_by" value="gulnar.sabitova@mail.kz"/>
+            <column name="created_date" valueComputed="NOW() - INTERVAL '9 days'"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════
+         9. AUDIT LOGS (activity trail)
+         ═══════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-16-019-demo-audit-logs" author="daniyal">
+
+        <!-- User registrations -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="action" value="USER_REGISTERED"/>
+            <column name="entity_type" value="USER"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="metadata" value="{&quot;email&quot;:&quot;asel.zhaksybekova@mail.kz&quot;,&quot;role&quot;:&quot;USER&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '30 days'"/>
+        </insert>
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="action" value="USER_REGISTERED"/>
+            <column name="entity_type" value="USER"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="metadata" value="{&quot;email&quot;:&quot;nurlan.akhmetov@mail.kz&quot;,&quot;role&quot;:&quot;USER&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '28 days'"/>
+        </insert>
+
+        <!-- Document created -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="action" value="DOCUMENT_CREATED"/>
+            <column name="entity_type" value="DOCUMENT"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="metadata" value="{&quot;title&quot;:&quot;Аренда квартиры на Достык, Асель&quot;,&quot;template&quot;:&quot;Договор аренды жилого помещения (квартиры)&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '7 days'"/>
+        </insert>
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="action" value="DOCUMENT_CREATED"/>
+            <column name="entity_type" value="DOCUMENT"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="metadata" value="{&quot;title&quot;:&quot;Трудовой договор — ТОО АльфаТех, Нурлан&quot;,&quot;template&quot;:&quot;Трудовой договор (стандартный)&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '14 days'"/>
+        </insert>
+
+        <!-- Document validated -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="action" value="DOCUMENT_VALIDATED"/>
+            <column name="entity_type" value="DOCUMENT"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="metadata" value="{&quot;status&quot;:&quot;VALIDATED&quot;,&quot;riskCount&quot;:0,&quot;validationPassed&quot;:true}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '6 days'"/>
+        </insert>
+
+        <!-- Document completed -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="action" value="DOCUMENT_COMPLETED"/>
+            <column name="entity_type" value="DOCUMENT"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="metadata" value="{&quot;status&quot;:&quot;COMPLETED&quot;,&quot;s3Key&quot;:&quot;documents/nurlan-employment-2026.pdf&quot;,&quot;version&quot;:1}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '13 days'"/>
+        </insert>
+
+        <!-- Document shared -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'nurlan.akhmetov@mail.kz')"/>
+            <column name="action" value="DOCUMENT_SHARED"/>
+            <column name="entity_type" value="DOCUMENT"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM documents WHERE title = 'Трудовой договор — ТОО «АльфаТех», Нурлан')"/>
+            <column name="metadata" value="{&quot;token&quot;:&quot;nrl-emp-a7f3c2d1e4b89506a1c8d3e7f2b04951&quot;,&quot;expiresInDays&quot;:30}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '12 days'"/>
+        </insert>
+
+        <!-- Lawyer reviewed document -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="action" value="DOCUMENT_REVIEWED"/>
+            <column name="entity_type" value="DOCUMENT"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM documents WHERE title = 'Аренда квартиры на Достык, Асель')"/>
+            <column name="metadata" value="{&quot;riskLevel&quot;:&quot;LOW&quot;,&quot;recommended&quot;:true,&quot;lawyer&quot;:&quot;aidos.bekzhanov@legalease.kz&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '6 days'"/>
+        </insert>
+
+        <!-- Lawyer application submitted -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'serik.tulegenov@mail.kz')"/>
+            <column name="action" value="LAWYER_APPLICATION_SUBMITTED"/>
+            <column name="entity_type" value="LAWYER_APPLICATION"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM lawyer WHERE user_id = (SELECT id FROM users WHERE email = 'serik.tulegenov@mail.kz'))"/>
+            <column name="metadata" value="{&quot;licenseNumber&quot;:&quot;KZ-ALA-2025-1102&quot;,&quot;status&quot;:&quot;PENDING&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '3 days'"/>
+        </insert>
+
+        <!-- Admin approved lawyer -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'orynbekdanial8@gmail.com')"/>
+            <column name="action" value="LAWYER_APPLICATION_APPROVED"/>
+            <column name="entity_type" value="LAWYER_APPLICATION"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM lawyer WHERE license_number = 'KZ-ALA-2021-0441')"/>
+            <column name="metadata" value="{&quot;applicant&quot;:&quot;aidos.bekzhanov@legalease.kz&quot;,&quot;licenseNumber&quot;:&quot;KZ-ALA-2021-0441&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '55 days'"/>
+        </insert>
+
+        <!-- Template published -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'aidos.bekzhanov@legalease.kz')"/>
+            <column name="action" value="TEMPLATE_PUBLISHED"/>
+            <column name="entity_type" value="TEMPLATE"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды жилого помещения (квартиры)')"/>
+            <column name="metadata" value="{&quot;title&quot;:&quot;Договор аренды жилого помещения (квартиры)&quot;,&quot;status&quot;:&quot;PUBLISHED&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '14 days'"/>
+        </insert>
+
+        <!-- User blocked (admin action) -->
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'orynbekdanial8@gmail.com')"/>
+            <column name="action" value="USER_BLOCKED"/>
+            <column name="entity_type" value="USER"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="metadata" value="{&quot;reason&quot;:&quot;Подозрительная активность: многократные попытки входа с разных IP&quot;,&quot;blockedBy&quot;:&quot;orynbekdanial8@gmail.com&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '50 days'"/>
+        </insert>
+        <insert tableName="audit_logs">
+            <column name="user_id" valueComputed="(SELECT id FROM users WHERE email = 'orynbekdanial8@gmail.com')"/>
+            <column name="action" value="USER_UNBLOCKED"/>
+            <column name="entity_type" value="USER"/>
+            <column name="entity_id" valueComputed="(SELECT id FROM users WHERE email = 'asel.zhaksybekova@mail.kz')"/>
+            <column name="metadata" value="{&quot;reason&quot;:&quot;Пользователь подтвердил личность через службу поддержки&quot;,&quot;unblockedBy&quot;:&quot;orynbekdanial8@gmail.com&quot;}"/>
+            <column name="created_at" valueComputed="NOW() - INTERVAL '49 days'"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>
