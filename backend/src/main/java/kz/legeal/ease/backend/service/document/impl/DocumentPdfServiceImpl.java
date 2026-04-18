@@ -88,13 +88,13 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     // ─────────────────────────────────────────────────────────────────────────
     private static final float PAGE_W     = PDRectangle.A4.getWidth();   // 595.28pt
     private static final float PAGE_H     = PDRectangle.A4.getHeight();  // 841.89pt
-    private static final float MARGIN_X   = 56f;
+    private static final float MARGIN_X   = 72f;                         // 1 inch — standard legal margin
     private static final float USABLE_W   = PAGE_W - 2 * MARGIN_X;
 
-    private static final float HEADER_H   = 80f;
+    private static final float HEADER_H   = 88f;
     private static final float FOOTER_H   = 36f;
     private static final float CONTENT_TOP = PAGE_H - HEADER_H - SP4;
-    private static final float CONTENT_BOT = FOOTER_H + SP2;
+    private static final float CONTENT_BOT = FOOTER_H + SP3;            // more breathing room at bottom
 
     // ─────────────────────────────────────────────────────────────────────────
     // Two-column field grid  (label 36% | gap | value remainder) — legacy mode
@@ -105,13 +105,13 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     private static final float COL_VALUE_W = USABLE_W - COL_LABEL_W - COL_GAP;
 
     // Field row geometry
-    private static final float ROW_PAD_V  = 8f;
-    private static final float LINE_LEAD  = 3.5f;
-    private static final float MIN_ROW_H  = 28f;
+    private static final float ROW_PAD_V  = 10f;
+    private static final float LINE_LEAD  = 4f;
+    private static final float MIN_ROW_H  = 30f;
 
     // Narrative paragraph geometry
-    private static final float BODY_LEAD  = 5.5f;
-    private static final float PARA_GAP   = SP2;
+    private static final float BODY_LEAD  = 7f;     // 1.64× leading — comfortable reading
+    private static final float PARA_GAP   = 16f;    // clear paragraph separation
 
     // ─────────────────────────────────────────────────────────────────────────
     // Brand palette
@@ -131,10 +131,10 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     private static final float F_BRAND   = 20f;
     private static final float F_TITLE   = 22f;
     private static final float F_SECTION =  9f;
-    private static final float F_BODY    = 10.5f;
-    private static final float F_VALUE   = 10f;
+    private static final float F_BODY    = 11f;     // slightly larger for comfortable reading
+    private static final float F_VALUE   = 10.5f;
     private static final float F_LABEL   =  9f;
-    private static final float F_META    =  8.5f;
+    private static final float F_META    =  9f;
     private static final float F_FOOTER  =  7.5f;
 
     // Section card height — defined after F_SECTION
@@ -389,12 +389,14 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
 
     private float drawTitleBlock(PDPageContentStream cs, PDFont bold, PDFont regular,
                                  Document document, String docRef, float y) throws Exception {
-        y -= SP1;
-        y  = line(cs, bold,    F_TITLE, document.getTitle(), MARGIN_X, y, NAVY);
         y -= SP2;
+        y  = line(cs, bold,    F_TITLE, document.getTitle(), MARGIN_X, y, NAVY);
+        y -= SP1;
         y  = line(cs, regular, F_META,
                   "Шаблон: " + document.getTemplate().getTitle() + "   ·   " + docRef,
                   MARGIN_X, y, MUTED);
+        y -= SP3;
+        hline(cs, MARGIN_X, PAGE_W - MARGIN_X, y, BLUE, 1.5f);
         y -= SP4;
         return y;
     }
@@ -422,11 +424,55 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
 
     private float drawBodyParagraph(PDPageContentStream cs, PDFont regular,
                                     List<String> lines, float y) throws Exception {
-        for (final String l : lines) {
-            text(cs, regular, F_BODY, l, MARGIN_X, y, C_TEXT);
+        for (int i = 0; i < lines.size(); i++) {
+            final String  l      = lines.get(i);
+            final boolean isLast = (i == lines.size() - 1);
+            // Justify all lines except the last (ragged-right last line is typographically correct)
+            if (!isLast) {
+                drawJustified(cs, regular, F_BODY, l, MARGIN_X, y, USABLE_W, C_TEXT);
+            } else {
+                text(cs, regular, F_BODY, l, MARGIN_X, y, C_TEXT);
+            }
             y -= (F_BODY + BODY_LEAD);
         }
         return y - PARA_GAP;
+    }
+
+    /**
+     * Renders a single line with full justification by distributing extra space
+     * evenly across word gaps. Words are drawn individually at calculated positions,
+     * which works reliably with composite (Type0/CID) fonts.
+     */
+    private void drawJustified(PDPageContentStream cs, PDFont font, float size,
+                               String str, float x, float y, float maxW,
+                               float[] color) throws Exception {
+        if (str == null || str.isEmpty()) return;
+        final String[] words = str.split(" +");
+        if (words.length <= 1) {
+            text(cs, font, size, str, x, y, color);
+            return;
+        }
+        final float textW = font.getStringWidth(str) / 1000f * size;
+        // Don't justify lines shorter than 50% of usable width (e.g. very short sentences)
+        if (textW < maxW * 0.5f) {
+            text(cs, font, size, str, x, y, color);
+            return;
+        }
+        float totalWordW = 0f;
+        for (final String word : words) {
+            totalWordW += font.getStringWidth(word) / 1000f * size;
+        }
+        final float gap = (maxW - totalWordW) / (words.length - 1);
+        float curX = x;
+        for (int i = 0; i < words.length; i++) {
+            if (!words[i].isEmpty()) {
+                text(cs, font, size, words[i], curX, y, color);
+                curX += font.getStringWidth(words[i]) / 1000f * size;
+            }
+            if (i < words.length - 1) {
+                curX += gap;
+            }
+        }
     }
 
     private void drawFieldRow(PDPageContentStream cs, PDFont regular, PDFont bold,
