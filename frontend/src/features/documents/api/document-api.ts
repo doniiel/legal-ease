@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery, type BaseQueryFn, type FetchArgs, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 
 export type DocumentStatus = "DRAFT" | "VALIDATED" | "PROCESSING" | "COMPLETED" | "ARCHIVED";
 export type RiskLevel = "HIGH" | "MEDIUM" | "LOW";
@@ -132,16 +132,52 @@ export interface DocumentShareResponse {
   expiresAt: string;
 }
 
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: "/api",
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem("accessToken");
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return headers;
+  },
+});
+
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions,
+) => {
+  let result = await rawBaseQuery(args, api, extraOptions);
+
+  if (result.error?.status === 401) {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (refreshToken) {
+      const refreshResult = await fetch("/open-api/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (refreshResult.ok) {
+        const data = await refreshResult.json();
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+        result = await rawBaseQuery(args, api, extraOptions);
+      } else {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }
+
+  return result;
+};
+
 export const documentApi = createApi({
   reducerPath: "documentApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api",
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("accessToken");
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   tagTypes: ["Document"],
   endpoints: (builder) => ({
     getDocuments: builder.query<DocumentsPage, GetDocumentsParams>({
