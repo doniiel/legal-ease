@@ -36,14 +36,17 @@ import java.util.regex.Pattern;
 public class TemplateBodyRenderer {
 
     /**
-     * Combined pattern:
-     *   group 1 — double-brace key  e.g. {{ field_key }}
+     * Combined pattern — only matches valid snake_case/camelCase identifiers:
+     *   group 1 — double-brace key  e.g. {{field_key}}
      *   group 2 — bracket key       e.g. [field_key]
+     *
+     * Intentionally does NOT match directive-style tokens like {{#if ...}} or {{/if}}
+     * so they pass through unchanged (useful for conditional syntax in template body).
      */
     private static final Pattern PLACEHOLDER = Pattern.compile(
-            "\\{\\{\\s*([^}\\s][^}]*)\\s*\\}\\}" +   // {{ field_key }}
+            "\\{\\{([a-zA-Z_][a-zA-Z0-9_]*)\\}\\}" +  // {{field_key}}
             "|" +
-            "\\[([a-zA-Z_][a-zA-Z0-9_]*)\\]"          // [field_key]
+            "\\[([a-zA-Z_][a-zA-Z0-9_]*)\\]"           // [field_key]
     );
 
     /**

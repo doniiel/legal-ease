@@ -65,14 +65,16 @@ export interface TemplateFieldRequest {
 
 export interface CreateTemplateRequest {
   title: string;
-  description: string;
+  description?: string;
+  body?: string;
   categoryId: number;
   fields: TemplateFieldRequest[];
 }
 
 export interface UpdateTemplateRequest {
   title: string;
-  description: string;
+  description?: string;
+  body?: string;
   categoryId: number;
   fields: TemplateFieldRequest[];
 }
