@@ -1,0 +1,1018 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!--
+        Fix: 5 of 6 seeded templates had mismatched field keys vs body placeholders.
+        Only "Договор аренды жилого помещения" was correct.
+
+        Strategy:
+          1. Delete all template_fields rows for each broken template.
+          2. Re-insert complete, matching field sets.
+          3. Delete document_field_values for documents on broken templates
+             (old keys are invalid) and re-insert with demo values for all keys.
+    -->
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TEMPLATE 2 — Договор аренды коммерческого помещения
+         Missing: authority_document, contract_date, end_date, landlord_bin,
+                  landlord_representative, payment_day, penalty_rate,
+                  property_area, start_date, tenant_bin, total_rent,
+                  vat_amount, vat_rate
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-18-001-fix-commercial-rent-fields" author="daniyal">
+
+        <delete tableName="template_fields">
+            <where>template_id = (SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')</where>
+        </delete>
+
+        <!-- 1 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="label"     value="Номер договора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 2 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="city"/>
+            <column name="label"     value="Город"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 3 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="contract_date"/>
+            <column name="label"     value="Дата договора"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 4 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="landlord_name"/>
+            <column name="label"     value="Наименование арендодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 5 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="landlord_bin"/>
+            <column name="label"     value="БИН арендодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 6 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="landlord_representative"/>
+            <column name="label"     value="Представитель арендодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="6"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 7 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="authority_document"/>
+            <column name="label"     value="Основание (устав / доверенность)"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="7"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 8 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="tenant_name"/>
+            <column name="label"     value="Наименование арендатора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="8"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 9 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="tenant_bin"/>
+            <column name="label"     value="БИН арендатора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="9"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 10 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="property_address"/>
+            <column name="label"     value="Адрес помещения"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="10"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 11 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="property_area"/>
+            <column name="label"     value="Площадь помещения (кв.м)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="11"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 12 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="intended_use"/>
+            <column name="label"     value="Целевое назначение"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="12"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 13 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="label"     value="Дата начала аренды"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="13"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 14 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="end_date"/>
+            <column name="label"     value="Дата окончания аренды"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="false"/>
+            <column name="order_num" valueNumeric="14"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 15 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="monthly_rent"/>
+            <column name="label"     value="Арендная плата в месяц (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="15"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 16 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="vat_rate"/>
+            <column name="label"     value="Ставка НДС (%)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="16"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 17 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="vat_amount"/>
+            <column name="label"     value="Сумма НДС (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="17"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 18 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="total_rent"/>
+            <column name="label"     value="Итого с НДС (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="18"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 19 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="payment_day"/>
+            <column name="label"     value="День оплаты (число месяца)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="19"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 20 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор аренды коммерческого помещения')"/>
+            <column name="field_key" value="penalty_rate"/>
+            <column name="label"     value="Пеня за просрочку (% в день)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="20"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TEMPLATE 3 — Трудовой договор (стандартный)
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-18-002-fix-employment-contract-fields" author="daniyal">
+
+        <delete tableName="template_fields">
+            <where>template_id = (SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')</where>
+        </delete>
+
+        <!-- 1 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="label"     value="Номер договора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 2 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="city"/>
+            <column name="label"     value="Город"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 3 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="contract_date"/>
+            <column name="label"     value="Дата договора"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 4 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="employer_name"/>
+            <column name="label"     value="Наименование работодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 5 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="employer_bin"/>
+            <column name="label"     value="БИН работодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 6 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="employer_representative"/>
+            <column name="label"     value="Представитель работодателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="6"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 7 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="authority_document"/>
+            <column name="label"     value="Основание (устав / доверенность)"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="7"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 8 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="employee_fio"/>
+            <column name="label"     value="ФИО работника"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="8"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 9 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="employee_iin"/>
+            <column name="label"     value="ИИН работника"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="9"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 10 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="position"/>
+            <column name="label"     value="Должность"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="10"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 11 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="department"/>
+            <column name="label"     value="Подразделение / отдел"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="false"/>
+            <column name="order_num" valueNumeric="11"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 12 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="workplace_address"/>
+            <column name="label"     value="Адрес рабочего места"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="12"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 13 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="work_type"/>
+            <column name="label"     value="Характер работы"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="13"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 14 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="contract_type"/>
+            <column name="label"     value="Вид договора (срочный / бессрочный)"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="14"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 15 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="label"     value="Дата начала работы"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="15"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 16 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="end_date"/>
+            <column name="label"     value="Дата окончания (для срочного)"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="false"/>
+            <column name="order_num" valueNumeric="16"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 17 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="monthly_salary"/>
+            <column name="label"     value="Оклад в месяц (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="17"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 18 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="payroll_day"/>
+            <column name="label"     value="День выплаты зарплаты (число)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="18"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 19 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="work_schedule"/>
+            <column name="label"     value="Режим рабочей недели"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="19"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 20 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="work_hours"/>
+            <column name="label"     value="Продолжительность дня (часов)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="20"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 21 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Трудовой договор (стандартный)')"/>
+            <column name="field_key" value="vacation_days"/>
+            <column name="label"     value="Дней отпуска в год"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="21"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TEMPLATE 4 — Договор купли-продажи транспортного средства
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-18-003-fix-vehicle-sale-fields" author="daniyal">
+
+        <delete tableName="template_fields">
+            <where>template_id = (SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')</where>
+        </delete>
+
+        <!-- 1 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="city"/>
+            <column name="label"     value="Город"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 2 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="contract_date"/>
+            <column name="label"     value="Дата договора"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 3 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="seller_fio"/>
+            <column name="label"     value="ФИО продавца"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 4 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="seller_iin"/>
+            <column name="label"     value="ИИН продавца"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 5 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="buyer_fio"/>
+            <column name="label"     value="ФИО покупателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 6 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="buyer_iin"/>
+            <column name="label"     value="ИИН покупателя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="6"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 7 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_make_model"/>
+            <column name="label"     value="Марка и модель ТС"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="7"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 8 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_year"/>
+            <column name="label"     value="Год выпуска"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="8"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 9 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_vin"/>
+            <column name="label"     value="VIN номер"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="9"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 10 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_plate"/>
+            <column name="label"     value="Гос. номер ТС"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="10"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 11 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="vehicle_color"/>
+            <column name="label"     value="Цвет ТС"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="11"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 12 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="mileage"/>
+            <column name="label"     value="Пробег (км)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="12"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 13 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="sale_price"/>
+            <column name="label"     value="Цена продажи (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="13"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 14 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="payment_method"/>
+            <column name="label"     value="Способ оплаты"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="14"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 15 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор купли-продажи транспортного средства')"/>
+            <column name="field_key" value="transfer_days"/>
+            <column name="label"     value="Срок передачи ТС (дней)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="15"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TEMPLATE 5 — Договор оказания услуг
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-18-004-fix-services-contract-fields" author="daniyal">
+
+        <delete tableName="template_fields">
+            <where>template_id = (SELECT id FROM templates WHERE title = 'Договор оказания услуг')</where>
+        </delete>
+
+        <!-- 1 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="label"     value="Номер договора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 2 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="city"/>
+            <column name="label"     value="Город"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 3 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="contract_date"/>
+            <column name="label"     value="Дата договора"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 4 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="customer_name"/>
+            <column name="label"     value="Наименование заказчика"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 5 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="customer_bin"/>
+            <column name="label"     value="БИН/ИИН заказчика"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 6 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="provider_name"/>
+            <column name="label"     value="Наименование исполнителя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="6"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 7 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="provider_bin"/>
+            <column name="label"     value="БИН/ИИН исполнителя"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="7"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 8 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="service_description"/>
+            <column name="label"     value="Описание услуг"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="8"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 9 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="service_result"/>
+            <column name="label"     value="Ожидаемый результат услуг"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="9"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 10 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="start_date"/>
+            <column name="label"     value="Дата начала"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="10"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 11 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="end_date"/>
+            <column name="label"     value="Дата окончания"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="11"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 12 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="total_price"/>
+            <column name="label"     value="Стоимость услуг (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="12"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 13 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="advance_percent"/>
+            <column name="label"     value="Аванс (%)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="13"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 14 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="advance_payment"/>
+            <column name="label"     value="Сумма аванса (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="14"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 15 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор оказания услуг')"/>
+            <column name="field_key" value="penalty_rate"/>
+            <column name="label"     value="Пеня за просрочку (% в день)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="15"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         TEMPLATE 6 — Договор займа между физическими лицами
+         ═══════════════════════════════════════════════════════════════════════ -->
+    <changeSet id="2026-04-18-005-fix-loan-contract-fields" author="daniyal">
+
+        <delete tableName="template_fields">
+            <where>template_id = (SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')</where>
+        </delete>
+
+        <!-- 1 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="contract_number"/>
+            <column name="label"     value="Номер договора"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="1"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 2 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="city"/>
+            <column name="label"     value="Город"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="2"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 3 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="contract_date"/>
+            <column name="label"     value="Дата договора"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="3"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 4 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="lender_fio"/>
+            <column name="label"     value="ФИО займодавца"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="4"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 5 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="lender_iin"/>
+            <column name="label"     value="ИИН займодавца"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="5"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 6 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="borrower_fio"/>
+            <column name="label"     value="ФИО заёмщика"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="6"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 7 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="borrower_iin"/>
+            <column name="label"     value="ИИН заёмщика"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="7"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 8 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="loan_amount"/>
+            <column name="label"     value="Сумма займа (тенге)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="8"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 9 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="interest_rate"/>
+            <column name="label"     value="Процентная ставка (% в год)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="9"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 10 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="repayment_date"/>
+            <column name="label"     value="Дата возврата"/>
+            <column name="field_type" value="DATE"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="10"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 11 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="repayment_method"/>
+            <column name="label"     value="Способ возврата"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="11"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 12 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="transfer_method"/>
+            <column name="label"     value="Способ передачи суммы"/>
+            <column name="field_type" value="TEXT"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="12"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 13 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="penalty_rate"/>
+            <column name="label"     value="Пеня за просрочку (% в день)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="13"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+        <!-- 14 --> <insert tableName="template_fields">
+            <column name="id" valueSequenceNext="template_field_seq_gen"/>
+            <column name="template_id" valueComputed="(SELECT id FROM templates WHERE title = 'Договор займа между физическими лицами')"/>
+            <column name="field_key" value="early_repayment_notice"/>
+            <column name="label"     value="Срок уведомления о досрочном погашении (дней)"/>
+            <column name="field_type" value="NUMBER"/>
+            <column name="required"  valueBoolean="true"/>
+            <column name="order_num" valueNumeric="14"/>
+            <column name="created_by" value="system"/>
+            <column name="created_date" valueComputed="NOW()"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>
