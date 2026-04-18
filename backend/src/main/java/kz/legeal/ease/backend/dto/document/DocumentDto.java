@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -35,7 +36,7 @@ public class DocumentDto {
     private List<DocumentFieldValueDto> fieldValues;
 
     @Schema(description = "List of required field keys that have not been filled in yet")
-    private List<String> missingRequiredFields;
+    private List<String> missingRequiredFields = new ArrayList<>();
 
     @Schema(description = "Creation timestamp")
     private LocalDateTime createdDate;
