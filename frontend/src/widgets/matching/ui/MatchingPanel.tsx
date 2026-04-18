@@ -13,6 +13,7 @@ import type { AnalysisResult, MatchedTemplate } from "../../../features/document
 import { ROUTES } from "../../../app/router/router";
 
 export default function MatchingPanel() {
+  const isMobile = useIsMobile();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
@@ -55,12 +56,12 @@ export default function MatchingPanel() {
   const hasRisks = (result?.risks?.length ?? 0) > 0;
 
   return (
-    <div style={{ padding: "0 32px 32px" }}>
+    <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
       {/* ── Full-bleed hero ── */}
       <div style={{
         background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-        padding: "40px 40px 56px",
-        marginLeft: -32, marginRight: -32,
+        padding: isMobile ? "24px 16px 40px" : "40px 40px 56px",
+        marginLeft: isMobile ? -16 : -32, marginRight: isMobile ? -16 : -32,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 32 }}>
           <div style={{ width: 52, height: 52, borderRadius: 14, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -92,7 +93,7 @@ export default function MatchingPanel() {
               }}
             />
           </div>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 12, alignItems: isMobile ? "stretch" : "center", flexDirection: isMobile ? "column" : "row" }}>
             <Select
               placeholder="Категория (необязательно)"
               allowClear
@@ -135,7 +136,7 @@ export default function MatchingPanel() {
         )}
 
         {result && (
-          <div style={{ display: "grid", gridTemplateColumns: matched.length ? "1fr 340px" : "1fr", gap: 20, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : (matched.length ? "1fr 340px" : "1fr"), gap: 20, alignItems: "start" }}>
             {/* Matched templates */}
             <div>
               {matched.length === 0 ? (
