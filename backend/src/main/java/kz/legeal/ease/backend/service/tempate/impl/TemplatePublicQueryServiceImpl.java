@@ -27,7 +27,7 @@ public class TemplatePublicQueryServiceImpl implements TemplatePublicQueryServic
     @Override
     @Transactional(readOnly = true)
     public Page<TemplatePreviewDto> getPublishedTemplates(Long categoryId, Pageable pageable) {
-        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "USER");
+        SecurityUtils.requireAnyRole(SecurityUtils.requireCurrentUser(), "USER", "ADMIN");
         return templateRepository.findAllPublished(TemplateStatus.PUBLISHED, categoryId, pageable)
                 .map(templateMapper::toPreviewDto);
     }
@@ -35,7 +35,7 @@ public class TemplatePublicQueryServiceImpl implements TemplatePublicQueryServic
     @Override
     @Transactional(readOnly = true)
     public TemplateDto getPublishedTemplateById(Long templateId) {
-        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "USER");
+        SecurityUtils.requireAnyRole(SecurityUtils.requireCurrentUser(), "USER", "ADMIN");
         final var template = templateRepository.findByIdAndActive(templateId)
                 .orElseThrow(() -> new NotFoundException("Template", templateId));
 

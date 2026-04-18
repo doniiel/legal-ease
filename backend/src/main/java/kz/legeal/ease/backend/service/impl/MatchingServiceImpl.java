@@ -19,7 +19,7 @@ public class MatchingServiceImpl implements MatchingService {
     @Override
     @Transactional
     public RuleEngineResult match(MatchingRequest request) {
-        SecurityUtils.requireRole(SecurityUtils.requireCurrentUser(), "USER");
+        SecurityUtils.requireAnyRole(SecurityUtils.requireCurrentUser(), "USER", "ADMIN");
         final var context = RuleContext.builder()
                 .inputText(request.getInputText())
                 .categoryId(request.getCategoryId())

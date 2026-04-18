@@ -527,7 +527,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     private User requireCurrentUser() {
         final var user = SecurityUtils.requireCurrentUser();
-        SecurityUtils.requireRole(user, "USER");
+        SecurityUtils.requireAnyRole(user, "USER", "ADMIN");
         return user;
     }
 
