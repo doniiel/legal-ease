@@ -174,6 +174,23 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
             DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Body line style — controls font, color, indent in narrative mode
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private enum BodyLineStyle {
+        /** ALL-CAPS document title — bold, navy, centered. */
+        TITLE,
+        /** "1. НАЗВАНИЕ РАЗДЕЛА" — bold, navy, slight top gap. */
+        SECTION_HEADER,
+        /** "1.1. Some text" — regular, dark, 12pt left indent. */
+        SUBSECTION,
+        /** "- item" or "• item" — regular, dark, 24pt indent, bullet char. */
+        BULLET,
+        /** Everything else — regular, dark gray. */
+        BODY
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Render queue — sealed type hierarchy
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -182,11 +199,11 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
 
     /**
      * @param lines    word-wrapped lines of one source line from the template body
-     * @param gapAfter vertical gap to add below this item:
-     *                 {@code PARA_GAP} after a blank-line section break,
-     *                 {@code SP1}      between consecutive lines in the same section
+     * @param gapAfter vertical gap below this item
+     * @param style    controls how this line is rendered (font/color/indent)
      */
-    private record ParagraphItem(List<String> lines, float gapAfter)    implements RenderItem {}
+    private record ParagraphItem(List<String> lines, float gapAfter,
+                                 BodyLineStyle style)                    implements RenderItem {}
     private record SectionCardItem(String title)                        implements RenderItem {}
     private record FieldRowItem(String label, List<String> valueLines,
                                 int rowIndex)                           implements RenderItem {}
@@ -295,10 +312,21 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
                 for (int li = 0; li < sectionLines.length; li++) {
                     final String ln = sectionLines[li].trim();
                     if (ln.isEmpty()) continue;
+                    final BodyLineStyle style = detectLineStyle(ln);
                     // Last line in a section gets full PARA_GAP; others get SP1 (line-break gap)
                     final float gap = (li == sectionLines.length - 1) ? PARA_GAP : SP1;
+                    // Bullets and subsections wrap within a narrower usable width (indented)
+                    final float wrapW = switch (style) {
+                        case BULLET     -> USABLE_W - 24f;
+                        case SUBSECTION -> USABLE_W - 12f;
+                        default         -> USABLE_W;
+                    };
+                    // Strip leading "- " from bullet lines (we'll draw the bullet ourselves)
+                    final String text = (style == BodyLineStyle.BULLET)
+                            ? ln.replaceFirst("^[-•]\\s*", "").trim()
+                            : ln;
                     queue.add(new ParagraphItem(
-                            wrapText(ln, regular, F_BODY, USABLE_W), gap));
+                            wrapText(text, regular, F_BODY, wrapW), gap, style));
                 }
             }
         } else {
@@ -335,7 +363,10 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
 
     private float itemHeight(RenderItem item) {
         return switch (item) {
-            case ParagraphItem   p       -> p.lines().size() * (F_BODY + BODY_LEAD) + p.gapAfter();
+            case ParagraphItem   p       -> {
+                final float fontSize = (p.style() == BodyLineStyle.SECTION_HEADER) ? F_BODY + 1f : F_BODY;
+                yield p.lines().size() * (fontSize + BODY_LEAD) + p.gapAfter();
+            }
             case SectionCardItem ignored -> SECTION_CARD_H + SP3;
             case FieldRowItem    f       -> rowHeight(f.valueLines().size());
             case SealItem        ignored -> SEAL_H;
@@ -354,7 +385,7 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     private float drawItem(PDPageContentStream cs, PDFont regular, PDFont bold,
                            PDDocument pdf, RenderItem item, float y) throws Exception {
         return switch (item) {
-            case ParagraphItem   p -> drawBodyParagraph(cs, regular, p.lines(), p.gapAfter(), y);
+            case ParagraphItem   p -> drawBodyParagraph(cs, regular, bold, p, y);
             case SectionCardItem s -> drawSectionCard(cs, bold, s.title(), y);
             case FieldRowItem    f -> {
                 final float h = rowHeight(f.valueLines().size());
@@ -436,18 +467,63 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
         return cardBottom - SP3;
     }
 
-    private float drawBodyParagraph(PDPageContentStream cs, PDFont regular,
-                                    List<String> lines, float gapAfter, float y) throws Exception {
+    private float drawBodyParagraph(PDPageContentStream cs, PDFont regular, PDFont bold,
+                                    ParagraphItem item, float y) throws Exception {
+        final List<String>   lines    = item.lines();
+        final float          gapAfter = item.gapAfter();
+        final BodyLineStyle  style    = item.style();
+
+        // Per-style rendering properties
+        final PDFont   font;
+        final float    size;
+        final float[]  color;
+        final float    xStart;
+        final boolean  center;
+        final boolean  justify;
+
+        switch (style) {
+            case TITLE -> {
+                font = bold; size = F_BODY + 2f; color = NAVY;
+                xStart = MARGIN_X; center = true; justify = false;
+            }
+            case SECTION_HEADER -> {
+                font = bold; size = F_BODY + 1f; color = NAVY;
+                xStart = MARGIN_X; center = false; justify = false;
+            }
+            case SUBSECTION -> {
+                font = regular; size = F_BODY; color = C_TEXT;
+                xStart = MARGIN_X + 12f; center = false; justify = true;
+            }
+            case BULLET -> {
+                font = regular; size = F_BODY; color = C_TEXT;
+                xStart = MARGIN_X + 24f; center = false; justify = false;
+            }
+            default -> {  // BODY
+                font = regular; size = F_BODY; color = C_TEXT;
+                xStart = MARGIN_X; center = false; justify = true;
+            }
+        }
+
+        final float lineW = PAGE_W - MARGIN_X - xStart;
+
         for (int i = 0; i < lines.size(); i++) {
             final String  l      = lines.get(i);
             final boolean isLast = (i == lines.size() - 1);
-            // Justify all word-wrapped lines except the last (ragged-right is typographically correct)
-            if (!isLast) {
-                drawJustified(cs, regular, F_BODY, l, MARGIN_X, y, USABLE_W, C_TEXT);
+
+            if (center) {
+                final float textW = font.getStringWidth(l) / 1000f * size;
+                final float cx    = (PAGE_W - textW) / 2f;
+                text(cs, font, size, l, cx, y, color);
+            } else if (style == BodyLineStyle.BULLET && i == 0) {
+                // Draw bullet character, then text indented after it
+                text(cs, font, size, "•", MARGIN_X + 10f, y, NAVY);
+                text(cs, font, size, l, xStart, y, color);
+            } else if (justify && !isLast) {
+                drawJustified(cs, font, size, l, xStart, y, lineW, color);
             } else {
-                text(cs, regular, F_BODY, l, MARGIN_X, y, C_TEXT);
+                text(cs, font, size, l, xStart, y, color);
             }
-            y -= (F_BODY + BODY_LEAD);
+            y -= (size + BODY_LEAD);
         }
         return y - gapAfter;
     }
@@ -678,6 +754,27 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
                         TemplateField::getFieldKey,
                         TemplateField::getLabel,
                         (a, b) -> a));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Body line style detection
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private static final java.util.regex.Pattern SECTION_HEADER_RE =
+            java.util.regex.Pattern.compile("^\\d+\\.\\s+[А-ЯA-Z\\s\\-/()]{3,}$");
+    private static final java.util.regex.Pattern SUBSECTION_RE =
+            java.util.regex.Pattern.compile("^\\d+\\.\\d+\\.\\s");
+    private static final java.util.regex.Pattern BULLET_RE =
+            java.util.regex.Pattern.compile("^[-•]\\s");
+    private static final java.util.regex.Pattern ALL_CAPS_RE =
+            java.util.regex.Pattern.compile("^[А-ЯA-Z][А-ЯA-Z\\s\\-/()«»№.,:0-9]{4,}$");
+
+    private BodyLineStyle detectLineStyle(String line) {
+        if (BULLET_RE.matcher(line).find())          return BodyLineStyle.BULLET;
+        if (SUBSECTION_RE.matcher(line).find())      return BodyLineStyle.SUBSECTION;
+        if (SECTION_HEADER_RE.matcher(line).find()) return BodyLineStyle.SECTION_HEADER;
+        if (ALL_CAPS_RE.matcher(line.trim()).matches()) return BodyLineStyle.TITLE;
+        return BodyLineStyle.BODY;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
