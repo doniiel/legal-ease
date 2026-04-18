@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
   App, Form, Input, Spin, Typography, Alert, Progress, Empty, Tooltip, Divider,
 } from "antd";
@@ -423,6 +424,7 @@ function VersionsPanel({ versions, isLoading }: { versions: DocumentVersion[]; i
 interface Props { documentId: number }
 
 export default function DocumentDetailPanel({ documentId }: Props) {
+  const isMobile = useIsMobile();
   const { message } = App.useApp();
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -551,7 +553,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: "28px 40px 48px", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: isMobile ? "20px 16px 40px" : "28px 40px 48px", position: "relative", zIndex: 1 }}>
           {/* Back + actions row */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
             <HeroBtn icon={<ArrowLeft size={14} />} label="Назад" onClick={() => navigate(ROUTES.DOCUMENTS)} />
@@ -601,7 +603,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
         </div>
       </div>
 
-      <div style={{ padding: "0 32px 32px" }}>
+      <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat pills ── */}
         <div style={{ display: "flex", gap: 16, marginTop: -20, marginBottom: 24, position: "relative", zIndex: 2, flexWrap: "wrap" }}>
           {[
@@ -620,7 +622,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
         </div>
 
         {/* ── Main content grid ── */}
-        <div style={{ display: "grid", gridTemplateColumns: hasRightPanel ? "1fr 420px" : "1fr", gap: 24, alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : (hasRightPanel ? "1fr 420px" : "1fr"), gap: 24, alignItems: "start" }}>
           {/* Left: Form */}
           <div style={{ background: "#fff", borderRadius: 16, padding: "28px 32px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
@@ -646,7 +648,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                   <Divider style={{ margin: "8px 0 20px" }}>
                     <span style={{ fontSize: 11, color: "#94a3b8", fontWeight: 600 }}>Поля шаблона</span>
                   </Divider>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 24px" }}>
+                  <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 0 : "0 24px" }}>
                     {templateFields.map(field => {
                       const isMissing = doc.missingRequiredFields?.includes(field.fieldKey);
                       return (

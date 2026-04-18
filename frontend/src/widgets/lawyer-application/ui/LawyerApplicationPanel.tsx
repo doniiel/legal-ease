@@ -114,18 +114,19 @@ export default function LawyerApplicationPanel() {
   };
 
   return (
-    <div style={{ padding: "0 32px 32px" }}>
+    <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
       {/* ── Full-bleed hero ── */}
       <div
         style={{
           background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-          padding: "40px 40px 56px",
-          marginLeft: -32,
-          marginRight: -32,
+          padding: isMobile ? "24px 16px 40px" : "40px 40px 56px",
+          marginLeft: isMobile ? -16 : -32,
+          marginRight: isMobile ? -16 : -32,
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 20,
+          flexWrap: "wrap",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
@@ -154,7 +155,7 @@ export default function LawyerApplicationPanel() {
         </div>
 
         {/* Steps inline in header */}
-        <div style={{ flexShrink: 0, minWidth: 280 }}>
+        <div style={{ flexShrink: 0, minWidth: 280, display: isMobile ? "none" : undefined }}>
           <Steps
             size="small"
             current={cfg?.step ?? 0}
