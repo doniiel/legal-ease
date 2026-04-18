@@ -180,7 +180,13 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     private sealed interface RenderItem
             permits ParagraphItem, SectionCardItem, FieldRowItem, SealItem {}
 
-    private record ParagraphItem(List<String> lines)                    implements RenderItem {}
+    /**
+     * @param lines    word-wrapped lines of one source line from the template body
+     * @param gapAfter vertical gap to add below this item:
+     *                 {@code PARA_GAP} after a blank-line section break,
+     *                 {@code SP1}      between consecutive lines in the same section
+     */
+    private record ParagraphItem(List<String> lines, float gapAfter)    implements RenderItem {}
     private record SectionCardItem(String title)                        implements RenderItem {}
     private record FieldRowItem(String label, List<String> valueLines,
                                 int rowIndex)                           implements RenderItem {}
@@ -281,11 +287,19 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
             // ── Narrative mode: render body as flowing paragraphs only ───────
             // Field table is intentionally omitted — the body text is the document.
             final String rendered = bodyRenderer.render(rawBody, fieldValues);
-            for (final String paragraph : rendered.split("\n{2,}")) {
-                final String normalized = paragraph.replace("\n", " ").trim();
-                if (normalized.isEmpty()) continue;
-                queue.add(new ParagraphItem(
-                        wrapText(normalized, regular, F_BODY, USABLE_W)));
+
+            // Split on blank lines (section breaks) → each section may contain
+            // multiple lines separated by single newlines.
+            for (final String section : rendered.split("\n{2,}")) {
+                final String[] sectionLines = section.split("\n");
+                for (int li = 0; li < sectionLines.length; li++) {
+                    final String ln = sectionLines[li].trim();
+                    if (ln.isEmpty()) continue;
+                    // Last line in a section gets full PARA_GAP; others get SP1 (line-break gap)
+                    final float gap = (li == sectionLines.length - 1) ? PARA_GAP : SP1;
+                    queue.add(new ParagraphItem(
+                            wrapText(ln, regular, F_BODY, USABLE_W), gap));
+                }
             }
         } else {
             // ── Legacy mode: field table only (backward-compatible) ──────────
@@ -321,7 +335,7 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
 
     private float itemHeight(RenderItem item) {
         return switch (item) {
-            case ParagraphItem   p       -> p.lines().size() * (F_BODY + BODY_LEAD) + PARA_GAP;
+            case ParagraphItem   p       -> p.lines().size() * (F_BODY + BODY_LEAD) + p.gapAfter();
             case SectionCardItem ignored -> SECTION_CARD_H + SP3;
             case FieldRowItem    f       -> rowHeight(f.valueLines().size());
             case SealItem        ignored -> SEAL_H;
@@ -340,7 +354,7 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     private float drawItem(PDPageContentStream cs, PDFont regular, PDFont bold,
                            PDDocument pdf, RenderItem item, float y) throws Exception {
         return switch (item) {
-            case ParagraphItem   p -> drawBodyParagraph(cs, regular, p.lines(), y);
+            case ParagraphItem   p -> drawBodyParagraph(cs, regular, p.lines(), p.gapAfter(), y);
             case SectionCardItem s -> drawSectionCard(cs, bold, s.title(), y);
             case FieldRowItem    f -> {
                 final float h = rowHeight(f.valueLines().size());
@@ -423,11 +437,11 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
     }
 
     private float drawBodyParagraph(PDPageContentStream cs, PDFont regular,
-                                    List<String> lines, float y) throws Exception {
+                                    List<String> lines, float gapAfter, float y) throws Exception {
         for (int i = 0; i < lines.size(); i++) {
             final String  l      = lines.get(i);
             final boolean isLast = (i == lines.size() - 1);
-            // Justify all lines except the last (ragged-right last line is typographically correct)
+            // Justify all word-wrapped lines except the last (ragged-right is typographically correct)
             if (!isLast) {
                 drawJustified(cs, regular, F_BODY, l, MARGIN_X, y, USABLE_W, C_TEXT);
             } else {
@@ -435,7 +449,7 @@ public class DocumentPdfServiceImpl implements DocumentPdfService {
             }
             y -= (F_BODY + BODY_LEAD);
         }
-        return y - PARA_GAP;
+        return y - gapAfter;
     }
 
     /**
