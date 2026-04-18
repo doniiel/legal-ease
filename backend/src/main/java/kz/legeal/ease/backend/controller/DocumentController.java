@@ -131,6 +131,14 @@ public class DocumentController {
         return ResponseEntity.ok(documentService.restore(id));
     }
 
+    @Operation(summary = "Re-generate PDF for a COMPLETED document (replaces stored file)")
+    @PostMapping("/{id}/regenerate-pdf")
+    public ResponseEntity<DocumentDto> regeneratePdf(
+            @Parameter(description = "Document ID", required = true) @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(documentService.regeneratePdf(id));
+    }
+
     @Operation(summary = "Complete a document (DRAFT → COMPLETED)")
     @PostMapping("/{id}/complete")
     public ResponseEntity<CompleteDocumentResponseDto> complete(

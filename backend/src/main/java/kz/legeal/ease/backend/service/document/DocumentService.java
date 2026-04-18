@@ -82,6 +82,12 @@ public interface DocumentService {
     /** Generate a time-limited presigned URL for direct PDF download. */
     PresignedUrlResponse getPresignedUrl(Long docId);
 
+    /**
+     * Re-generate the PDF for a COMPLETED document and replace the stored file in S3.
+     * Useful when the template renderer is updated after the document was completed.
+     */
+    DocumentDto regeneratePdf(Long docId);
+
     /** List all immutable PDF versions for a document owned by the current user. */
     List<DocumentVersionDto> getVersions(Long docId);
 
