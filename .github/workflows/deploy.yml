@@ -187,10 +187,17 @@ jobs:
 
           cp /opt/legalease/legal-ease/.env .env
 
+          # Load .env vars into shell (needed for password sync below)
+          set -a; source .env; set +a
+
           docker rm -f legalease-nginx legalease-frontend legalease-backend legalease-minio legalease-postgres 2>/dev/null || true
 
           docker compose -p legalease -f docker-compose.prod.yml up -d postgres minio
           until docker exec legalease-postgres pg_isready -U "${POSTGRES_USER:-postgres}"; do sleep 2; done
+
+          # Sync DB password to match .env — safe to run every deploy
+          docker exec legalease-postgres psql -U "${POSTGRES_USER:-postgres}" \
+            -c "ALTER USER \"${POSTGRES_USER:-postgres}\" WITH PASSWORD '${POSTGRES_PASSWORD}';"
 
           docker compose -p legalease -f docker-compose.prod.yml up -d --remove-orphans
           docker image prune -f
