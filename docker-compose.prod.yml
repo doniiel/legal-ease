@@ -127,7 +127,8 @@ networks:
 
 volumes:
   postgres_data:
-    driver: local
+    external: true
+    name: legalease_postgres_data
   backend_logs:
     driver: local
   minio_data:

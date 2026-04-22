@@ -189,10 +189,10 @@ jobs:
 
           docker rm -f legalease-nginx legalease-frontend legalease-backend 2>/dev/null || true
 
-          docker compose -f docker-compose.prod.yml up -d postgres minio
-          until docker exec legalease-postgres pg_isready -U postgres; do sleep 2; done
+          docker compose -p legalease -f docker-compose.prod.yml up -d postgres minio
+          until docker exec legalease-postgres pg_isready -U "${POSTGRES_USER:-postgres}"; do sleep 2; done
 
-          docker compose -f docker-compose.prod.yml up -d --remove-orphans
+          docker compose -p legalease -f docker-compose.prod.yml up -d --remove-orphans
           docker image prune -f
 
           echo "Deploy complete!"
