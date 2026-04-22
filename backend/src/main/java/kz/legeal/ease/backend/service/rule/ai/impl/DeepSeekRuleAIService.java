@@ -335,7 +335,16 @@ public class DeepSeekRuleAIService implements RuleAiService {
         final var choices = (List<Map<String, Object>>) response.getBody().get("choices");
         @SuppressWarnings("unchecked")
         final var message = (Map<String, Object>) choices.get(0).get("message");
-        return (String) message.get("content");
+        return stripMarkdown((String) message.get("content"));
+    }
+
+    private String stripMarkdown(String raw) {
+        if (raw == null) return "";
+        String s = raw.strip();
+        if (s.startsWith("```")) {
+            s = s.replaceFirst("^```[a-zA-Z]*\\s*", "").replaceFirst("(?s)```\\s*$", "").strip();
+        }
+        return s;
     }
 
     private String buildEnrichPrompt(RuleChainContext ctx) {
