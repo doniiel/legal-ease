@@ -244,24 +244,36 @@ public class DeepSeekRuleAIService implements RuleAiService {
     }
 
     @Override
-    public String explainClause(String clauseText) {
+    public kz.legeal.ease.backend.dto.ai.ClauseExplainResponse explainClause(String clauseText) {
         final var prompt = """
                 Ты — юридический ассистент для Казахстана.
                 Объясни следующий пункт юридического документа простым языком для обычного человека.
-                Укажи: что он означает, какие права/обязанности он создаёт, на что обратить внимание.
                 Текст пункта: "%s"
                 Ответь СТРОГО в JSON без markdown:
                 {
-                  "explanation": "Объяснение на русском языке..."
+                  "explanation": "Что означает этот пункт (2-3 предложения)",
+                  "simplifiedText": "Одно предложение — суть пункта простыми словами",
+                  "risks": ["Риск 1 если есть", "Риск 2 если есть"],
+                  "recommendations": ["Рекомендация 1", "Рекомендация 2"]
                 }
                 """.formatted(clauseText);
         try {
             final var json = call(prompt);
             final var node = objectMapper.readTree(json);
-            return node.get("explanation").asText();
+            final var risks = objectMapper.convertValue(node.get("risks"), new TypeReference<List<String>>() {});
+            final var recs  = objectMapper.convertValue(node.get("recommendations"), new TypeReference<List<String>>() {});
+            return new kz.legeal.ease.backend.dto.ai.ClauseExplainResponse(
+                    node.get("explanation").asText(),
+                    node.get("simplifiedText").asText(),
+                    risks != null ? risks : List.of(),
+                    recs  != null ? recs  : List.of()
+            );
         } catch (Exception e) {
             log.warn("explainClause failed: {}", e.getMessage());
-            return "Не удалось получить объяснение. Пожалуйста, попробуйте позже.";
+            return new kz.legeal.ease.backend.dto.ai.ClauseExplainResponse(
+                    "Не удалось получить объяснение. Пожалуйста, попробуйте позже.",
+                    "", List.of(), List.of()
+            );
         }
     }
 

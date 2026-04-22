@@ -21,7 +21,6 @@ public class AiController {
     @Operation(summary = "Explain a legal clause (any authenticated user)")
     @PostMapping("/explain-clause")
     public ResponseEntity<ClauseExplainResponse> explainClause(@Valid @RequestBody ClauseExplainRequest request) {
-        final String explanation = ruleAiService.explainClause(request.getText());
-        return ResponseEntity.ok(new ClauseExplainResponse(explanation));
+        return ResponseEntity.ok(ruleAiService.explainClause(request.getText()));
     }
 }
