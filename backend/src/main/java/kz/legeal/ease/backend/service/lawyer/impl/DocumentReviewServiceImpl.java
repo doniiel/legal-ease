@@ -4,6 +4,8 @@ import kz.legeal.ease.backend.domain.Document;
 import kz.legeal.ease.backend.domain.DocumentReview;
 import kz.legeal.ease.backend.dto.document.DocumentReviewDto;
 import kz.legeal.ease.backend.enums.AuditAction;
+import kz.legeal.ease.backend.enums.ReviewStatus;
+import kz.legeal.ease.backend.enums.RiskLevel;
 import kz.legeal.ease.backend.exception.BusinessRuleException;
 import kz.legeal.ease.backend.exception.NotFoundException;
 import kz.legeal.ease.backend.mapper.DocumentReviewMapper;
@@ -38,21 +40,28 @@ public class DocumentReviewServiceImpl implements DocumentReviewService {
 
         assertLawyerOwnsTemplate(lawyer.getId(), document);
 
+        final boolean recommended = request.getStatus() == ReviewStatus.APPROVED;
+        final RiskLevel riskLevel = switch (request.getStatus()) {
+            case APPROVED       -> RiskLevel.LOW;
+            case NEEDS_REVISION -> RiskLevel.MEDIUM;
+            case REJECTED       -> RiskLevel.HIGH;
+        };
+
         // Update existing review if lawyer already reviewed this document, otherwise create new.
         final DocumentReview review;
         final var existing = reviewRepository.findByDocumentIdAndLawyerId(documentId, lawyer.getId());
         if (existing.isPresent()) {
             review = existing.get();
-            review.setNotes(request.getNotes());
-            review.setRiskLevel(request.getRiskLevel());
-            review.setRecommended(request.isRecommended());
+            review.setNotes(request.getComment());
+            review.setRiskLevel(riskLevel);
+            review.setRecommended(recommended);
         } else {
             review = DocumentReview.builder()
                     .document(document)
                     .lawyer(lawyer)
-                    .notes(request.getNotes())
-                    .riskLevel(request.getRiskLevel())
-                    .recommended(request.isRecommended())
+                    .notes(request.getComment())
+                    .riskLevel(riskLevel)
+                    .recommended(recommended)
                     .build();
         }
 

@@ -84,6 +84,7 @@ services:
       STORAGE_S3_ACCESS_KEY: ${MINIO_ROOT_USER}
       STORAGE_S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       STORAGE_S3_BUCKET: ${STORAGE_S3_BUCKET}
+      APP_SHARE_BASE_URL: ${APP_SHARE_BASE_URL}
     volumes:
       - backend_logs:/app/logs
     networks:

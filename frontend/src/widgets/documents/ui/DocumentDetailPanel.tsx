@@ -18,7 +18,6 @@ import {
   useArchiveDocumentMutation,
   useRestoreDocumentMutation,
   useShareDocumentMutation,
-  useLazyGetDocumentUrlQuery,
   useGetDocumentVersionsQuery,
   useGetDocumentSuggestionsQuery,
   type AnalysisResult,
@@ -445,7 +444,6 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   const [archiveDocument,  { isLoading: isArchiving }]  = useArchiveDocumentMutation();
   const [restoreDocument,  { isLoading: isRestoring }]  = useRestoreDocumentMutation();
   const [shareDocument,    { isLoading: isSharing }]    = useShareDocumentMutation();
-  const [triggerGetUrl] = useLazyGetDocumentUrlQuery();
 
   // Template fields sorted by orderNum; fall back to fields derived from doc.fieldValues
   const templateFields: TemplateField[] = template?.fields
@@ -501,9 +499,19 @@ export default function DocumentDetailPanel({ documentId }: Props) {
 
   const handleDownload = async () => {
     try {
-      const result = await triggerGetUrl(documentId).unwrap();
-      window.open(result.url, "_blank");
-    } catch { message.error("Не удалось получить ссылку для скачивания"); }
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(`/api/documents/${documentId}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `document-${documentId}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { message.error("Не удалось скачать документ"); }
   };
 
   const handleShare = async () => {

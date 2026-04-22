@@ -13,6 +13,7 @@ import kz.legeal.ease.backend.repository.TemplateFieldRepository;
 import kz.legeal.ease.backend.repository.TemplateRepository;
 import kz.legeal.ease.backend.request.TemplateFieldRequest;
 import kz.legeal.ease.backend.request.TemplateRequest;
+import kz.legeal.ease.backend.service.document.TemplateBodyRenderer;
 import kz.legeal.ease.backend.service.tempate.TemplateCommandService;
 import kz.legeal.ease.backend.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,6 +34,7 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
     private final TemplateFieldRepository templateFieldRepository;
     private final CategoryRepository categoryRepository;
     private final TemplateMapper templateMapper;
+    private final TemplateBodyRenderer bodyRenderer;
 
     @Override
     @Transactional
@@ -40,6 +44,8 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
 
         final var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
+
+        validateBodyPlaceholders(request.getBody(), request.getFields());
 
         final var template = Template.builder()
                 .title(request.getTitle())
@@ -65,6 +71,8 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
         final var template = getOwnedDraftTemplate(templateId, currentLawyer.getId());
         final var category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new NotFoundException(Category.class.getName(), request.getCategoryId()));
+
+        validateBodyPlaceholders(request.getBody(), request.getFields());
 
         template.setTitle(request.getTitle());
         template.setDescription(request.getDescription());
@@ -126,6 +134,29 @@ public class TemplateCommandServiceImpl implements TemplateCommandService {
                     "Template id=" + templateId + " is already published", "TPL_001");
         }
         return template;
+    }
+
+    /**
+     * Validates that every {{placeholder}} key in the body has a matching TemplateField.
+     * Throws BusinessRuleException listing unmatched keys so the lawyer can fix them.
+     */
+    private void validateBodyPlaceholders(String body, List<TemplateFieldRequest> fields) {
+        if (body == null || body.isBlank()) return;
+        final Set<String> placeholders = bodyRenderer.extractPlaceholders(body);
+        if (placeholders.isEmpty()) return;
+        final Set<String> fieldKeys = fields == null ? Set.of() :
+                fields.stream().map(TemplateFieldRequest::getFieldKey).collect(Collectors.toSet());
+        final List<String> unmatched = placeholders.stream()
+                .filter(p -> !fieldKeys.contains(p))
+                .sorted()
+                .toList();
+        if (!unmatched.isEmpty()) {
+            throw new BusinessRuleException(
+                    "Template body contains placeholders with no matching field key: " + unmatched
+                    + ". Add fields with those exact keys or fix the placeholder names in the body.",
+                    "TPL_PLACEHOLDER_MISMATCH"
+            );
+        }
     }
 
     private List<TemplateField> buildFields(

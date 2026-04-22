@@ -9,52 +9,76 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Renders a template body by substituting {@code {{field_key}}} placeholders
- * with actual document field values.
+ * Renders a template body by substituting field-key placeholders with actual
+ * document field values.
  *
- * <h3>Placeholder syntax</h3>
+ * <h3>Supported placeholder syntaxes</h3>
  * <pre>
- *   {{field_key}}          — exact match, whitespace inside braces is trimmed
+ *   {{field_key}}   — double curly braces
+ *   [field_key]     — square brackets (natural lawyer format)
  * </pre>
+ *
+ * <h3>Conditionals</h3>
+ * <pre>
+ *   {{#if field_key}}...content...{{/if}}
+ * </pre>
+ * If {@code field_key} has a non-blank value the content is kept (with its own
+ * placeholders substituted); otherwise the entire block including the tags is removed.
  *
  * <h3>Missing values</h3>
- * If a placeholder key has no corresponding value in the field map, it is
- * replaced with {@code [field_key]} — visually obvious in the rendered
- * document so the user notices the gap rather than seeing blank space.
- *
- * <h3>Example</h3>
- * <pre>
- *   body:   "Договор заключён {{date}} между {{client_name}} и {{company}}."
- *   values: { date="28.03.2026", client_name="Daniyal" }   // company is missing
- *   result: "Договор заключён 28.03.2026 между Daniyal и [company]."
- * </pre>
+ * If a placeholder key has no corresponding filled value it is replaced with
+ * {@code _______} so the gap is clearly visible in the PDF as a blank line to fill.
  */
 @Service
 public class TemplateBodyRenderer {
 
-    /** Matches {{ anything }} allowing whitespace around the key. */
-    private static final Pattern PLACEHOLDER =
-            Pattern.compile("\\{\\{\\s*([^}\\s][^}]*)\\s*\\}\\}");
+    /** {{#if key}}...{{/if}} — DOTALL so content can span multiple lines. */
+    private static final Pattern CONDITIONAL = Pattern.compile(
+            "\\{\\{#if\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\}\\}(.*?)\\{\\{/if\\}\\}",
+            Pattern.DOTALL
+    );
 
     /**
-     * Substitute all placeholders in {@code body} using the provided value map.
-     *
-     * @param body        template text with {@code {{field_key}}} placeholders
-     * @param fieldValues map of fieldKey → fieldValue from the document
-     * @return fully rendered text; empty string if {@code body} is null or blank
+     * Combined placeholder pattern — only valid identifier characters:
+     *   group 1 — {{field_key}}
+     *   group 2 — [field_key]
+     * Does NOT match directive tokens like {{#if ...}} or {{/if}}.
+     */
+    private static final Pattern PLACEHOLDER = Pattern.compile(
+            "\\{\\{([a-zA-Z_][a-zA-Z0-9_]*)\\}\\}" +
+            "|" +
+            "\\[([a-zA-Z_][a-zA-Z0-9_]*)\\]"
+    );
+
+    /** Shown in the PDF when a field was left blank. */
+    private static final String BLANK_FILL = "_______";
+
+    /**
+     * Render the template body:
+     * <ol>
+     *   <li>Resolve {@code {{#if key}}...{{/if}}} conditionals.</li>
+     *   <li>Substitute {@code {{field_key}}} / {@code [field_key]} placeholders.</li>
+     * </ol>
      */
     public String render(String body, Map<String, String> fieldValues) {
         if (body == null || body.isBlank()) return "";
 
+        // Pass 1 — conditionals
+        body = resolveConditionals(body, fieldValues);
+
+        // Pass 2 — placeholder substitution
         final Matcher      matcher = PLACEHOLDER.matcher(body);
         final StringBuffer result  = new StringBuffer();
 
         while (matcher.find()) {
-            final String key         = matcher.group(1).trim();
-            final String value       = fieldValues.get(key);
-            final String replacement = value != null && !value.isBlank()
+            final String key = matcher.group(1) != null
+                    ? matcher.group(1).trim()
+                    : matcher.group(2);
+
+            final String value = fieldValues.get(key);
+            final String replacement = (value != null && !value.isBlank())
                     ? value
-                    : "[" + key + "]";   // visually flag missing value
+                    : BLANK_FILL;
             matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(result);
@@ -63,12 +87,8 @@ public class TemplateBodyRenderer {
     }
 
     /**
-     * Extract all unique placeholder keys from a template body, in order of
-     * first appearance. Useful for validating that a template's fields cover
-     * all placeholders used in its body.
-     *
-     * @param body template text
-     * @return ordered set of placeholder keys; empty if body is null or blank
+     * Extract all unique placeholder keys (for template validation).
+     * Supports both {@code {{key}}} and {@code [key]} syntaxes.
      */
     public Set<String> extractPlaceholders(String body) {
         final Set<String> keys = new LinkedHashSet<>();
@@ -76,8 +96,29 @@ public class TemplateBodyRenderer {
 
         final Matcher matcher = PLACEHOLDER.matcher(body);
         while (matcher.find()) {
-            keys.add(matcher.group(1).trim());
+            final String key = matcher.group(1) != null
+                    ? matcher.group(1).trim()
+                    : matcher.group(2);
+            keys.add(key);
         }
         return keys;
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────────────
+
+    private String resolveConditionals(String body, Map<String, String> fieldValues) {
+        final Matcher      m  = CONDITIONAL.matcher(body);
+        final StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            final String key     = m.group(1);
+            final String content = m.group(2);
+            final String value   = fieldValues.get(key);
+            // Keep content (with its own placeholders) if field is filled; else remove block
+            m.appendReplacement(sb,
+                    Matcher.quoteReplacement(
+                            (value != null && !value.isBlank()) ? content : ""));
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 }

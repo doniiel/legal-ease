@@ -71,4 +71,7 @@
     <include file="changelogs/v1/2026-04-16-001-insert-demo-data.xml"                  relativeToChangelogFile="true"/>
     <include file="changelogs/v1/2026-04-16-002-insert-demo-data-extended.xml"         relativeToChangelogFile="true"/>
 
+    <!-- v1.13.0 — Fix template field keys to match body placeholders -->
+    <include file="changelogs/v1/2026-04-18-001-fix-template-fields.xml"              relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

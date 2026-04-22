@@ -158,6 +158,7 @@ function TemplateFormModal({ open, onClose, editingTemplate, onSuccess }: {
     setStep(0);
     if (editingTemplate) {
       form.setFieldsValue({ title: editingTemplate.title, description: editingTemplate.description, categoryId: editingTemplate.category?.id,
+        body: (editingTemplate as any).body ?? "",
         fields: editingTemplate.fields.map(f => ({ label: f.label, fieldKey: f.fieldKey, fieldType: f.fieldType, required: f.required })) });
     } else {
       form.resetFields();
@@ -220,15 +221,32 @@ function TemplateFormModal({ open, onClose, editingTemplate, onSuccess }: {
               <Input size="large" placeholder="Например: Договор купли-продажи" prefix={<FileText size={16} color="#9ca3af" />} />
             </Form.Item>
             <Form.Item label={<Text style={{ fontWeight: 600 }}>Описание</Text>} name="description" rules={[{ max: 2000 }]}>
-              <TextArea rows={3} placeholder="Краткое описание..." showCount maxLength={2000} />
+              <TextArea rows={2} placeholder="Краткое описание..." showCount maxLength={2000} />
             </Form.Item>
             <Form.Item label={<Text style={{ fontWeight: 600 }}>Категория</Text>} name="categoryId" rules={[{ required: true, message: "Выберите категорию" }]}>
               <Select size="large" showSearch placeholder="Выберите категорию" filterOption={(input, opt) => String(opt?.label ?? "").toLowerCase().includes(input.toLowerCase())}
                 options={(categoriesData ?? []).map(c => ({ value: c.id, label: c.name }))} />
             </Form.Item>
-            <div style={{ background: "#f0f9ff", borderRadius: 10, padding: "12px 16px", border: "1px solid #bae6fd" }}>
-              <Text style={{ fontSize: 12, color: "#0369a1" }}>💡 На следующем шаге вы добавите поля для заполнения.</Text>
-            </div>
+            <Form.Item
+              label={<Text style={{ fontWeight: 600 }}>Текст шаблона (тело документа)</Text>}
+              name="body"
+              rules={[{ max: 100000 }]}
+              extra={
+                <Text style={{ fontSize: 11, color: "#6b7280" }}>
+                  Используйте <code style={{ background: "#f3f4f6", padding: "1px 4px", borderRadius: 3 }}>{"{{field_key}}"}</code> для подстановки значений полей.
+                  Ключи должны совпадать с ключами полей на следующем шаге.
+                  Пример: <code style={{ background: "#f3f4f6", padding: "1px 4px", borderRadius: 3 }}>{"Договор №{{contract_number}} от {{contract_date}}"}</code>
+                </Text>
+              }
+            >
+              <TextArea
+                rows={10}
+                placeholder={"Введите текст документа с плейсхолдерами...\n\nПример:\nДОГОВОР №{{contract_number}}\nг. {{city}}, {{contract_date}}\n\nСтороны заключили настоящий договор о следующем:"}
+                showCount
+                maxLength={100000}
+                style={{ fontFamily: "monospace", fontSize: 13 }}
+              />
+            </Form.Item>
           </div>
           <div style={{ display: step === 1 ? "block" : "none" }}>
             <div style={{ background: "#f0f9ff", borderRadius: 10, padding: "10px 14px", marginBottom: 18, border: "1px solid #bae6fd" }}>

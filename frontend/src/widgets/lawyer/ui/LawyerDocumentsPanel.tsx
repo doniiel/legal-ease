@@ -281,12 +281,12 @@ export default function LawyerDocumentsPanel() {
                     </div>
                   )}
 
-                  {docDetail.missingRequiredFields.length > 0 && (
+                  {(docDetail.missingRequiredFields?.length ?? 0) > 0 && (
                     <>
                       <Divider style={{ margin: "20px 0" }} />
                       <Text style={{ fontSize: 12, fontWeight: 700, color: "#ef4444", display: "block", marginBottom: 8 }}>Незаполненные обязательные поля</Text>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {docDetail.missingRequiredFields.map(f => (
+                        {docDetail.missingRequiredFields?.map(f => (
                           <span key={f} style={{ fontSize: 11, fontFamily: "monospace", color: "#ef4444", background: "rgba(239,68,68,0.08)", padding: "2px 8px", borderRadius: 6, border: "1px solid rgba(239,68,68,0.2)" }}>{f}</span>
                         ))}
                       </div>

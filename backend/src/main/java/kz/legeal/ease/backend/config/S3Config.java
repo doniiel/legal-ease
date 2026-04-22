@@ -61,7 +61,7 @@ public class S3Config {
      */
     @Bean
     public S3Presigner s3Presigner() {
-        final var publicEndpoint = props.getPublicEndpoint() != null
+        final var publicEndpoint = (props.getPublicEndpoint() != null && !props.getPublicEndpoint().isBlank())
                 ? props.getPublicEndpoint()
                 : props.getEndpoint();
 

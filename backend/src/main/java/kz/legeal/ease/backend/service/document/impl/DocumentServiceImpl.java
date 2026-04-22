@@ -381,6 +381,48 @@ public class DocumentServiceImpl implements DocumentService {
         auditService.log(currentUser.getId(), AuditAction.DOCUMENT_DELETED, "Document", docId, null);
     }
 
+    // ─── REGENERATE PDF ──────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public DocumentDto regeneratePdf(Long docId) {
+        final var currentUser = requireCurrentUser();
+        final var doc = findOwnedOrThrow(currentUser.getId(), docId);
+
+        if (doc.getStatus() != DocumentStatus.COMPLETED) {
+            throw new BusinessRuleException(
+                    "Only COMPLETED documents can have their PDF regenerated.",
+                    "DOC_NOT_COMPLETED"
+            );
+        }
+
+        try {
+            final int nextVersion  = doc.getCurrentVersion() + 1;
+            final byte[] pdfBytes  = pdfService.generate(doc);
+            doc.setContentHash(sha256Hex(pdfBytes));
+            final String objectKey = buildVersionedObjectKey(currentUser.getId(), docId, nextVersion);
+            storageService.uploadFile(objectKey, pdfBytes, "application/pdf");
+
+            final var docVersion = DocumentVersion.builder()
+                    .document(doc)
+                    .version(nextVersion)
+                    .s3ObjectKey(objectKey)
+                    .build();
+            documentVersionRepository.save(docVersion);
+
+            doc.setCurrentVersion(nextVersion);
+            doc.setS3ObjectKey(objectKey);
+            log.info("PDF regenerated: v{} for document id={} → key={}", nextVersion, docId, objectKey);
+        } catch (RuntimeException e) {
+            log.error("PDF regeneration failed for document id={}: {}", docId, e.getMessage(), e);
+            throw e;
+        }
+
+        auditService.log(currentUser.getId(), AuditAction.DOCUMENT_COMPLETED, "Document", docId,
+                "{\"regenerated\":true}");
+        return documentMapper.toDto(doc);
+    }
+
     // ─── DOWNLOAD ────────────────────────────────────────────────────────────
 
     @Override
@@ -527,7 +569,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     private User requireCurrentUser() {
         final var user = SecurityUtils.requireCurrentUser();
-        SecurityUtils.requireRole(user, "USER");
+        SecurityUtils.requireAnyRole(user, "USER", "ADMIN");
         return user;
     }
 

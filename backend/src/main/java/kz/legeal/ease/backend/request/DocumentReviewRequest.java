@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import kz.legeal.ease.backend.enums.RiskLevel;
+import kz.legeal.ease.backend.enums.ReviewStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,14 +14,11 @@ import lombok.Setter;
 public class DocumentReviewRequest {
 
     @NotBlank
-    @Size(min = 10, max = 5000)
-    @Schema(description = "Lawyer's written notes or observations about the document", required = true)
-    private String notes;
+    @Size(max = 5000)
+    @Schema(description = "Lawyer's comment or observations about the document", required = true)
+    private String comment;
 
     @NotNull
-    @Schema(description = "Overall risk level the lawyer assigns to this document", required = true)
-    private RiskLevel riskLevel;
-
-    @Schema(description = "Whether the lawyer recommends proceeding with this document", defaultValue = "true")
-    private boolean recommended = true;
+    @Schema(description = "Review decision: APPROVED, REJECTED, or NEEDS_REVISION", required = true)
+    private ReviewStatus status;
 }

@@ -3,7 +3,6 @@ package kz.legeal.ease.backend.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
-import kz.legeal.ease.backend.domain.Role;
 import lombok.*;
 
 @Getter
@@ -30,8 +29,8 @@ public class UserDto {
     @Schema(description = "Фамилия пользователя")
     private String lastName;
 
-    @Schema(description = "Роль пользователя (например: ADMIN, SUPERVISOR, PARENT)")
-    private Role role;
+    @Schema(description = "Роль пользователя (например: ADMIN, LAWYER, USER)")
+    private String role;
 
     @Pattern(
             regexp = "^(\\+7|8)7\\d{9}$",
