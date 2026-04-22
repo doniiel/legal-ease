@@ -2,6 +2,7 @@ package kz.legeal.ease.backend.service.rule.ai.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kz.legeal.ease.backend.dto.ai.DocumentExplainResponse;
 import kz.legeal.ease.backend.service.rule.ai.RuleAiService;
 import kz.legeal.ease.backend.service.rule.chain.RuleChainContext;
 import kz.legeal.ease.backend.service.rule.common.FieldSuggestion;
@@ -261,6 +262,42 @@ public class DeepSeekRuleAIService implements RuleAiService {
         } catch (Exception e) {
             log.warn("explainClause failed: {}", e.getMessage());
             return "Не удалось получить объяснение. Пожалуйста, попробуйте позже.";
+        }
+    }
+
+    @Override
+    public DocumentExplainResponse explainDocument(String documentText, String templateTitle) {
+        final var prompt = """
+                Ты — юридический ассистент для Казахстана. Пользователь заполнил юридический документ.
+                Тип документа: %s
+
+                Данные документа:
+                %s
+
+                Объясни этот документ простым языком для обычного человека без юридического образования.
+                Ответь СТРОГО в JSON без markdown:
+                {
+                  "summary": "Что это за документ и для чего он нужен (2-3 предложения)",
+                  "obligations": "Какие обязательства и права создаёт этот документ для каждой стороны (3-5 пунктов списком)",
+                  "warnings": "На что важно обратить внимание, возможные риски и подводные камни (2-3 пункта)",
+                  "nextSteps": "Что делать дальше после подписания этого документа (2-3 рекомендации)"
+                }
+                """.formatted(templateTitle, documentText);
+        try {
+            final var json = call(prompt);
+            final var node = objectMapper.readTree(json);
+            return new DocumentExplainResponse(
+                    node.get("summary").asText(),
+                    node.get("obligations").asText(),
+                    node.get("warnings").asText(),
+                    node.get("nextSteps").asText()
+            );
+        } catch (Exception e) {
+            log.warn("explainDocument failed: {}", e.getMessage());
+            return new DocumentExplainResponse(
+                    "Не удалось получить объяснение документа.",
+                    "", "", "Пожалуйста, попробуйте позже."
+            );
         }
     }
 

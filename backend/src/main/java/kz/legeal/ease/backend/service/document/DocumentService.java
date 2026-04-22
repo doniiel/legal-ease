@@ -1,6 +1,7 @@
 package kz.legeal.ease.backend.service.document;
 
 import kz.legeal.ease.backend.dto.CompleteDocumentResponseDto;
+import kz.legeal.ease.backend.dto.ai.DocumentExplainResponse;
 import kz.legeal.ease.backend.dto.document.DocumentDto;
 import kz.legeal.ease.backend.dto.document.DocumentPreviewDto;
 import kz.legeal.ease.backend.dto.document.DocumentVersionDto;
@@ -93,4 +94,10 @@ public interface DocumentService {
 
     /** Download a specific immutable version of a document's PDF. */
     byte[] downloadVersion(Long docId, int version);
+
+    /**
+     * Explain the document in plain language — what it is, what obligations it creates,
+     * warnings, and recommended next steps. Works on any document status.
+     */
+    DocumentExplainResponse explainDocument(Long docId);
 }

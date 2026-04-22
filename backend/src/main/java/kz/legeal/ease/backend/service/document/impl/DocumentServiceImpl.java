@@ -8,6 +8,7 @@ import kz.legeal.ease.backend.domain.DocumentVersion;
 import kz.legeal.ease.backend.domain.Template;
 import kz.legeal.ease.backend.domain.User;
 import kz.legeal.ease.backend.dto.CompleteDocumentResponseDto;
+import kz.legeal.ease.backend.dto.ai.DocumentExplainResponse;
 import kz.legeal.ease.backend.dto.document.DocumentDto;
 import kz.legeal.ease.backend.dto.document.DocumentPreviewDto;
 import kz.legeal.ease.backend.dto.document.DocumentVersionDto;
@@ -27,6 +28,7 @@ import kz.legeal.ease.backend.service.RateLimitService;
 import kz.legeal.ease.backend.service.audit.AuditService;
 import kz.legeal.ease.backend.service.document.DocumentPdfService;
 import kz.legeal.ease.backend.service.document.DocumentService;
+import kz.legeal.ease.backend.service.rule.ai.RuleAiService;
 import kz.legeal.ease.backend.service.rule.context.RuleContext;
 import kz.legeal.ease.backend.service.rule.engine.RuleEngine;
 import kz.legeal.ease.backend.service.rule.result.RuleEngineResult;
@@ -68,6 +70,7 @@ public class DocumentServiceImpl implements DocumentService {
     private final AuditService              auditService;
     private final RateLimitService          rateLimitService;
     private final EntityManager             entityManager;
+    private final RuleAiService             aiService;
 
     // ─── CREATE ──────────────────────────────────────────────────────────────
 
@@ -309,6 +312,23 @@ public class DocumentServiceImpl implements DocumentService {
         log.info("User id={} ran AI analysis on document id={}", currentUser.getId(), docId);
         auditService.log(currentUser.getId(), AuditAction.DOCUMENT_AI_ANALYZED, "Document", docId, null);
         return result;
+    }
+
+    // ─── EXPLAIN ─────────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional(readOnly = true)
+    public DocumentExplainResponse explainDocument(Long docId) {
+        final var currentUser = requireCurrentUser();
+        rateLimitService.checkAiLimit(currentUser.getId());
+
+        final var doc = findOwnedOrThrow(currentUser.getId(), docId);
+        final var documentText = buildDocumentText(doc);
+        final var templateTitle = doc.getTemplate().getTitle();
+
+        log.info("User id={} requested explanation for document id={}", currentUser.getId(), docId);
+        auditService.log(currentUser.getId(), AuditAction.DOCUMENT_AI_ANALYZED, "Document", docId, null);
+        return aiService.explainDocument(documentText, templateTitle);
     }
 
     // ─── ARCHIVE / RESTORE ───────────────────────────────────────────────────
