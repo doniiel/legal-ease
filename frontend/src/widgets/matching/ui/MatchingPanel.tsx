@@ -29,7 +29,7 @@ export default function MatchingPanel() {
     if (!query.trim()) { message.warning("Опишите вашу юридическую ситуацию"); return; }
     try {
       const res = await matchTemplate({
-        fieldValues: { query },
+        inputText: query,
         categoryId,
       }).unwrap();
       setResult(res);

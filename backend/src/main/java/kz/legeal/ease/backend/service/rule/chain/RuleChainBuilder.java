@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  *
  * <p>Chains:
  * <ol>
- *   <li><b>Matching</b>: aiUnderstanding → matching → aiRanking</li>
+ *   <li><b>Matching</b>: aiUnderstanding → matching → aiIntentFallback → aiRanking</li>
  *   <li><b>Field Suggestion</b>: conditional → requiredDocs → aiDocsExplainer → aiFieldSuggestion</li>
  *   <li><b>Complete</b>: validation → risk → requiredDocs → aiDocsExplainer → aiRiskExplainer → aiFinalReview</li>
  * </ol>
@@ -21,6 +21,7 @@ public class RuleChainBuilder {
 
     private final AIUnderstandingHandler   aiUnderstandingHandler;
     private final MatchingHandler          matchingHandler;
+    private final AIIntentFallbackHandler  aiIntentFallbackHandler;
     private final AiRankingHandler         aiRankingHandler;
 
     private final ValidationHandler        validationHandler;
@@ -36,11 +37,11 @@ public class RuleChainBuilder {
     private final AiFinalReviewHandler     aiFinalReviewHandler;
 
     /**
-     * Chain for template-matching flow (POST /api/user/matching).
-     * Intent detection → keyword matching → AI score re-ranking.
+     * Chain for template-matching flow (POST /api/matching).
+     * Intent detection → keyword matching → AI intent fallback → AI score re-ranking.
      */
     public RuleHandler buildMatchingChain() {
-        return chain(aiUnderstandingHandler, matchingHandler, aiRankingHandler);
+        return chain(aiUnderstandingHandler, matchingHandler, aiIntentFallbackHandler, aiRankingHandler);
     }
 
     /**

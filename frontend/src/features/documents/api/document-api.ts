@@ -234,6 +234,9 @@ export const documentApi = createApi({
     getDocumentSuggestions: builder.query<AnalysisResult, number>({
       query: (id) => `/documents/${id}/suggestions`,
     }),
+    explainDocument: builder.query<{ summary: string; obligations: string; warnings: string; nextSteps: string }, number>({
+      query: (id) => `/documents/${id}/explain`,
+    }),
     downloadDocumentVersion: builder.query<string, { id: number; version: number }>({
       query: ({ id, version }) => ({
         url: `/documents/${id}/versions/${version}/download`,
@@ -265,4 +268,5 @@ export const {
   useShareDocumentMutation,
   useGetDocumentVersionsQuery,
   useGetDocumentSuggestionsQuery,
+  useLazyExplainDocumentQuery,
 } = documentApi;

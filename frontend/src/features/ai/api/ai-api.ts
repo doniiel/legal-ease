@@ -1,8 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface ClauseExplainRequest {
-  clause: string;
-  context?: string;
+  text: string;
 }
 
 export interface ClauseExplainResponse {
@@ -32,5 +31,12 @@ export const aiApi = createApi({
     }),
   }),
 });
+
+export interface DocumentExplainResponse {
+  summary: string;
+  obligations: string;
+  warnings: string;
+  nextSteps: string;
+}
 
 export const { useExplainClauseMutation } = aiApi;

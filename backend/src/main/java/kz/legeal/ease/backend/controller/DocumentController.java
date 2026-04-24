@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kz.legeal.ease.backend.dto.CompleteDocumentResponseDto;
+import kz.legeal.ease.backend.dto.ai.DocumentExplainResponse;
 import kz.legeal.ease.backend.dto.document.DocumentDto;
 import kz.legeal.ease.backend.dto.document.DocumentPreviewDto;
 import kz.legeal.ease.backend.dto.document.DocumentShareResponse;
@@ -105,6 +106,14 @@ public class DocumentController {
             @Parameter(description = "Document ID", required = true) @PathVariable Long id
     ) {
         return ResponseEntity.ok(documentService.validate(id));
+    }
+
+    @Operation(summary = "Explain document in plain language (AI-powered)")
+    @GetMapping("/{id}/explain")
+    public ResponseEntity<DocumentExplainResponse> explain(
+            @Parameter(description = "Document ID", required = true) @PathVariable Long id
+    ) {
+        return ResponseEntity.ok(documentService.explainDocument(id));
     }
 
     @Operation(summary = "AI analysis (no status change)")

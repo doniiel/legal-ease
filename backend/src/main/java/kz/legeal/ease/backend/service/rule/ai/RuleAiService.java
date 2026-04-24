@@ -1,5 +1,7 @@
 package kz.legeal.ease.backend.service.rule.ai;
 
+import kz.legeal.ease.backend.dto.ai.ClauseExplainResponse;
+import kz.legeal.ease.backend.dto.ai.DocumentExplainResponse;
 import kz.legeal.ease.backend.service.rule.chain.RuleChainContext;
 import kz.legeal.ease.backend.service.rule.result.*;
 
@@ -26,7 +28,16 @@ public interface RuleAiService {
      * Explain a single legal clause in plain language for a non-lawyer user.
      *
      * @param clauseText raw text of the clause from a contract or legal document
-     * @return human-readable explanation in Russian
+     * @return structured explanation with plain text, risks, and recommendations
      */
-    String explainClause(String clauseText);
+    ClauseExplainResponse explainClause(String clauseText);
+
+    /**
+     * Explain a completed document in plain language — summary, obligations, warnings, next steps.
+     *
+     * @param documentText the rendered document text (field labels + values)
+     * @param templateTitle the template title for context
+     * @return structured plain-language explanation
+     */
+    DocumentExplainResponse explainDocument(String documentText, String templateTitle);
 }

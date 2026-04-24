@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { AnalysisResult } from "../../documents/api/document-api";
 
 export interface MatchingRequest {
-  fieldValues: Record<string, string>;
+  inputText: string;
   categoryId?: number;
 }
 

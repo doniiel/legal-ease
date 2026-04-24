@@ -20,6 +20,7 @@ import {
   useShareDocumentMutation,
   useGetDocumentVersionsQuery,
   useGetDocumentSuggestionsQuery,
+  useLazyExplainDocumentQuery,
   type AnalysisResult,
   type DocumentVersion,
 } from "../../../features/documents/api/document-api";
@@ -295,14 +296,13 @@ function ShareModal({ url, onClose }: { url: string; onClose: () => void }) {
 function ClauseExplainModal({ onClose }: { onClose: () => void }) {
   const { message } = App.useApp();
   const [clause, setClause] = useState("");
-  const [context, setContext] = useState("");
   const [result, setResult] = useState<ClauseExplainResponse | null>(null);
   const [explainClause, { isLoading }] = useExplainClauseMutation();
 
   const handleExplain = async () => {
     if (!clause.trim()) { message.warning("Введите текст клаузы"); return; }
     try {
-      const res = await explainClause({ clause, context: context || undefined }).unwrap();
+      const res = await explainClause({ text: clause }).unwrap();
       setResult(res);
     } catch { message.error("Ошибка при объяснении клаузы"); }
   };
@@ -322,7 +322,7 @@ function ClauseExplainModal({ onClose }: { onClose: () => void }) {
         </div>
         {/* Body */}
         <div style={{ padding: "24px", overflowY: "auto", flex: 1 }}>
-          <div style={{ marginBottom: 14 }}>
+          <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94a3b8", marginBottom: 6 }}>Текст клаузы *</div>
             <textarea
               value={clause}
@@ -330,15 +330,6 @@ function ClauseExplainModal({ onClose }: { onClose: () => void }) {
               placeholder="Вставьте текст юридической клаузы или пункта договора..."
               rows={5}
               style={{ width: "100%", boxSizing: "border-box", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 14px", fontSize: 13, resize: "vertical", outline: "none", fontFamily: "inherit", color: "#111827" }}
-            />
-          </div>
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94a3b8", marginBottom: 6 }}>Контекст (необязательно)</div>
-            <input
-              value={context}
-              onChange={e => setContext(e.target.value)}
-              placeholder="Например: договор аренды, Казахстан, 2024 год"
-              style={{ width: "100%", boxSizing: "border-box", border: "1px solid #e2e8f0", borderRadius: 10, padding: "10px 14px", fontSize: 13, outline: "none", fontFamily: "inherit", color: "#111827" }}
             />
           </div>
 
@@ -401,6 +392,83 @@ function ClauseExplainModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Document Explain modal ───────────────────────────────────
+function DocumentExplainModal({ documentId, onClose }: { documentId: number; onClose: () => void }) {
+  const [trigger, { data, isFetching }] = useLazyExplainDocumentQuery();
+
+  useEffect(() => { trigger(documentId); }, [documentId, trigger]);
+
+  const Section = ({ icon, title, color, bg, border, text }: {
+    icon: React.ReactNode; title: string; color: string;
+    bg: string; border: string; text: string;
+  }) => (
+    <div style={{ background: bg, borderRadius: 12, padding: "16px 18px", border: `1px solid ${border}` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        {icon}
+        <span style={{ fontSize: 12, fontWeight: 700, color }}>{title}</span>
+      </div>
+      <p style={{ fontSize: 13, color, lineHeight: 1.7, margin: 0, whiteSpace: "pre-line" }}>{text}</p>
+    </div>
+  );
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ background: "#fff", borderRadius: 16, width: 600, maxHeight: "85vh", display: "flex", flexDirection: "column", boxShadow: "0 24px 64px rgba(0,0,0,0.2)", overflow: "hidden" }}>
+        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "20px 24px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <BrainCircuit size={18} color="#fff" />
+            <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>Понять документ</span>
+          </div>
+          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, margin: "6px 0 0" }}>
+            AI объяснит этот документ простым языком — что он означает, ваши права и обязанности
+          </p>
+        </div>
+        <div style={{ padding: "24px", overflowY: "auto", flex: 1 }}>
+          {isFetching && (
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <Spin size="large" />
+              <p style={{ marginTop: 16, color: "#94a3b8", fontSize: 13 }}>AI анализирует документ...</p>
+            </div>
+          )}
+          {data && !isFetching && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <Section
+                icon={<BrainCircuit size={14} color="#1677ff" />}
+                title="Что это за документ" color="#1e3a8a"
+                bg="rgba(22,119,255,0.05)" border="rgba(22,119,255,0.15)"
+                text={data.summary}
+              />
+              <Section
+                icon={<FileCheck2 size={14} color="#059669" />}
+                title="Обязательства и права" color="#065f46"
+                bg="rgba(5,150,105,0.05)" border="rgba(5,150,105,0.15)"
+                text={data.obligations}
+              />
+              <Section
+                icon={<ShieldAlert size={14} color="#f59e0b" />}
+                title="На что обратить внимание" color="#92400e"
+                bg="rgba(245,158,11,0.05)" border="rgba(245,158,11,0.2)"
+                text={data.warnings}
+              />
+              <Section
+                icon={<Lightbulb size={14} color="#0F2A44" />}
+                title="Следующие шаги" color="#374151"
+                bg="rgba(15,42,68,0.04)" border="rgba(15,42,68,0.1)"
+                text={data.nextSteps}
+              />
+            </div>
+          )}
+        </div>
+        <div style={{ padding: "16px 24px", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "flex-end", flexShrink: 0 }}>
+          <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+            Закрыть
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Versions panel ───────────────────────────────────────────
 function VersionsPanel({ versions, isLoading }: { versions: DocumentVersion[]; isLoading: boolean }) {
   if (isLoading) return <div style={{ textAlign: "center", padding: "20px 0" }}><Spin size="small" /></div>;
@@ -431,7 +499,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
-  const [showExplainModal, setShowExplainModal] = useState(false);
+  const [showDocExplainModal, setShowDocExplainModal] = useState(false);
+  const [showClauseModal, setShowClauseModal] = useState(false);
 
   const { data: doc, isLoading } = useGetDocumentByIdQuery(documentId);
   const { data: template } = useGetTemplateByIdQuery(doc?.templateId ?? 0, { skip: !doc?.templateId });
@@ -556,7 +625,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   return (
     <div style={{ overflowX: "hidden" }}>
       {shareUrl && <ShareModal url={shareUrl} onClose={() => setShareUrl(null)} />}
-      {showExplainModal && <ClauseExplainModal onClose={() => setShowExplainModal(false)} />}
+      {showDocExplainModal && <DocumentExplainModal documentId={documentId} onClose={() => setShowDocExplainModal(false)} />}
+      {showClauseModal && <ClauseExplainModal onClose={() => setShowClauseModal(false)} />}
 
       {/* ── Full-bleed hero ── */}
       <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
@@ -570,6 +640,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
             {/* DRAFT / VALIDATED */}
             {isDraft && <>
               <HeroBtn icon={<Lightbulb size={14} />} label={isFetchingSuggestions ? "Загрузка..." : "Предложения AI"} onClick={() => setShowSuggestions(!showSuggestions)} />
+              <HeroBtn icon={<BrainCircuit size={14} />} label="Объяснить клаузу" onClick={() => setShowClauseModal(true)} />
               <HeroBtn icon={<Save size={14} />} label={isUpdating ? "Сохранение..." : "Сохранить"} onClick={handleSave} disabled={isUpdating} />
               <HeroBtn icon={<ShieldCheck size={14} />} label={isValidating ? "Проверка..." : "Валидировать"} onClick={handleValidate} disabled={isValidating} variant="primary" />
               <HeroBtn icon={<Zap size={14} />} label={isCompleting ? "Анализ..." : "Завершить"} onClick={handleComplete} disabled={isCompleting} variant="success" />
@@ -577,7 +648,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
 
             {/* COMPLETED */}
             {isCompleted && <>
-              <HeroBtn icon={<BrainCircuit size={14} />} label="AI Объяснение" onClick={() => setShowExplainModal(true)} variant="primary" />
+              <HeroBtn icon={<BrainCircuit size={14} />} label="Понять документ" onClick={() => setShowDocExplainModal(true)} variant="primary" />
+              <HeroBtn icon={<Lightbulb size={14} />} label="Объяснить клаузу" onClick={() => setShowClauseModal(true)} />
               <HeroBtn icon={<History size={14} />} label="Версии" onClick={() => setShowVersions(!showVersions)} />
               <HeroBtn icon={<Download size={14} />} label="Скачать PDF" onClick={handleDownload} />
               <HeroBtn icon={<Share2 size={14} />} label={isSharing ? "Создание..." : "Поделиться"} onClick={handleShare} disabled={isSharing} variant="primary" />
