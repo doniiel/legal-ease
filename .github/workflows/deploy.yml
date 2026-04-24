@@ -197,7 +197,7 @@ jobs:
           until docker exec legalease-postgres pg_isready -U "${DB_USER:-postgres}"; do sleep 2; done
 
           # Sync DB password to match .env — safe to run every deploy
-          docker exec legalease-postgres psql -U "${DB_USER:-postgres}" \
+          docker exec -u postgres legalease-postgres psql -U "${DB_USER:-postgres}" \
             -c "ALTER USER \"${DB_USER:-postgres}\" WITH PASSWORD '${DB_PASS}';"
 
           docker compose -p legalease -f docker-compose.prod.yml up -d --remove-orphans
