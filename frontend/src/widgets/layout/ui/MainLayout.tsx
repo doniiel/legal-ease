@@ -15,7 +15,7 @@ const { Sider, Content, Header } = Layout;
 
 const NAV_ITEMS = [
   { key: ROUTES.HOME,                  icon: <Home size={16} />,            label: "Главная",            roles: ["USER"] },
-  { key: ROUTES.DOCUMENTS,             icon: <FileText size={16} />,        label: "Документы",          roles: ["USER", "LAWYER", "ADMIN"] },
+  { key: ROUTES.DOCUMENTS,             icon: <FileText size={16} />,        label: "Документы",          roles: ["USER", "ADMIN"] },
   { key: ROUTES.LAWYER_APPLICATION,    icon: <ShieldCheck size={16} />,     label: "Заявка адвоката",    roles: ["USER"] },
   { key: ROUTES.ADMIN_DASHBOARD,       icon: <LayoutDashboard size={16} />, label: "Дашборд",            roles: ["ADMIN"] },
   { key: ROUTES.ADMIN_APPLICATIONS,    icon: <ClipboardList size={16} />,   label: "Заявки",             roles: ["ADMIN"] },

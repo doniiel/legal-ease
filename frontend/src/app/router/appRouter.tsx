@@ -48,7 +48,7 @@ export const PAGES = [
 
   // ── Authenticated (all roles) ──
   { path: ROUTES.HOME,      element: auth(<Home />) },
-  { path: ROUTES.DOCUMENTS, element: auth(<Documents />) },
+  { path: ROUTES.DOCUMENTS, element: auth(<Documents />, ["USER", "ADMIN"]) },
   { path: `${ROUTES.DOCUMENTS}/:id`, element: auth(<DocumentDetail />) },
   { path: ROUTES.PROFILE,   element: auth(<Profile />) },
   { path: ROUTES.SETTINGS,  element: auth(<Settings />) },
