@@ -28,7 +28,7 @@ const NAV_ITEMS = [
   { key: ROUTES.LAWYER_RULE_MANAGER,   icon: <ShieldAlert size={16} />,     label: "Rule Manager",       roles: ["LAWYER"] },
   { key: ROUTES.LAWYER_DOCUMENTS,      icon: <FileText size={16} />,        label: "Документы клиентов", roles: ["LAWYER"] },
   { key: ROUTES.LAWYER_CLAUSES,        icon: <BookOpen size={16} />,        label: "Библиотека клауз",   roles: ["LAWYER"] },
-  { key: ROUTES.MATCHING,              icon: <Sparkles size={16} />,        label: "Подбор шаблона",     roles: ["USER", "LAWYER", "ADMIN"] },
+  { key: ROUTES.MATCHING,              icon: <Sparkles size={16} />,        label: "Подбор шаблона",     roles: ["USER", "ADMIN"] },
 ];
 
 const getDropdownItems = (navigate: NavigateFunction, logout: () => void): MenuProps["items"] => [
