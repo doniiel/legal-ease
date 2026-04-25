@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   App, Table, Button, Modal, Form, Input, Select,
-  Space, Typography, Tabs, Switch, Badge, Empty, InputNumber,
+  Space, Typography, Tabs, Switch, Empty, InputNumber,
 } from "antd";
 import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import type { ColumnsType } from "antd/es/table";
@@ -182,8 +182,8 @@ function ValidationTab({ templateId }: { templateId: number }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-        <Button icon={<Plus size={14} />} onClick={openCreate}
-          style={{ background: "#1677ff", borderColor: "#1677ff", color: "#fff", borderRadius: 8 }}>Добавить правило</Button>
+        <Button type="primary" icon={<Plus size={14} />} onClick={openCreate}
+        >Добавить правило</Button>
       </div>
       <Table components={editorialTableComponents} columns={columns} dataSource={rules} rowKey="id" loading={isLoading}
         locale={{ emptyText: <Empty description="Нет правил валидации для этого шаблона" /> }}
@@ -280,8 +280,8 @@ function RiskTab({ templateId }: { templateId: number }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-        <Button icon={<Plus size={14} />} onClick={openCreate}
-          style={{ background: "#ef4444", borderColor: "#ef4444", color: "#fff", borderRadius: 8 }}>Добавить риск</Button>
+        <Button type="primary" icon={<Plus size={14} />} onClick={openCreate}
+          >Добавить риск</Button>
       </div>
       <Table components={editorialTableComponents} columns={columns} dataSource={rules} rowKey="id" loading={isLoading}
         locale={{ emptyText: <Empty description="Нет правил риска для этого шаблона" /> }}
@@ -366,8 +366,8 @@ function ConditionalTab({ templateId }: { templateId: number }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-        <Button icon={<Plus size={14} />} onClick={openCreate}
-          style={{ background: "#7c3aed", borderColor: "#7c3aed", color: "#fff", borderRadius: 8 }}>Добавить условие</Button>
+        <Button type="primary" icon={<Plus size={14} />} onClick={openCreate}
+          >Добавить условие</Button>
       </div>
       <Table components={editorialTableComponents} columns={columns} dataSource={rules} rowKey="id" loading={isLoading}
         locale={{ emptyText: <Empty description="Нет условных правил для этого шаблона" /> }}
@@ -459,8 +459,8 @@ function RequiredDocTab({ templateId }: { templateId: number }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-        <Button icon={<Plus size={14} />} onClick={openCreate}
-          style={{ background: "#059669", borderColor: "#059669", color: "#fff", borderRadius: 8 }}>Добавить документ</Button>
+        <Button type="primary" icon={<Plus size={14} />} onClick={openCreate}
+          >Добавить документ</Button>
       </div>
       <Table components={editorialTableComponents} columns={columns} dataSource={rules} rowKey="id" loading={isLoading}
         locale={{ emptyText: <Empty description="Нет требований к документам" /> }}
@@ -550,8 +550,8 @@ function MatchingTab({ templateId }: { templateId: number }) {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-        <Button icon={<Plus size={14} />} onClick={openCreate}
-          style={{ background: "#1a2744", borderColor: "#1a2744", color: "#fff", borderRadius: 8 }}>Добавить правило</Button>
+        <Button type="primary" icon={<Plus size={14} />} onClick={openCreate}
+          >Добавить правило</Button>
       </div>
       <Table components={editorialTableComponents} columns={columns} dataSource={rules} rowKey="id" loading={isLoading}
         locale={{ emptyText: <Empty description="Нет правил матчинга для этого шаблона" /> }}
@@ -595,32 +595,31 @@ export default function LawyerRuleManagerPanel() {
   const { data: requiredDocRules = [] } = useGetRequiredDocRulesByTemplateQuery(selectedTemplateId!, { skip: !selectedTemplateId });
   const { data: matchingRules = [] } = useGetRulesByTemplateQuery(selectedTemplateId!, { skip: !selectedTemplateId });
 
-  const totalRules = validationRules.length + riskRules.length + conditionalRules.length + requiredDocRules.length + matchingRules.length;
 
   const tabItems = [
     {
       key: "validation",
-      label: <Space><FileCheck2 size={14} /><span>Валидация</span>{selectedTemplateId && <Badge count={validationRules.length} color="#1677ff" />}</Space>,
+      label: <Space><FileCheck2 size={14} /><span>Валидация</span></Space>,
       children: selectedTemplateId ? <ValidationTab templateId={selectedTemplateId} /> : null,
     },
     {
       key: "risk",
-      label: <Space><ShieldAlert size={14} /><span>Риски</span>{selectedTemplateId && <Badge count={riskRules.length} color="#ef4444" />}</Space>,
+      label: <Space><ShieldAlert size={14} /><span>Риски</span></Space>,
       children: selectedTemplateId ? <RiskTab templateId={selectedTemplateId} /> : null,
     },
     {
       key: "conditional",
-      label: <Space><GitBranch size={14} /><span>IF / THEN</span>{selectedTemplateId && <Badge count={conditionalRules.length} color="#7c3aed" />}</Space>,
+      label: <Space><GitBranch size={14} /><span>IF / THEN</span></Space>,
       children: selectedTemplateId ? <ConditionalTab templateId={selectedTemplateId} /> : null,
     },
     {
       key: "required-docs",
-      label: <Space><FileBadge2 size={14} /><span>Доп. документы</span>{selectedTemplateId && <Badge count={requiredDocRules.length} color="#059669" />}</Space>,
+      label: <Space><FileBadge2 size={14} /><span>Доп. документы</span></Space>,
       children: selectedTemplateId ? <RequiredDocTab templateId={selectedTemplateId} /> : null,
     },
     {
       key: "matching",
-      label: <Space><GitMerge size={14} /><span>Матчинг</span>{selectedTemplateId && <Badge count={matchingRules.length} color="#1a2744" />}</Space>,
+      label: <Space><GitMerge size={14} /><span>Матчинг</span></Space>,
       children: selectedTemplateId ? <MatchingTab templateId={selectedTemplateId} /> : null,
     },
   ];
@@ -634,31 +633,12 @@ export default function LawyerRuleManagerPanel() {
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Rule Engine</h1>
             <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>Управление правилами валидации, рисков, условий и матчинга</p>
           </div>
-          {selectedTemplateId && (
-            <div style={{ display: "flex", gap: 8, alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)", padding: "12px 20px" }}>
-              {[
-                { label: "Валидация", value: validationRules.length, color: "#60a5fa" },
-                { label: "Риски", value: riskRules.length, color: "#f87171" },
-                { label: "IF/THEN", value: conditionalRules.length, color: "#c084fc" },
-                { label: "Документы", value: requiredDocRules.length, color: "#34d399" },
-                { label: "Матчинг", value: matchingRules.length, color: "#94a3b8" },
-              ].map((s, i, arr) => (
-                <>
-                  <div key={s.label} style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: s.color, lineHeight: 1, fontFamily: "Manrope, sans-serif" }}>{s.value}</div>
-                    <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", color: "rgba(255,255,255,0.5)", marginTop: 3 }}>{s.label}</div>
-                  </div>
-                  {i < arr.length - 1 && <div key={`div-${i}`} style={{ width: 1, height: 32, background: "rgba(255,255,255,0.1)" }} />}
-                </>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
       <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
-        <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(5, 1fr)", gap: isMobile ? 10 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Валидация"     value={validationRules.length}  color="#1677ff" icon={<FileCheck2 size={26} />} />
           <StatCard label="Риски"         value={riskRules.length}        color="#ef4444" icon={<ShieldAlert size={26} />} />
           <StatCard label="IF/THEN"       value={conditionalRules.length} color="#7c3aed" icon={<GitBranch size={26} />} />
@@ -676,11 +656,6 @@ export default function LawyerRuleManagerPanel() {
               value={selectedTemplateId} onChange={(v) => setSelectedTemplateId(v)}
               options={templates.map((t) => ({ value: t.id, label: `${t.title} · ${t.category?.name ?? "—"}` }))}
               allowClear onClear={() => setSelectedTemplateId(null)} />
-            {selectedTemplateId && (
-              <Text style={{ fontSize: 12, color: "#94a3b8", whiteSpace: "nowrap" }}>
-                Всего правил: <Text strong style={{ color: "#0b1c30" }}>{totalRules}</Text>
-              </Text>
-            )}
           </div>
         </div>
 

@@ -182,9 +182,6 @@ export default function LawyerClausesPanel() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20, padding: "6px 16px", color: "#fff", fontSize: 12, fontWeight: 600 }}>
-            {totalCount} клауз
-          </div>
           <button onClick={openCreate}
             style={{ background: "#fff", color: "#1a2744", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
             <Plus size={15} /> Создать клаузу

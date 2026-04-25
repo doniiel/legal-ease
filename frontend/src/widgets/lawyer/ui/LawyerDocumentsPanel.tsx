@@ -122,23 +122,12 @@ export default function LawyerDocumentsPanel() {
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Документы клиентов</h1>
             <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>Документы на основе ваших шаблонов — просмотр и добавление ревью</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ padding: "12px 20px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{data?.totalElements ?? 0}</div>
-            </div>
-            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
-            <div style={{ padding: "12px 20px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>В работе</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#f59e0b", fontFamily: "Manrope, sans-serif" }}>{processingCount}</div>
-            </div>
-          </div>
         </div>
       </div>
 
       <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
-        <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : undefined, gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 10 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
           <StatCard label="Всего документов" value={data?.totalElements ?? 0} color="#1a2744" icon={<FileText size={26} />} loading={isLoading} />
           <StatCard label="Проверен"          value={processingCount}          color="#f59e0b" icon={<Clock size={26} />} />
           <StatCard label="Завершённые"       value={completedCount}           color="#059669" icon={<CheckCircle2 size={26} />} />
