@@ -554,7 +554,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
       });
       form.setFieldsValue({ title: doc.title, ...fieldMap });
     }
-  }, [doc, form]);
+  }, [doc, form, templateFields]);
 
   const extractFieldValues = (values: Record<string, unknown>): Record<string, string> => {
     const result: Record<string, string> = {};
