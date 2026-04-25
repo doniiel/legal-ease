@@ -54,7 +54,7 @@ function StepDots({ step }: { step: number }) {
                   width: 32,
                   height: 32,
                   borderRadius: "50%",
-                  background: done ? "#059669" : active ? "#0F2A44" : "#e5e7eb",
+                  background: done ? "#059669" : active ? "#1a2744" : "#e8eaf0",
                   color: done || active ? "#fff" : "#9ca3af",
                   display: "flex",
                   alignItems: "center",
@@ -66,12 +66,12 @@ function StepDots({ step }: { step: number }) {
               >
                 {done ? <CheckCircle2 size={16} /> : i + 1}
               </div>
-              <span style={{ fontSize: 11, color: active ? "#0F2A44" : done ? "#059669" : "#9ca3af", fontWeight: active ? 700 : 500, whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: 11, color: active ? "#1a2744" : done ? "#059669" : "#9ca3af", fontWeight: active ? 700 : 500, whiteSpace: "nowrap" }}>
                 {label}
               </span>
             </div>
             {i < labels.length - 1 && (
-              <div style={{ flex: 1, height: 2, background: done ? "#059669" : "#e5e7eb", marginBottom: 20, transition: "background 0.2s" }} />
+              <div style={{ flex: 1, height: 2, background: done ? "#059669" : "#e8eaf0", marginBottom: 20, transition: "background 0.2s" }} />
             )}
           </div>
         );
@@ -153,7 +153,7 @@ export default function SettingsPanel() {
       {/* ── Full-bleed hero ── */}
       <div
         style={{
-          background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
+          background: "#1a2744",
           padding: isMobile ? "24px 16px 40px" : "40px 40px 56px",
           marginLeft: isMobile ? -16 : -32,
           marginRight: isMobile ? -16 : -32,
@@ -197,11 +197,11 @@ export default function SettingsPanel() {
             {/* ── LEFT: password change ── */}
             <Col xs={24} lg={14}>
               <Card
-                style={{ borderRadius: 14, border: "1px solid #e5e7eb", marginBottom: 20 }}
+                style={{ borderRadius: 14, border: "1px solid #e8eaf0", marginBottom: 20 }}
                 styles={{ body: { padding: "28px 32px" } }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <KeyRound size={18} color="#0F2A44" />
+                  <KeyRound size={18} color="#1a2744" />
                   <span style={{ fontWeight: 700, fontSize: 16, color: "#111827" }}>Изменение пароля</span>
                 </div>
                 <p style={{ color: "#6b7280", fontSize: 13, marginBottom: 28, marginTop: 4 }}>
@@ -237,7 +237,7 @@ export default function SettingsPanel() {
                       onClick={handleSendCode}
                       disabled={isSending || !email}
                       style={{
-                        background: "#0F2A44",
+                        background: "#1a2744",
                         color: "#fff",
                         border: "none",
                         borderRadius: 8,
@@ -291,7 +291,7 @@ export default function SettingsPanel() {
                         onClick={handleVerifyCode}
                         disabled={isVerifying}
                         style={{
-                          background: "#0F2A44",
+                          background: "#1a2744",
                           color: "#fff",
                           border: "none",
                           borderRadius: 8,
@@ -312,7 +312,7 @@ export default function SettingsPanel() {
                         style={{
                           background: "transparent",
                           color: "#6b7280",
-                          border: "1px solid #e5e7eb",
+                          border: "1px solid #e8eaf0",
                           borderRadius: 8,
                           padding: "10px 16px",
                           fontSize: 13,
@@ -382,7 +382,7 @@ export default function SettingsPanel() {
                         style={{
                           background: "transparent",
                           color: "#6b7280",
-                          border: "1px solid #e5e7eb",
+                          border: "1px solid #e8eaf0",
                           borderRadius: 8,
                           padding: "10px 16px",
                           fontSize: 13,
@@ -429,7 +429,7 @@ export default function SettingsPanel() {
                     <button
                       onClick={handleLogoutAndLogin}
                       style={{
-                        background: "#0F2A44",
+                        background: "#1a2744",
                         color: "#fff",
                         border: "none",
                         borderRadius: 8,
@@ -449,18 +449,18 @@ export default function SettingsPanel() {
             {/* ── RIGHT: account info ── */}
             <Col xs={24} lg={10}>
               <Card
-                style={{ borderRadius: 14, border: "1px solid #e5e7eb" }}
+                style={{ borderRadius: 14, border: "1px solid #e8eaf0" }}
                 styles={{ body: { padding: "28px 28px" } }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                  <User size={18} color="#0F2A44" />
+                  <User size={18} color="#1a2744" />
                   <span style={{ fontWeight: 700, fontSize: 16, color: "#111827" }}>Данные аккаунта</span>
                 </div>
                 <p style={{ color: "#6b7280", fontSize: 12, marginBottom: 16, marginTop: 2 }}>
                   Для редактирования перейдите в{" "}
                   <span
                     onClick={() => navigate(ROUTES.PROFILE)}
-                    style={{ color: "#0F2A44", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                    style={{ color: "#1a2744", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
                   >
                     Профиль
                   </span>

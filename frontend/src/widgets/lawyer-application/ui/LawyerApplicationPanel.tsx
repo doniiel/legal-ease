@@ -118,7 +118,7 @@ export default function LawyerApplicationPanel() {
       {/* ── Full-bleed hero ── */}
       <div
         style={{
-          background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
+          background: "#1a2744",
           padding: isMobile ? "24px 16px 40px" : "40px 40px 56px",
           marginLeft: isMobile ? -16 : -32,
           marginRight: isMobile ? -16 : -32,
@@ -204,7 +204,7 @@ export default function LawyerApplicationPanel() {
           <div
             style={{
               background: "#fff",
-              border: "1px solid #e5e7eb",
+              border: "1px solid #e8eaf0",
               borderRadius: 10,
               padding: "10px 20px",
               display: "flex",
@@ -213,7 +213,7 @@ export default function LawyerApplicationPanel() {
               boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
             }}
           >
-            <FileText size={20} color="#0F2A44" />
+            <FileText size={20} color="#1a2744" />
             <div>
               <div style={{ fontSize: 11, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.05em" }}>Лицензия</div>
               <div style={{ fontWeight: 600, fontSize: 13, color: "#111827", fontFamily: "monospace" }}>{application.licenseNumber}</div>
@@ -222,7 +222,7 @@ export default function LawyerApplicationPanel() {
           <div
             style={{
               background: "#fff",
-              border: "1px solid #e5e7eb",
+              border: "1px solid #e8eaf0",
               borderRadius: 10,
               padding: "10px 20px",
               display: "flex",
@@ -306,7 +306,7 @@ export default function LawyerApplicationPanel() {
                 {application.status === "REJECTED" && (
                   <Button
                     type="primary"
-                    style={{ background: "#0F2A44", borderRadius: 8, marginTop: 20 }}
+                    style={{ background: "#1a2744", borderRadius: 8, marginTop: 20 }}
                     icon={<Send size={14} />}
                     onClick={() => setShowForm(true)}
                   >
@@ -319,12 +319,12 @@ export default function LawyerApplicationPanel() {
             {/* Submit form */}
             {displayForm && (
               <Card
-                style={{ borderRadius: 12, border: "1px solid #e5e7eb" }}
+                style={{ borderRadius: 12, border: "1px solid #e8eaf0" }}
                 styles={{ body: { padding: "28px 32px" } }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-                  <FileText size={18} color="#0F2A44" />
-                  <Title level={5} style={{ margin: 0, color: "#0F2A44" }}>
+                  <FileText size={18} color="#1a2744" />
+                  <Title level={5} style={{ margin: 0, color: "#1a2744" }}>
                     Данные для заявки
                   </Title>
                 </div>
@@ -375,7 +375,7 @@ export default function LawyerApplicationPanel() {
                     loading={isSubmitting}
                     size="large"
                     icon={<Send size={15} />}
-                    style={{ background: "#0F2A44", borderRadius: 8, height: 44, fontWeight: 500, paddingInline: 28 }}
+                    style={{ background: "#1a2744", borderRadius: 8, height: 44, fontWeight: 500, paddingInline: 28 }}
                   >
                     Отправить заявку
                   </Button>
@@ -388,20 +388,20 @@ export default function LawyerApplicationPanel() {
           <Col xs={24} lg={10}>
             {/* Process timeline */}
             <Card
-              style={{ borderRadius: 12, border: "1px solid #e5e7eb", marginBottom: 16 }}
+              style={{ borderRadius: 12, border: "1px solid #e8eaf0", marginBottom: 16 }}
               styles={{ body: { padding: "24px 28px" } }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-                <CalendarDays size={16} color="#0F2A44" />
-                <Title level={5} style={{ margin: 0, color: "#0F2A44" }}>
+                <CalendarDays size={16} color="#1a2744" />
+                <Title level={5} style={{ margin: 0, color: "#1a2744" }}>
                   Как проходит верификация
                 </Title>
               </div>
               <Timeline
                 items={[
                   {
-                    color: hasApplication ? "#059669" : "#0F2A44",
-                    dot: <CircleCheck size={16} color={hasApplication ? "#059669" : "#0F2A44"} />,
+                    color: hasApplication ? "#059669" : "#1a2744",
+                    dot: <CircleCheck size={16} color={hasApplication ? "#059669" : "#1a2744"} />,
                     children: (
                       <div>
                         <Text style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>
@@ -451,12 +451,12 @@ export default function LawyerApplicationPanel() {
 
             {/* FAQ */}
             <Card
-              style={{ borderRadius: 12, border: "1px solid #e5e7eb" }}
+              style={{ borderRadius: 12, border: "1px solid #e8eaf0" }}
               styles={{ body: { padding: "24px 28px" } }}
             >
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-                <MessageSquare size={16} color="#0F2A44" />
-                <Title level={5} style={{ margin: 0, color: "#0F2A44" }}>
+                <MessageSquare size={16} color="#1a2744" />
+                <Title level={5} style={{ margin: 0, color: "#1a2744" }}>
                   Часто задаваемые вопросы
                 </Title>
               </div>

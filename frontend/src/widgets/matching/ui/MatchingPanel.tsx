@@ -59,7 +59,7 @@ export default function MatchingPanel() {
     <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
       {/* ── Full-bleed hero ── */}
       <div style={{
-        background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
+        background: "#1a2744",
         padding: isMobile ? "24px 16px 40px" : "40px 40px 56px",
         marginLeft: isMobile ? -16 : -32, marginRight: isMobile ? -16 : -32,
       }}>
@@ -108,7 +108,7 @@ export default function MatchingPanel() {
               disabled={isLoading || !query.trim()}
               style={{
                 background: isLoading || !query.trim() ? "rgba(255,255,255,0.3)" : "#fff",
-                color: "#0F2A44", border: "none", borderRadius: 10,
+                color: "#1a2744", border: "none", borderRadius: 10,
                 padding: "10px 24px", fontWeight: 700, fontSize: 14,
                 cursor: isLoading || !query.trim() ? "not-allowed" : "pointer",
                 display: "flex", alignItems: "center", gap: 8,
@@ -124,9 +124,9 @@ export default function MatchingPanel() {
       {/* ── Results ── */}
       <div style={{ marginTop: 28 }}>
         {!result && !isLoading && (
-          <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e5e7eb", padding: "64px 24px", textAlign: "center" }}>
-            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(15,42,68,0.06)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-              <BrainCircuit size={28} color="#0F2A44" />
+          <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e8eaf0", padding: "64px 24px", textAlign: "center" }}>
+            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(26,39,68,0.06)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+              <BrainCircuit size={28} color="#1a2744" />
             </div>
             <div style={{ fontWeight: 700, fontSize: 16, color: "#111827", marginBottom: 8 }}>Начните поиск</div>
             <p style={{ color: "#6b7280", fontSize: 14, maxWidth: 420, margin: "0 auto" }}>
@@ -140,21 +140,21 @@ export default function MatchingPanel() {
             {/* Matched templates */}
             <div>
               {matched.length === 0 ? (
-                <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e5e7eb", padding: "48px 24px" }}>
+                <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e8eaf0", padding: "48px 24px" }}>
                   <Empty description={<span style={{ color: "#6b7280" }}>Подходящих шаблонов не найдено. Попробуйте другой запрос.</span>} />
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   {matched.map((t) => (
-                    <div key={t.templateId} style={{ background: "#fff", borderRadius: 14, border: "1px solid #e5e7eb", padding: "20px 24px", display: "flex", alignItems: "flex-start", gap: 16 }}>
-                      <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(15,42,68,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                        <FileText size={20} color="#0F2A44" />
+                    <div key={t.templateId} style={{ background: "#fff", borderRadius: 14, border: "1px solid #e8eaf0", padding: "20px 24px", display: "flex", alignItems: "flex-start", gap: 16 }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(26,39,68,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <FileText size={20} color="#1a2744" />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                           <span style={{ fontWeight: 700, fontSize: 15, color: "#111827" }}>{t.title}</span>
                           <span style={{ fontSize: 12, fontWeight: 700, color: "#1677ff", background: "rgba(22,119,255,0.08)", padding: "2px 10px", borderRadius: 20 }}>
-                            {Math.round(t.score * 100)}%
+                            {t.score}%
                           </span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
@@ -162,10 +162,10 @@ export default function MatchingPanel() {
                           <span style={{ fontSize: 12, color: "#9ca3af" }}>{t.categoryName}</span>
                         </div>
                         <Progress
-                          percent={Math.round(t.score * 100)}
+                          percent={t.score}
                           size="small"
                           showInfo={false}
-                          strokeColor={t.score >= 0.7 ? "#059669" : t.score >= 0.4 ? "#f59e0b" : "#ef4444"}
+                          strokeColor={t.score >= 70 ? "#059669" : t.score >= 40 ? "#f59e0b" : "#ef4444"}
                           style={{ marginBottom: 8 }}
                         />
                         {t.aiNote && <p style={{ fontSize: 12, color: "#64748b", margin: "0 0 12px" }}>{t.aiNote}</p>}
@@ -173,7 +173,7 @@ export default function MatchingPanel() {
                           onClick={() => handleUseTemplate(t)}
                           disabled={creatingFor === t.templateId}
                           style={{
-                            background: "#0F2A44", color: "#fff", border: "none", borderRadius: 8,
+                            background: "#1a2744", color: "#fff", border: "none", borderRadius: 8,
                             padding: "8px 18px", cursor: creatingFor === t.templateId ? "not-allowed" : "pointer",
                             fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 6,
                             opacity: creatingFor === t.templateId ? 0.7 : 1,

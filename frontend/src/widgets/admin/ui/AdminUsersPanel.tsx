@@ -33,7 +33,7 @@ export default function AdminUsersPanel() {
           <Avatar
             size={40}
             src={record.userProfileImageUrl || undefined}
-            style={{ background: "#0F2A44", fontWeight: 700, flexShrink: 0, borderRadius: 10 }}
+            style={{ background: "#1a2744", fontWeight: 700, flexShrink: 0, borderRadius: 10 }}
           >
             {!record.userProfileImageUrl && `${record.firstName?.[0] ?? ""}${record.lastName?.[0] ?? ""}`}
           </Avatar>
@@ -82,7 +82,7 @@ export default function AdminUsersPanel() {
             <button
               onClick={() => setSelectedUserId(record.id)}
               style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.15s, color 0.15s" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#0F2A44"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#1a2744"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}
             >
               <Eye size={15} />
@@ -148,7 +148,7 @@ export default function AdminUsersPanel() {
   return (
     <div style={{ overflowX: "hidden" }}>
       {/* ── Hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
+      <div style={{ background: "#1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ padding: isMobile ? "24px 16px 40px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexDirection: isMobile ? "column" : undefined }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
@@ -165,7 +165,7 @@ export default function AdminUsersPanel() {
       <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: 20, flexWrap: "wrap", marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
-          <StatCard label="Всего пользователей" value={data?.totalElements} color="#0F2A44" icon={<Users size={26} />} loading={isLoading} />
+          <StatCard label="Всего пользователей" value={data?.totalElements} color="#1a2744" icon={<Users size={26} />} loading={isLoading} />
           <StatCard label="Юристов"              value={metrics?.totalLawyers}  color="#1677ff"  icon={<Scale size={26} />}    loading={isMetricsLoading} />
           <StatCard label="Активных"             value={metrics?.activeUsers}   color="#059669"  icon={<Activity size={26} />} loading={isMetricsLoading} />
         </div>

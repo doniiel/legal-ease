@@ -29,7 +29,7 @@ export default function UserDetailDrawer({ userId, onClose }: Props) {
             <Avatar
               size={72}
               src={user.userProfileImageUrl || undefined}
-              style={{ background: "#0F2A44", fontWeight: 700, fontSize: 24, marginBottom: 12, borderRadius: 16 }}
+              style={{ background: "#1a2744", fontWeight: 700, fontSize: 24, marginBottom: 12, borderRadius: 16 }}
               icon={!user.userProfileImageUrl ? <User size={32} /> : undefined}
             >
               {!user.userProfileImageUrl && `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`}

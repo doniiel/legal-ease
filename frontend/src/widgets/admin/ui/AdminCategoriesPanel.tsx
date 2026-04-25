@@ -94,7 +94,7 @@ function DeactivateModal({
           Деактивировать категорию?
         </div>
         <div style={{ fontSize: 13, color: "#64748b", marginBottom: 6, lineHeight: 1.6 }}>
-          Категория <strong style={{ color: "#0F2A44" }}>«{category?.name}»</strong> будет скрыта из системы.
+          Категория <strong style={{ color: "#1a2744" }}>«{category?.name}»</strong> будет скрыта из системы.
         </div>
         <div
           style={{
@@ -158,7 +158,7 @@ export default function AdminCategoriesPanel() {
               border: `1px solid ${record.active ? "#dce9ff" : "#e2e8f0"}`,
             }}
           >
-            <FolderOpen size={18} color={record.active ? "#0F2A44" : "#94a3b8"} />
+            <FolderOpen size={18} color={record.active ? "#1a2744" : "#94a3b8"} />
           </div>
           <Text strong style={{ fontSize: 14, color: "#0b1c30" }}>{record.name}</Text>
         </div>
@@ -187,7 +187,7 @@ export default function AdminCategoriesPanel() {
           <IconBtn
             icon={<FilePen size={15} />}
             tooltip="Редактировать"
-            hoverBg="#f1f5f9" hoverColor="#0F2A44"
+            hoverBg="#f1f5f9" hoverColor="#1a2744"
             onClick={() => openEdit(record, form.setFieldsValue)}
           />
 
@@ -227,36 +227,20 @@ export default function AdminCategoriesPanel() {
 
   return (
     <div style={{ overflowX: "hidden" }}>
-      {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: isMobile ? "24px 16px 40px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", flexDirection: isMobile ? "column" : ("row" as React.CSSProperties["flexDirection"]), alignItems: isMobile ? "flex-start" : "flex-end", position: "relative", zIndex: 1 }}>
-          <div>
-            <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
-              Управление категориями
-            </h1>
-            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
-              Создание, редактирование и управление статусом категорий документов
-            </p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ padding: "12px 20px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{data?.totalElements ?? "—"}</div>
-            </div>
-            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
-            <div style={{ padding: "12px 20px", textAlign: "right" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Активных</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#059669", fontFamily: "Manrope, sans-serif" }}>{activeCount}</div>
-            </div>
-          </div>
-        </div>
+      {/* ── Hero ── */}
+      <div style={{ background: "#1a2744", padding: isMobile ? "24px 16px 40px" : "40px 40px 56px" }}>
+        <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+          Управление категориями
+        </h1>
+        <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
+          Создание, редактирование и управление статусом категорий документов
+        </p>
       </div>
 
       <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: isMobile ? 12 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
-          <StatCard label="Всего категорий" value={data?.totalElements} color="#0F2A44" icon={<FolderOpen size={26} />} loading={isLoading} />
+          <StatCard label="Всего категорий" value={data?.totalElements} color="#1a2744" icon={<FolderOpen size={26} />} loading={isLoading} />
           <StatCard label="Активных"        value={activeCount}         color="#059669"  icon={<FolderCheck size={26} />} />
           <StatCard label="Неактивных"      value={inactiveCount}       color="#94a3b8"  icon={<FolderX size={26} />} />
         </div>
@@ -282,7 +266,7 @@ export default function AdminCategoriesPanel() {
             <Button
               icon={<Plus size={15} />}
               onClick={() => openCreate(form.resetFields)}
-              style={{ borderRadius: 12, background: "#0F2A44", borderColor: "#0F2A44", color: "#fff", height: 40, paddingLeft: 20, paddingRight: 20, fontWeight: 600 }}
+              style={{ borderRadius: 12, background: "#1a2744", borderColor: "#1a2744", color: "#fff", height: 40, paddingLeft: 20, paddingRight: 20, fontWeight: 600 }}
             >
               Добавить
             </Button>
@@ -329,7 +313,7 @@ export default function AdminCategoriesPanel() {
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff4ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <FolderOpen size={16} color="#0F2A44" />
+              <FolderOpen size={16} color="#1a2744" />
             </div>
             <span style={{ fontWeight: 700, color: "#0b1c30" }}>
               {editingCategory ? "Редактировать категорию" : "Новая категория"}
@@ -345,7 +329,7 @@ export default function AdminCategoriesPanel() {
         okText={editingCategory ? "Сохранить" : "Создать"}
         cancelText="Отмена"
         confirmLoading={isCreating || isUpdating}
-        okButtonProps={{ style: { background: "#0F2A44", borderColor: "#0F2A44", borderRadius: 8 } }}
+        okButtonProps={{ style: { background: "#1a2744", borderColor: "#1a2744", borderRadius: 8 } }}
         cancelButtonProps={{ style: { borderRadius: 8 } }}
         destroyOnHidden
         width={480}

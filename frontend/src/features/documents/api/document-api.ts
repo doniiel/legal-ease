@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery, type BaseQueryFn, type FetchArgs, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 
-export type DocumentStatus = "DRAFT" | "VALIDATED" | "PROCESSING" | "COMPLETED" | "ARCHIVED";
+export type DocumentStatus = "DRAFT" | "VALIDATED" | "COMPLETED" | "ARCHIVED";
 export type RiskLevel = "HIGH" | "MEDIUM" | "LOW";
 
 export interface FieldValue {
@@ -228,6 +228,10 @@ export const documentApi = createApi({
     shareDocument: builder.mutation<DocumentShareResponse, number>({
       query: (id) => ({ url: `/documents/${id}/share`, method: "POST" }),
     }),
+    regeneratePdf: builder.mutation<DocumentDetail, number>({
+      query: (id) => ({ url: `/documents/${id}/regenerate-pdf`, method: "POST" }),
+      invalidatesTags: ["Document"],
+    }),
     getDocumentVersions: builder.query<DocumentVersion[], number>({
       query: (id) => `/documents/${id}/versions`,
     }),
@@ -266,6 +270,7 @@ export const {
   useGetDocumentUrlQuery,
   useLazyGetDocumentUrlQuery,
   useShareDocumentMutation,
+  useRegeneratePdfMutation,
   useGetDocumentVersionsQuery,
   useGetDocumentSuggestionsQuery,
   useLazyExplainDocumentQuery,

@@ -38,7 +38,7 @@ export default function DocumentVerify() {
   return (
     <div style={{ minHeight: "100vh", background: "#f5f7fa" }}>
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "28px 32px" }}>
+      <div style={{ background: "#1a2744", padding: "28px 32px" }}>
         <div style={{ maxWidth: 560, margin: "0 auto", display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <ShieldCheck size={24} color="#fff" />
@@ -99,13 +99,13 @@ export default function DocumentVerify() {
             {data.status === "VALID" && (
               <div style={{ padding: "24px 32px" }}>
                 {data.documentId && (
-                  <InfoRow icon={<FileText size={16} color="#0F2A44" />} label="Идентификатор" value={data.documentId} />
+                  <InfoRow icon={<FileText size={16} color="#1a2744" />} label="Идентификатор" value={data.documentId} />
                 )}
                 {data.createdBy && (
-                  <InfoRow icon={<User size={16} color="#0F2A44" />} label="Составитель" value={data.createdBy} />
+                  <InfoRow icon={<User size={16} color="#1a2744" />} label="Составитель" value={data.createdBy} />
                 )}
                 {data.createdAt && (
-                  <InfoRow icon={<Calendar size={16} color="#0F2A44" />} label="Дата создания"
+                  <InfoRow icon={<Calendar size={16} color="#1a2744" />} label="Дата создания"
                     value={new Date(data.createdAt).toLocaleDateString("ru-KZ", { day: "numeric", month: "long", year: "numeric" })} />
                 )}
                 <InfoRow icon={<Hash size={16} color={data.hashValid ? "#059669" : "#f59e0b"} />} label="Целостность файла"

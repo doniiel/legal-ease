@@ -110,7 +110,7 @@ function ActivePill({ active }: { active: boolean }) {
 // ─── Modal header ─────────────────────────────────────────────
 function ModalHeader({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
   return (
-    <div style={{ background: "linear-gradient(135deg, #0F2A44, #1a4070)", borderRadius: "8px 8px 0 0", padding: "20px 28px 16px" }}>
+    <div style={{ background: "#1a2744", borderRadius: "8px 8px 0 0", padding: "20px 28px 16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           {icon}
@@ -532,7 +532,7 @@ function MatchingTab({ templateId }: { templateId: number }) {
 
   const columns: ColumnsType<MatchingRule> = [
     { title: "Категория", dataIndex: "categoryName", key: "categoryName",
-      render: (v: string) => <span style={{ fontSize: 11, fontWeight: 600, color: "#0F2A44", background: "rgba(15,42,68,0.06)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(15,42,68,0.12)" }}>{v || "—"}</span> },
+      render: (v: string) => <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2744", background: "rgba(26,39,68,0.06)", padding: "3px 10px", borderRadius: 20, border: "1px solid rgba(26,39,68,0.12)" }}>{v || "—"}</span> },
     { title: "Ключевые слова", dataIndex: "keywords", key: "keywords",
       render: (v: string) => <Text style={{ fontSize: 12, fontFamily: "monospace", color: "#1677ff" }}>{v}</Text> },
     { title: "Базовый балл", dataIndex: "baseScore", key: "baseScore", width: 120, align: "center" as const,
@@ -551,13 +551,13 @@ function MatchingTab({ templateId }: { templateId: number }) {
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
         <Button icon={<Plus size={14} />} onClick={openCreate}
-          style={{ background: "#0F2A44", borderColor: "#0F2A44", color: "#fff", borderRadius: 8 }}>Добавить правило</Button>
+          style={{ background: "#1a2744", borderColor: "#1a2744", color: "#fff", borderRadius: 8 }}>Добавить правило</Button>
       </div>
       <Table components={editorialTableComponents} columns={columns} dataSource={rules} rowKey="id" loading={isLoading}
         locale={{ emptyText: <Empty description="Нет правил матчинга для этого шаблона" /> }}
         pagination={{ pageSize: 8, showTotal: (t) => `Всего ${t}` }} style={{ borderRadius: 12, overflow: "hidden" }} />
       <Modal open={open} onCancel={() => setOpen(false)} title={null}
-        footer={<div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}><Button onClick={() => setOpen(false)}>Отмена</Button><Button type="primary" onClick={handleSubmit} loading={isCreating || isUpdating} style={{ background: "#0F2A44", borderColor: "#0F2A44" }}>{editing ? "Сохранить" : "Создать"}</Button></div>}
+        footer={<div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}><Button onClick={() => setOpen(false)}>Отмена</Button><Button type="primary" onClick={handleSubmit} loading={isCreating || isUpdating} style={{ background: "#1a2744", borderColor: "#1a2744" }}>{editing ? "Сохранить" : "Создать"}</Button></div>}
         destroyOnHidden styles={{ body: { padding: 0 } }}>
         <ModalHeader icon={<GitMerge size={18} color="#fff" />} title={editing ? "Редактировать правило матчинга" : "Новое правило матчинга"} subtitle="Подбор шаблона для клиентских запросов" />
         <div style={{ padding: "20px 28px" }}>
@@ -620,7 +620,7 @@ export default function LawyerRuleManagerPanel() {
     },
     {
       key: "matching",
-      label: <Space><GitMerge size={14} /><span>Матчинг</span>{selectedTemplateId && <Badge count={matchingRules.length} color="#0F2A44" />}</Space>,
+      label: <Space><GitMerge size={14} /><span>Матчинг</span>{selectedTemplateId && <Badge count={matchingRules.length} color="#1a2744" />}</Space>,
       children: selectedTemplateId ? <MatchingTab templateId={selectedTemplateId} /> : null,
     },
   ];
@@ -628,8 +628,7 @@ export default function LawyerRuleManagerPanel() {
   return (
     <div style={{ overflowX: "hidden" }}>
       {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+      <div style={{ background: "#1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ padding: isMobile ? "24px 16px 48px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Rule Engine</h1>
@@ -664,13 +663,13 @@ export default function LawyerRuleManagerPanel() {
           <StatCard label="Риски"         value={riskRules.length}        color="#ef4444" icon={<ShieldAlert size={26} />} />
           <StatCard label="IF/THEN"       value={conditionalRules.length} color="#7c3aed" icon={<GitBranch size={26} />} />
           <StatCard label="Доп. документы" value={requiredDocRules.length} color="#059669" icon={<FileBadge2 size={26} />} />
-          <StatCard label="Матчинг"       value={matchingRules.length}    color="#0F2A44" icon={<GitMerge size={26} />} />
+          <StatCard label="Матчинг"       value={matchingRules.length}    color="#1a2744" icon={<GitMerge size={26} />} />
         </div>
 
         {/* ── Template selector ── */}
         <div style={{ background: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", borderRadius: 16, padding: "20px 24px", marginBottom: 20, boxShadow: "0 1px 4px rgba(11,28,48,0.06)", border: "1px solid rgba(197,198,210,0.15)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <Text strong style={{ color: "#0F2A44", whiteSpace: "nowrap", fontSize: 13, fontWeight: 700 }}>Шаблон:</Text>
+            <Text strong style={{ color: "#1a2744", whiteSpace: "nowrap", fontSize: 13, fontWeight: 700 }}>Шаблон:</Text>
             <Select showSearch style={{ flex: 1, maxWidth: 520 }}
               placeholder="Выберите шаблон для управления правилами..."
               filterOption={(input, opt) => String(opt?.label ?? "").toLowerCase().includes(input.toLowerCase())}

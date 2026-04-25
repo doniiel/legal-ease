@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import {
   useGetDocumentsQuery,
+  useGetAllDocumentsQuery,
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
   type DocumentListItem,
@@ -26,7 +27,8 @@ const { Text } = Typography;
 function StatusPill({ status }: { status: string }) {
   const cfg =
     status === "COMPLETED"  ? { color: "#059669", bg: "rgba(5,150,105,0.08)",   border: "rgba(5,150,105,0.2)",   dot: "#059669", label: "Завершён"  } :
-    status === "PROCESSING" ? { color: "#1677ff", bg: "rgba(22,119,255,0.08)",  border: "rgba(22,119,255,0.2)",  dot: "#1677ff", label: "В обработке" } :
+    status === "VALIDATED"  ? { color: "#1677ff", bg: "rgba(22,119,255,0.08)",  border: "rgba(22,119,255,0.2)",  dot: "#1677ff", label: "Проверен"  } :
+    status === "ARCHIVED"   ? { color: "#6b7280", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.2)", dot: "#6b7280", label: "Архив"     } :
                               { color: "#f59e0b", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.2)",  dot: "#f59e0b", label: "Черновик"  };
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
@@ -63,7 +65,7 @@ export default function DocumentsListPanel() {
   const [form] = Form.useForm();
 
   const { data, isLoading } = useGetDocumentsQuery({ page: page - 1, size: 10 });
-  const { data: allData } = useGetDocumentsQuery({ page: 0, size: 1000 });
+  const { data: allData } = useGetAllDocumentsQuery({ page: 0, size: 1000 });
   const { data: templatesData } = useGetTemplatesQuery({ page: 0, size: 100 });
   const templates = templatesData?.content ?? [];
   const [createDocument, { isLoading: isCreating }] = useCreateDocumentMutation();
@@ -72,9 +74,10 @@ export default function DocumentsListPanel() {
   const allDocs = allData?.content ?? [];
   const draftCount     = allDocs.filter(d => d.status === "DRAFT").length;
   const completedCount = allDocs.filter(d => d.status === "COMPLETED").length;
-  const processingCount = allDocs.filter(d => d.status === "PROCESSING").length;
+  const processingCount = allDocs.filter(d => d.status === "VALIDATED").length;
 
-  const filtered = (data?.content ?? []).filter(d => {
+  const sourceData = statusFilter === "ARCHIVED" ? allDocs : (data?.content ?? []);
+  const filtered = sourceData.filter(d => {
     const q = search.toLowerCase();
     const matchSearch = !search || d.title.toLowerCase().includes(q) || d.templateTitle?.toLowerCase().includes(q) || d.categoryName?.toLowerCase().includes(q);
     const matchStatus = !statusFilter || d.status === statusFilter;
@@ -106,8 +109,8 @@ export default function DocumentsListPanel() {
       key: "title",
       render: (_, r) => (
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(15,42,68,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <FilePen size={16} color="#0F2A44" />
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: "rgba(26,39,68,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <FilePen size={16} color="#1a2744" />
           </div>
           <div>
             <Text strong style={{ fontSize: 14, color: "#0b1c30" }}>{r.title}</Text>
@@ -122,8 +125,8 @@ export default function DocumentsListPanel() {
       key: "categoryName",
       width: 160,
       render: (name: string) => (
-        <div style={{ display: "inline-flex", padding: "3px 10px", borderRadius: 20, background: "rgba(15,42,68,0.06)", border: "1px solid rgba(15,42,68,0.12)" }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#0F2A44" }}>{name || "—"}</span>
+        <div style={{ display: "inline-flex", padding: "3px 10px", borderRadius: 20, background: "rgba(26,39,68,0.06)", border: "1px solid rgba(26,39,68,0.12)" }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2744" }}>{name || "—"}</span>
         </div>
       ),
     },
@@ -158,39 +161,23 @@ export default function DocumentsListPanel() {
   return (
     <div style={{ overflowX: "hidden" }}>
       {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+      <div style={{ background: "#1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ padding: isMobile ? "24px 20px 48px" : "40px 40px 56px", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "flex-end", gap: isMobile ? 16 : 0, position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: isMobile ? 26 : 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Мои документы</h1>
             <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 13, margin: 0 }}>Создавайте, редактируйте и анализируйте юридические документы с помощью AI</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            {!isMobile && (
-              <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
-                <div style={{ padding: "12px 20px" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{data?.totalElements ?? 0}</div>
-                </div>
-                <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
-                <div style={{ padding: "12px 20px" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Завершённых</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: "#34d399", fontFamily: "Manrope, sans-serif" }}>{completedCount}</div>
-                </div>
-              </div>
-            )}
-            <Button icon={<Plus size={15} />} onClick={() => setCreateOpen(true)}
-              style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 10, height: 42, fontWeight: 600, paddingLeft: 20, paddingRight: 20 }}>
-              Создать документ
-            </Button>
-          </div>
+          <Button icon={<Plus size={15} />} onClick={() => setCreateOpen(true)}
+            style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: "#fff", borderRadius: 10, height: 42, fontWeight: 600, paddingLeft: 20, paddingRight: 20 }}>
+            Создать документ
+          </Button>
         </div>
       </div>
 
       <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 10 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
-          <StatCard label="Всего документов" value={data?.totalElements ?? 0} color="#0F2A44" icon={<FileText size={26} />} loading={isLoading} />
+          <StatCard label="Всего документов" value={data?.totalElements ?? 0} color="#1a2744" icon={<FileText size={26} />} loading={isLoading} />
           <StatCard label="Черновики"         value={draftCount}              color="#f59e0b" icon={<FilePen size={26} />} />
           <StatCard label="Завершённые"       value={completedCount}          color="#059669" icon={<CheckCircle2 size={26} />} />
           <StatCard label="В обработке"       value={processingCount}         color="#1677ff" icon={<Clock size={26} />} />
@@ -208,9 +195,10 @@ export default function DocumentsListPanel() {
               <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#757682", marginBottom: 8 }}>Статус</div>
               <Select allowClear placeholder="Все статусы" value={statusFilter} onChange={setStatusFilter} style={{ width: "100%" }}
                 options={[
-                  { value: "DRAFT",      label: "Черновик" },
-                  { value: "PROCESSING", label: "В обработке" },
-                  { value: "COMPLETED",  label: "Завершён" },
+                  { value: "DRAFT",     label: "Черновик" },
+                  { value: "VALIDATED", label: "Проверен" },
+                  { value: "COMPLETED", label: "Завершён" },
+                  { value: "ARCHIVED",  label: "Архив" },
                 ]} />
             </div>
             {(search || statusFilter) && (
@@ -241,7 +229,7 @@ export default function DocumentsListPanel() {
       {createOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#fff", borderRadius: 16, width: isMobile ? "92vw" : 500, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
-            <div style={{ background: "linear-gradient(135deg, #0F2A44, #1a4070)", padding: "20px 28px 16px" }}>
+            <div style={{ background: "#1a2744", padding: "20px 28px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <FilePen size={18} color="#fff" />
@@ -265,7 +253,7 @@ export default function DocumentsListPanel() {
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
                   <Button onClick={() => { setCreateOpen(false); form.resetFields(); }}>Отмена</Button>
                   <Button type="primary" htmlType="submit" loading={isCreating}
-                    style={{ background: "#0F2A44", borderColor: "#0F2A44" }}>
+                    style={{ background: "#1a2744", borderColor: "#1a2744" }}>
                     Создать и открыть
                   </Button>
                 </div>

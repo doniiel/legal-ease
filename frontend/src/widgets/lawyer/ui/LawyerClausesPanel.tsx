@@ -105,7 +105,7 @@ export default function LawyerClausesPanel() {
           {row.tags && (
             <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
               {row.tags.split(",").map(t => t.trim()).filter(Boolean).map(t => (
-                <span key={t} style={{ fontSize: 10, padding: "1px 7px", borderRadius: 20, background: "rgba(15,42,68,0.07)", color: "#0F2A44", fontWeight: 600 }}>
+                <span key={t} style={{ fontSize: 10, padding: "1px 7px", borderRadius: 20, background: "rgba(26,39,68,0.07)", color: "#1a2744", fontWeight: 600 }}>
                   {t}
                 </span>
               ))}
@@ -156,7 +156,7 @@ export default function LawyerClausesPanel() {
       width: 80,
       render: (_: unknown, row: LegalClause) => (
         <div style={{ display: "flex", gap: 4 }}>
-          <IconBtn icon={<Pencil size={14} />} tooltip="Редактировать" onClick={() => openEdit(row)} hoverColor="#0F2A44" />
+          <IconBtn icon={<Pencil size={14} />} tooltip="Редактировать" onClick={() => openEdit(row)} hoverColor="#1a2744" />
           <IconBtn icon={<Trash2 size={14} />} tooltip="Удалить" onClick={() => setDeleteModal({ open: true, clause: row })} hoverColor="#ef4444" />
         </div>
       ),
@@ -167,7 +167,7 @@ export default function LawyerClausesPanel() {
     <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
       {/* ── Full-bleed hero ── */}
       <div style={{
-        background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
+        background: "#1a2744",
         padding: isMobile ? "24px 16px 48px" : "40px 40px 56px",
         marginLeft: isMobile ? -12 : -32, marginRight: isMobile ? -12 : -32,
         display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20,
@@ -186,7 +186,7 @@ export default function LawyerClausesPanel() {
             {totalCount} клауз
           </div>
           <button onClick={openCreate}
-            style={{ background: "#fff", color: "#0F2A44", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+            style={{ background: "#fff", color: "#1a2744", border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, fontSize: 13, cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
             <Plus size={15} /> Создать клаузу
           </button>
         </div>
@@ -194,13 +194,13 @@ export default function LawyerClausesPanel() {
 
       {/* ── Stat cards ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: -28, position: "relative", zIndex: 2, marginBottom: 24 }}>
-        <StatCard label="Всего клауз" value={totalCount} color="#0F2A44" icon={<BookOpen size={18} />} loading={isLoading} />
+        <StatCard label="Всего клауз" value={totalCount} color="#1a2744" icon={<BookOpen size={18} />} loading={isLoading} />
         <StatCard label="Активных" value={activeCount} color="#059669" icon={<Tag size={18} />} loading={isLoading} />
         <StatCard label="Категорий" value={categoryCount} color="#1677ff" icon={<FolderOpen size={18} />} loading={isLoading} />
       </div>
 
       {/* ── Filter toolbar ── */}
-      <div style={{ background: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", border: "1px solid #e5e7eb", borderRadius: 12, padding: "16px 20px", marginBottom: 20, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+      <div style={{ background: "rgba(255,255,255,0.8)", backdropFilter: "blur(20px)", border: "1px solid #e8eaf0", borderRadius: 12, padding: "16px 20px", marginBottom: 20, display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
         <Input prefix={<Search size={14} color="#9ca3af" />} placeholder="Поиск по ключевому слову..." value={keyword}
           onChange={e => { setKeyword(e.target.value); setPage(1); }}
           style={{ width: 260, borderRadius: 8, height: 36 }} />
@@ -209,13 +209,13 @@ export default function LawyerClausesPanel() {
           style={{ width: 200 }}
           options={categories.map(c => ({ value: c.id, label: c.name }))} />
         <button onClick={() => { setKeyword(""); setCategoryFilter(undefined); setPage(1); }}
-          style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "7px 14px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+          style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e8eaf0", borderRadius: 8, padding: "7px 14px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
           <RotateCcw size={13} /> Сбросить
         </button>
       </div>
 
       {/* ── Table ── */}
-      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e5e7eb", overflow: "hidden" }}>
+      <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e8eaf0", overflow: "hidden" }}>
         <Table<LegalClause>
           columns={columns}
           dataSource={data?.content ?? []}
@@ -237,7 +237,7 @@ export default function LawyerClausesPanel() {
       {modalOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#fff", borderRadius: 16, width: 560, maxHeight: "90vh", overflow: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.18)" }}>
-            <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "20px 28px" }}>
+            <div style={{ background: "#1a2744", padding: "20px 28px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <BookOpen size={18} color="#fff" />
                 <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>{editing ? "Редактировать клаузу" : "Создать клаузу"}</span>
@@ -265,11 +265,11 @@ export default function LawyerClausesPanel() {
                 </div>
                 <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
                   <button type="button" onClick={() => { setModalOpen(false); form.resetFields(); }}
-                    style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "9px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+                    style={{ background: "transparent", border: "1px solid #e8eaf0", borderRadius: 8, padding: "9px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
                     Отмена
                   </button>
                   <button type="submit" disabled={isCreating || isUpdating}
-                    style={{ background: "#0F2A44", color: "#fff", border: "none", borderRadius: 8, padding: "9px 20px", cursor: "pointer", fontWeight: 700, fontSize: 13, opacity: (isCreating || isUpdating) ? 0.7 : 1 }}>
+                    style={{ background: "#1a2744", color: "#fff", border: "none", borderRadius: 8, padding: "9px 20px", cursor: "pointer", fontWeight: 700, fontSize: 13, opacity: (isCreating || isUpdating) ? 0.7 : 1 }}>
                     {(isCreating || isUpdating) ? "Сохранение..." : (editing ? "Сохранить" : "Создать")}
                   </button>
                 </div>
@@ -295,7 +295,7 @@ export default function LawyerClausesPanel() {
               </p>
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
                 <button onClick={() => setDeleteModal({ open: false, clause: null })}
-                  style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "9px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+                  style={{ background: "transparent", border: "1px solid #e8eaf0", borderRadius: 8, padding: "9px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
                   Отмена
                 </button>
                 <button onClick={handleDelete} disabled={isDeleting}

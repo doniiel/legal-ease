@@ -54,7 +54,7 @@ function ActiveCell({ active, onToggle }: { active: boolean; onToggle: () => voi
 function TemplateCell({ id, name }: { id: number; name?: string }) {
   return (
     <div>
-      <Text strong style={{ display: "block", fontSize: 13, color: "#0F2A44", fontFamily: "Manrope, sans-serif" }}>
+      <Text strong style={{ display: "block", fontSize: 13, color: "#1a2744", fontFamily: "Manrope, sans-serif" }}>
         {name ?? `Template #${id}`}
       </Text>
       <Text style={{ fontSize: 10, color: "#7790bd", fontWeight: 600 }}>ID: {id}</Text>
@@ -92,7 +92,7 @@ function matchingColumns(onToggle: (id: number) => void): ColumnsType<AdminMatch
     { title: "Шаблон",       key: "tpl",  render: (_, r) => <TemplateCell id={r.templateId} name={r.templateTitle} /> },
     { title: "Категория",    key: "cat",  render: (_, r) => <Tag color="geekblue" style={{ fontWeight: 600, fontSize: 11 }}>{r.categoryName}</Tag> },
     { title: "Ключевые слова", key: "kw", ellipsis: true, render: (_, r) => monoText(r.keywords) },
-    { title: "Базовый балл", key: "score",width: 110, align: "center" as const, render: (_, r) => <Text strong style={{ color: "#0F2A44" }}>{r.baseScore}</Text> },
+    { title: "Базовый балл", key: "score",width: 110, align: "center" as const, render: (_, r) => <Text strong style={{ color: "#1a2744" }}>{r.baseScore}</Text> },
     { title: "Активно",      key: "active",width: 90, render: (_, r) => <ActiveCell active={r.active} onToggle={() => onToggle(r.id)} /> },
   ];
 }
@@ -112,7 +112,7 @@ function conditionalColumns(onToggle: (id: number) => void): ColumnsType<AdminCo
 function requiredDocColumns(onToggle: (id: number) => void): ColumnsType<AdminRequiredDocRule> {
   return [
     { title: "Шаблон",      key: "tpl",  render: (_, r) => <TemplateCell id={r.templateId} /> },
-    { title: "Документ",    key: "title",render: (_, r) => <Text strong style={{ fontSize: 13, color: "#0F2A44" }}>{r.title}</Text> },
+    { title: "Документ",    key: "title",render: (_, r) => <Text strong style={{ fontSize: 13, color: "#1a2744" }}>{r.title}</Text> },
     { title: "Причина",     key: "rsn",  ellipsis: true, render: (_, r) => <Text style={{ fontSize: 13, color: "#475569" }}>{r.reason}</Text> },
     { title: "Обязательный",key: "mand", width: 120, align: "center" as const, render: (_, r) => (
         <Tag color={r.mandatory ? "red" : "default"} style={{ fontWeight: 700, fontSize: 11 }}>{r.mandatory ? "Да" : "Нет"}</Tag>
@@ -122,20 +122,20 @@ function requiredDocColumns(onToggle: (id: number) => void): ColumnsType<AdminRe
 }
 
 // ─── Summary stat cards ───────────────────────────────────────
-function SummaryCard({ label, value, total, color, description }: { label: string; value: number; total: number; color: string; description: string }) {
+function SummaryCard({ label, value, total, description }: { label: string; value: number; total: number; color: string; description: string }) {
   return (
-    <div style={{ padding: "20px 20px 18px", background: "#e5eeff", borderRadius: 12, borderLeft: `4px solid ${color}` }}>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#7790bd", marginBottom: 10 }}>
+    <div style={{ padding: "20px 20px 18px", background: "#fff", borderRadius: 14, border: "1px solid #e8eaf0" }}>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a92a6", marginBottom: 10 }}>
         {label}
       </div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, marginBottom: 6 }}>
-        <span style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1, fontFamily: "Manrope, sans-serif" }}>{value}</span>
-        <span style={{ fontSize: 13, color: "#94a3b8", marginBottom: 2 }}>/ {total}</span>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 6, marginBottom: 8 }}>
+        <span style={{ fontSize: 28, fontWeight: 700, color: "#1a2744", lineHeight: 1, letterSpacing: "-1px" }}>{value}</span>
+        <span style={{ fontSize: 13, color: "#8a92a6", marginBottom: 2 }}>/ {total}</span>
       </div>
-      <div style={{ height: 4, borderRadius: 4, background: "rgba(0,0,0,0.08)", marginBottom: 12, overflow: "hidden" }}>
-        <div style={{ height: "100%", borderRadius: 4, background: color, width: total > 0 ? `${Math.round((value / total) * 100)}%` : "0%", transition: "width 0.4s" }} />
+      <div style={{ height: 3, borderRadius: 4, background: "#f0f2f7", marginBottom: 10, overflow: "hidden" }}>
+        <div style={{ height: "100%", borderRadius: 4, background: "#1a2744", width: total > 0 ? `${Math.round((value / total) * 100)}%` : "0%", transition: "width 0.4s" }} />
       </div>
-      <p style={{ fontSize: 11, color: "#64748b", margin: 0, lineHeight: 1.5 }}>{description}</p>
+      <p style={{ fontSize: 11, color: "#8a92a6", margin: 0, lineHeight: 1.5 }}>{description}</p>
     </div>
   );
 }
@@ -179,8 +179,7 @@ export default function AdminRulesPanel() {
   return (
     <div style={{ overflowX: "hidden" }}>
       {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+      <div style={{ background: "#1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ padding: isMobile ? "24px 16px 80px" : "48px 48px 96px", display: "flex", justifyContent: "space-between", flexDirection: isMobile ? "column" : ("row" as React.CSSProperties["flexDirection"]), alignItems: isMobile ? "flex-start" : "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: 0, fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
@@ -232,11 +231,11 @@ export default function AdminRulesPanel() {
                       onClick={() => { setActiveTab(tab.key); setSearch(""); }}
                       style={{
                         padding: "8px 20px", borderRadius: 8, border: "none",
-                        background: isActive ? "#0F2A44" : "transparent",
+                        background: isActive ? "#1a2744" : "transparent",
                         color: isActive ? "#fff" : "#64748b",
                         fontWeight: isActive ? 700 : 500, fontSize: 13,
                         cursor: "pointer", whiteSpace: "nowrap",
-                        boxShadow: isActive ? "0 4px 12px rgba(15,42,68,0.25)" : "none",
+                        boxShadow: isActive ? "0 4px 12px rgba(26,39,68,0.25)" : "none",
                         transition: "all 0.15s",
                       }}
                       onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = "#dce9ff"; }}

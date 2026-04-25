@@ -2,15 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import { Empty, Table } from "antd";
 import {
-  FileText,
-  ShieldCheck,
-  User,
-  ArrowRight,
-  FolderOpen,
-  Clock,
-  CheckCircle2,
-  PenLine,
-  Plus,
+  FileText, ShieldCheck, User, ArrowRight,
+  FolderOpen, Clock, CheckCircle2, PenLine, Plus,
 } from "lucide-react";
 import { useGetProfileQuery } from "../../../features/profile/api/profile-api";
 import { useGetDocumentsQuery } from "../../../features/documents/api/document-api";
@@ -20,38 +13,20 @@ import { ROUTES } from "../../../app/router/router";
 import editorialTableComponents from "../../../shared/ui/table-components";
 
 function StatusPill({ status }: { status: string }) {
-  const MAP: Record<string, { label: string; dot: string; bg: string; color: string }> = {
-    DRAFT:      { label: "Черновик",    dot: "#f59e0b", bg: "#fffbeb", color: "#92400e" },
-    PROCESSING: { label: "В обработке", dot: "#1677ff", bg: "#eff6ff", color: "#1d4ed8" },
-    COMPLETED:  { label: "Завершён",    dot: "#059669", bg: "#f0fdf4", color: "#065f46" },
+  const MAP: Record<string, { label: string; color: string; bg: string }> = {
+    DRAFT:     { label: "Черновик", color: "#92400e", bg: "rgba(245,158,11,0.1)"  },
+    VALIDATED: { label: "Проверен", color: "#1d4ed8", bg: "rgba(22,119,255,0.08)" },
+    COMPLETED: { label: "Завершён", color: "#065f46", bg: "rgba(5,150,105,0.08)"  },
+    ARCHIVED:  { label: "Архив",    color: "#6b7280", bg: "rgba(107,114,128,0.08)"},
   };
-  const s = MAP[status] ?? { label: status, dot: "#9ca3af", bg: "#f3f4f6", color: "#374151" };
+  const s = MAP[status] ?? { label: status, color: "#6b7280", bg: "#f0f2f7" };
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        background: s.bg,
-        color: s.color,
-        borderRadius: 20,
-        padding: "3px 10px",
-        fontSize: 12,
-        fontWeight: 600,
-        whiteSpace: "nowrap",
-      }}
-    >
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot, flexShrink: 0 }} />
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: s.bg, color: s.color, borderRadius: 20, padding: "3px 10px", fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>
+      <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
       {s.label}
     </span>
   );
 }
-
-const ROLE_LABEL: Record<string, string> = {
-  USER: "Пользователь",
-  LAWYER: "Адвокат",
-  ADMIN: "Администратор",
-};
 
 function getInitials(fio: string) {
   const parts = fio.trim().split(/\s+/);
@@ -67,317 +42,129 @@ export default function DashboardHomePanel() {
 
   const docs = docsPage?.content ?? [];
   const totalDocs = docsPage?.totalElements ?? 0;
-  const drafts = docs.filter((d) => d.status === "DRAFT").length;
-  const processing = docs.filter((d) => d.status === "PROCESSING").length;
-  const completed = docs.filter((d) => d.status === "COMPLETED").length;
+  const drafts     = docs.filter(d => d.status === "DRAFT").length;
+  const validated  = docs.filter(d => d.status === "VALIDATED").length;
+  const completed  = docs.filter(d => d.status === "COMPLETED").length;
 
   const recentDocs = [...docs]
     .sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime())
     .slice(0, 5);
 
-  const today = new Date().toLocaleDateString("ru-KZ", { day: "numeric", month: "long", year: "numeric" });
-
   const quickCards = [
-    {
-      icon: <FileText size={22} color="#0F2A44" />,
-      iconBg: "#e0e7ff",
-      title: "Мои документы",
-      desc: "Создавайте и управляйте юридическими документами по шаблонам",
-      route: ROUTES.DOCUMENTS,
-      show: true,
-    },
-    {
-      icon: <ShieldCheck size={22} color="#059669" />,
-      iconBg: "#d1fae5",
-      title: "Заявка адвоката",
-      desc: "Подайте заявку на получение статуса адвоката в системе",
-      route: ROUTES.LAWYER_APPLICATION,
-      show: profile?.role === "USER",
-    },
-    {
-      icon: <User size={22} color="#7c3aed" />,
-      iconBg: "#ede9fe",
-      title: "Мой профиль",
-      desc: "Просматривайте и редактируйте личные данные",
-      route: ROUTES.PROFILE,
-      show: true,
-    },
-  ].filter((c) => c.show);
+    { icon: <FileText size={22} />, title: "Мои документы",   desc: "Создавайте и управляйте юридическими документами по шаблонам", route: ROUTES.DOCUMENTS,          show: true },
+    { icon: <ShieldCheck size={22} />, title: "Заявка адвоката", desc: "Подайте заявку на получение статуса адвоката в системе",       route: ROUTES.LAWYER_APPLICATION, show: profile?.role === "USER" },
+    { icon: <User size={22} />,     title: "Мой профиль",     desc: "Просматривайте и редактируйте личные данные",                    route: ROUTES.PROFILE,            show: true },
+  ].filter(c => c.show);
 
   const columns = [
     {
-      title: "Название",
-      dataIndex: "title",
-      key: "title",
-      ellipsis: true,
-      render: (v: string) => <span style={{ fontWeight: 500, color: "#111827" }}>{v}</span>,
+      title: "Название", dataIndex: "title", key: "title", ellipsis: true,
+      render: (v: string) => <span style={{ fontWeight: 500, color: "#1a2744", fontSize: 13 }}>{v}</span>,
     },
     {
-      title: "Шаблон",
-      dataIndex: "templateTitle",
-      key: "templateTitle",
-      ellipsis: true,
-      render: (v: string) => <span style={{ color: "#6b7280", fontSize: 13 }}>{v}</span>,
+      title: "Шаблон", dataIndex: "templateTitle", key: "templateTitle", ellipsis: true,
+      render: (v: string) => <span style={{ color: "#8a92a6", fontSize: 13 }}>{v}</span>,
     },
     {
-      title: "Статус",
-      dataIndex: "status",
-      key: "status",
+      title: "Статус", dataIndex: "status", key: "status",
       render: (v: string) => <StatusPill status={v} />,
     },
     {
-      title: "Дата",
-      dataIndex: "createdDate",
-      key: "createdDate",
-      render: (v: string) => (
-        <span style={{ color: "#6b7280", fontSize: 13 }}>
-          {new Date(v).toLocaleDateString("ru-KZ")}
-        </span>
-      ),
+      title: "Дата", dataIndex: "createdDate", key: "createdDate",
+      render: (v: string) => <span style={{ color: "#8a92a6", fontSize: 13 }}>{new Date(v).toLocaleDateString("ru-KZ")}</span>,
     },
   ];
 
   return (
     <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
-      {/* ── Full-bleed hero ── */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-          padding: isMobile ? "24px 20px 48px" : "40px 40px 56px",
-          marginLeft: isMobile ? -16 : -32,
-          marginRight: isMobile ? -16 : -32,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 20,
-          flexWrap: "wrap",
-        }}
-      >
-        {/* Left: avatar + greeting */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <div
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: "50%",
-              background: "rgba(255,255,255,0.2)",
-              border: "2px solid rgba(255,255,255,0.35)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 22,
-              fontWeight: 800,
-              color: "#fff",
-              flexShrink: 0,
-              letterSpacing: 1,
-            }}
-          >
-            {profile?.fio ? getInitials(profile.fio) : "U"}
-          </div>
-          <div>
-            <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, marginBottom: 4 }}>
-              Добрый день,
-            </div>
-            <div style={{ color: "#fff", fontSize: 22, fontWeight: 800, lineHeight: 1.2, marginBottom: 4 }}>
-              {profileLoading ? "..." : (profile?.fio ?? "Пользователь")}
-            </div>
-            <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 13 }}>
-              Добро пожаловать в LegalEase
-            </div>
-          </div>
-        </div>
 
-        {/* Right: pills + action */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              borderRadius: 20,
-              padding: "6px 14px",
-              color: "#fff",
-              fontSize: 12,
-              fontWeight: 600,
-            }}
-          >
-            {ROLE_LABEL[profile?.role ?? "USER"] ?? "Пользователь"}
-          </div>
-          <div
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              borderRadius: 20,
-              padding: "6px 14px",
-              color: "rgba(255,255,255,0.85)",
-              fontSize: 12,
-            }}
-          >
-            {today}
-          </div>
-          <button
-            onClick={() => navigate(ROUTES.DOCUMENTS)}
-            style={{
-              background: "#fff",
-              color: "#0F2A44",
-              border: "none",
-              borderRadius: 20,
-              padding: "8px 18px",
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-            }}
-          >
-            <Plus size={14} />
-            Создать документ
-          </button>
-        </div>
-      </div>
-
-      {/* ── Stat cards (overlap hero) ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)",
-          gap: isMobile ? 10 : 16,
-          marginTop: -28,
-          position: "relative",
-          zIndex: 2,
-          marginBottom: 28,
-        }}
-      >
-        <StatCard label="Всего документов" value={totalDocs} color="#0F2A44" icon={<FolderOpen size={18} />} loading={docsLoading} />
-        <StatCard label="Черновики" value={drafts} color="#f59e0b" icon={<PenLine size={18} />} loading={docsLoading} />
-        <StatCard label="В обработке" value={processing} color="#1677ff" icon={<Clock size={18} />} loading={docsLoading} />
-        <StatCard label="Завершённые" value={completed} color="#059669" icon={<CheckCircle2 size={18} />} loading={docsLoading} />
-      </div>
-
-      {/* ── Quick access cards ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : `repeat(${quickCards.length}, 1fr)`,
-          gap: isMobile ? 10 : 16,
-          marginBottom: 28,
-        }}
-      >
-        {quickCards.map((card) => (
-          <div
-            key={card.route}
-            style={{
-              background: "#fff",
-              border: "1px solid #e5e7eb",
-              borderRadius: 14,
-              padding: "24px 24px 20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-              transition: "box-shadow 0.2s, transform 0.15s",
-              cursor: "pointer",
-            }}
-            onClick={() => navigate(card.route)}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 24px rgba(15,42,68,0.12)";
-              (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-              (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-            }}
-          >
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 12,
-                background: card.iconBg,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {card.icon}
+      {/* ── Topbar ── */}
+      <div style={{ background: "#1a2744", padding: isMobile ? "24px 20px 48px" : "24px 32px 48px", marginLeft: isMobile ? -16 : -32, marginRight: isMobile ? -16 : -32, position: "relative" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#fff", flexShrink: 0 }}>
+              {profile?.fio ? getInitials(profile.fio) : "U"}
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 15, color: "#111827", marginBottom: 4 }}>
-                {card.title}
-              </div>
-              <div style={{ fontSize: 13, color: "#6b7280", lineHeight: 1.5 }}>
-                {card.desc}
+              <div style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, marginBottom: 2 }}>Добрый день,</div>
+              <div style={{ color: "#fff", fontSize: 20, fontWeight: 700, lineHeight: 1.2 }}>
+                {profileLoading ? "..." : (profile?.fio ?? "Пользователь")}
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, color: "#0F2A44", fontSize: 13, fontWeight: 600, marginTop: 4 }}>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+
+            <button
+              onClick={() => navigate(ROUTES.DOCUMENTS)}
+              style={{ background: "#fff", color: "#1a2744", border: "none", borderRadius: 8, padding: "10px 18px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, transition: "opacity 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = "0.9")}
+              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+            >
+              <Plus size={14} /> Новый документ
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Stat cards ── */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 10 : 14, marginTop: -24, position: "relative", zIndex: 2, marginBottom: 14 }}>
+        <StatCard label="Всего документов" value={totalDocs}  icon={<FolderOpen size={16} />}    loading={docsLoading} />
+        <StatCard label="Черновики"         value={drafts}     icon={<PenLine size={16} />}       loading={docsLoading} />
+        <StatCard label="Проверено"          value={validated}  icon={<Clock size={16} />}         loading={docsLoading} />
+        <StatCard label="Завершённые"       value={completed}  icon={<CheckCircle2 size={16} />}  loading={docsLoading} />
+      </div>
+
+      {/* ── Quick access ── */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : `repeat(${quickCards.length}, 1fr)`, gap: isMobile ? 10 : 14, marginBottom: 28 }}>
+        {quickCards.map(card => (
+          <div
+            key={card.route}
+            onClick={() => navigate(card.route)}
+            style={{ background: "#fff", border: "1px solid #e8eaf0", borderRadius: 14, padding: 24, display: "flex", flexDirection: "column", cursor: "pointer", transition: "box-shadow 0.15s, transform 0.15s" }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLDivElement; el.style.boxShadow = "0 6px 24px rgba(26,39,68,0.09)"; el.style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLDivElement; el.style.boxShadow = "none"; el.style.transform = "translateY(0)"; }}
+          >
+            <div style={{ width: 44, height: 44, borderRadius: 10, background: "#f0f2f7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16, color: "#6b7490" }}>
+              {card.icon}
+            </div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: "#1a2744", marginBottom: 6 }}>{card.title}</div>
+            <div style={{ fontSize: 13, color: "#8a92a6", lineHeight: 1.5, flex: 1, marginBottom: 20 }}>{card.desc}</div>
+            <button
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "#1a2744", color: "#fff", border: "none", borderRadius: 8, padding: "11px 16px", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", transition: "opacity 0.15s" }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+            >
               Перейти <ArrowRight size={14} />
-            </div>
+            </button>
           </div>
         ))}
       </div>
 
       {/* ── Recent documents ── */}
-      <div
-        style={{
-          background: "#fff",
-          border: "1px solid #e5e7eb",
-          borderRadius: 14,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "20px 24px 16px",
-            borderBottom: "1px solid #f0f0f0",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <FileText size={16} color="#0F2A44" />
-            <span style={{ fontWeight: 700, fontSize: 15, color: "#111827" }}>Последние документы</span>
+      <div style={{ background: "#fff", border: "1px solid #e8eaf0", borderRadius: 14, overflow: "hidden" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px 16px", borderBottom: "1px solid #e8eaf0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: "#f0f2f7", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7490" }}>
+              <FileText size={14} />
+            </div>
+            <span style={{ fontWeight: 700, fontSize: 15, color: "#1a2744" }}>Последние документы</span>
           </div>
           <button
             onClick={() => navigate(ROUTES.DOCUMENTS)}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "#0F2A44",
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: 4,
-              padding: "4px 8px",
-              borderRadius: 6,
-            }}
+            style={{ background: "transparent", border: "none", color: "#8a92a6", fontSize: 12, fontWeight: 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, transition: "color 0.15s" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#1a2744")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#8a92a6")}
           >
-            Все документы <ArrowRight size={13} />
+            Смотреть все <ArrowRight size={12} />
           </button>
         </div>
 
         {recentDocs.length === 0 && !docsLoading ? (
           <div style={{ padding: "48px 24px", textAlign: "center" }}>
-            <Empty
-              description={<span style={{ color: "#6b7280", fontSize: 14 }}>Документы пока не созданы</span>}
-            >
+            <Empty description={<span style={{ color: "#8a92a6", fontSize: 14 }}>Документы пока не созданы</span>}>
               <button
                 onClick={() => navigate(ROUTES.DOCUMENTS)}
-                style={{
-                  background: "#0F2A44",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "8px 20px",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  marginTop: 8,
-                }}
+                style={{ background: "#1a2744", color: "#fff", border: "none", borderRadius: 8, padding: "9px 20px", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, marginTop: 8 }}
               >
                 <Plus size={14} /> Создать первый документ
               </button>
@@ -391,7 +178,7 @@ export default function DashboardHomePanel() {
             loading={docsLoading}
             pagination={false}
             components={editorialTableComponents}
-            onRow={(record) => ({ onClick: () => navigate(`${ROUTES.DOCUMENTS}/${record.id}`) })}
+            onRow={record => ({ onClick: () => navigate(`${ROUTES.DOCUMENTS}/${record.id}`) })}
             style={{ cursor: "pointer" }}
           />
         )}

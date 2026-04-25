@@ -77,8 +77,8 @@ export default function LawyerMatchingRulesPanel() {
       key: "categoryName",
       width: 180,
       render: (name: string) => (
-        <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 20, background: "rgba(15,42,68,0.06)", border: "1px solid rgba(15,42,68,0.12)" }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#0F2A44" }}>{name || "—"}</span>
+        <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 20, background: "rgba(26,39,68,0.06)", border: "1px solid rgba(26,39,68,0.12)" }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2744" }}>{name || "—"}</span>
         </div>
       ),
     },
@@ -133,8 +133,7 @@ export default function LawyerMatchingRulesPanel() {
   return (
     <div style={{ overflowX: "hidden" }}>
       {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+      <div style={{ background: "#1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ padding: isMobile ? "24px 16px 48px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Правила матчинга</h1>
@@ -163,7 +162,7 @@ export default function LawyerMatchingRulesPanel() {
       <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "flex", gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
-          <StatCard label="Всего правил"   value={rules.length}      color="#0F2A44" icon={<GitMerge size={26} />} loading={isLoading} />
+          <StatCard label="Всего правил"   value={rules.length}      color="#1a2744" icon={<GitMerge size={26} />} loading={isLoading} />
           <StatCard label="Активных"       value={activeCount}        color="#059669" icon={<CheckCircle2 size={26} />} />
           <StatCard label="Неактивных"     value={rules.length - activeCount} color="#94a3b8" icon={<Target size={26} />} />
           <StatCard label="Шаблонов"       value={[...new Set(rules.map(r => r.templateId))].length} color="#7c3aed" icon={<Hash size={26} />} />
@@ -209,14 +208,14 @@ export default function LawyerMatchingRulesPanel() {
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
             <Button onClick={closeModal}>Отмена</Button>
             <Button type="primary" onClick={handleSubmit} loading={isCreating || isUpdating}
-              style={{ background: "#0F2A44", borderColor: "#0F2A44" }}>
+              style={{ background: "#1a2744", borderColor: "#1a2744" }}>
               {editingRule ? "Сохранить" : "Создать"}
             </Button>
           </div>
         }
         width={560} destroyOnHidden styles={{ body: { padding: 0 } }}
       >
-        <div style={{ background: "linear-gradient(135deg, #0F2A44, #1a4070)", borderRadius: "8px 8px 0 0", padding: "20px 28px 16px" }}>
+        <div style={{ background: "#1a2744", borderRadius: "8px 8px 0 0", padding: "20px 28px 16px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <GitMerge size={20} color="#fff" />

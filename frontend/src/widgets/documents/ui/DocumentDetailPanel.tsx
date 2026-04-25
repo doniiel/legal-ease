@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
-  App, Form, Input, Spin, Typography, Alert, Progress, Empty, Tooltip, Divider,
+  App, Form, Input, Spin, Typography, Alert, Progress, Empty, Tooltip, Divider, DatePicker,
 } from "antd";
+import dayjs from "dayjs";
 import {
   ArrowLeft, Save, CheckCircle2, AlertTriangle, Lightbulb,
   FileSearch, Zap, ShieldAlert, FileCheck2, BrainCircuit,
@@ -34,11 +35,10 @@ const { Text, Paragraph } = Typography;
 // ─── Status pill ──────────────────────────────────────────────
 function StatusPill({ status }: { status: string }) {
   const cfg =
-    status === "COMPLETED"  ? { color: "#059669", bg: "rgba(5,150,105,0.12)",   border: "rgba(5,150,105,0.3)",   dot: "#059669", label: "Завершён"     } :
-    status === "VALIDATED"  ? { color: "#7c3aed", bg: "rgba(124,58,237,0.12)",  border: "rgba(124,58,237,0.3)",  dot: "#7c3aed", label: "Проверен"     } :
-    status === "PROCESSING" ? { color: "#1677ff", bg: "rgba(22,119,255,0.12)",  border: "rgba(22,119,255,0.3)",  dot: "#1677ff", label: "В обработке"  } :
-    status === "ARCHIVED"   ? { color: "#6b7280", bg: "rgba(107,114,128,0.12)", border: "rgba(107,114,128,0.3)", dot: "#6b7280", label: "Архив"         } :
-                              { color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.3)",  dot: "#f59e0b", label: "Черновик"     };
+    status === "COMPLETED"  ? { color: "#059669", bg: "rgba(5,150,105,0.12)",   border: "rgba(5,150,105,0.3)",   dot: "#059669", label: "Завершён"  } :
+    status === "VALIDATED"  ? { color: "#1677ff", bg: "rgba(22,119,255,0.12)",  border: "rgba(22,119,255,0.3)",  dot: "#1677ff", label: "Проверен"  } :
+    status === "ARCHIVED"   ? { color: "#6b7280", bg: "rgba(107,114,128,0.12)", border: "rgba(107,114,128,0.3)", dot: "#6b7280", label: "Архив"      } :
+                              { color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.3)",  dot: "#f59e0b", label: "Черновик"  };
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "4px 12px", borderRadius: 20, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: cfg.dot }} />
@@ -171,15 +171,15 @@ function AnalysisBlock({ result }: { result: AnalysisResult }) {
       )}
 
       {result.fieldSuggestions?.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(15,42,68,0.12)", overflow: "hidden" }}>
-          <div style={{ background: "rgba(15,42,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(15,42,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
-            <Lightbulb size={14} color="#0F2A44" />
-            <Text style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Предложения по полям ({result.fieldSuggestions.length})</Text>
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(26,39,68,0.12)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(26,39,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(26,39,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+            <Lightbulb size={14} color="#1a2744" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#1a2744" }}>Предложения по полям ({result.fieldSuggestions.length})</Text>
           </div>
           <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
             {result.fieldSuggestions.map((s, i) => (
               <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9" }}>
-                <Text strong style={{ fontSize: 12, color: "#0F2A44", display: "block" }}>{s.label || s.fieldKey}</Text>
+                <Text strong style={{ fontSize: 12, color: "#1a2744", display: "block" }}>{s.label || s.fieldKey}</Text>
                 <Text style={{ fontSize: 12, color: "#374151" }}>
                   Предлагается: <span style={{ fontFamily: "monospace", background: "#e2e8f0", padding: "1px 5px", borderRadius: 4, fontSize: 11 }}>{s.suggestedValue}</span>
                 </Text>
@@ -191,16 +191,16 @@ function AnalysisBlock({ result }: { result: AnalysisResult }) {
       )}
 
       {result.matchedTemplates?.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(15,42,68,0.12)", overflow: "hidden" }}>
-          <div style={{ background: "rgba(15,42,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(15,42,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
-            <FileSearch size={14} color="#0F2A44" />
-            <Text style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Похожие шаблоны</Text>
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(26,39,68,0.12)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(26,39,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(26,39,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+            <FileSearch size={14} color="#1a2744" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#1a2744" }}>Похожие шаблоны</Text>
           </div>
           <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
             {result.matchedTemplates.map((t, i) => (
               <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <Text strong style={{ fontSize: 12, color: "#0F2A44" }}>{t.title}</Text>
+                  <Text strong style={{ fontSize: 12, color: "#1a2744" }}>{t.title}</Text>
                   <Text style={{ fontSize: 11, color: "#94a3b8", display: "block" }}>{t.categoryName}</Text>
                   {t.aiNote && <Text style={{ fontSize: 11, color: "#64748b" }}>{t.aiNote}</Text>}
                 </div>
@@ -212,17 +212,17 @@ function AnalysisBlock({ result }: { result: AnalysisResult }) {
       )}
 
       {result.requiredDocuments?.length > 0 && (
-        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(15,42,68,0.12)", overflow: "hidden" }}>
-          <div style={{ background: "rgba(15,42,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(15,42,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
-            <FileCheck2 size={14} color="#0F2A44" />
-            <Text style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Требуемые документы</Text>
+        <div style={{ background: "#fff", borderRadius: 12, border: "1px solid rgba(26,39,68,0.12)", overflow: "hidden" }}>
+          <div style={{ background: "rgba(26,39,68,0.03)", padding: "10px 16px", borderBottom: "1px solid rgba(26,39,68,0.08)", display: "flex", alignItems: "center", gap: 8 }}>
+            <FileCheck2 size={14} color="#1a2744" />
+            <Text style={{ fontSize: 12, fontWeight: 700, color: "#1a2744" }}>Требуемые документы</Text>
           </div>
           <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
             {result.requiredDocuments.map((d, i) => (
               <div key={i} style={{ padding: "8px 12px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9", display: "flex", alignItems: "flex-start", gap: 10 }}>
                 {d.mandatory && <span style={{ fontSize: 10, fontWeight: 700, color: "#ef4444", background: "rgba(239,68,68,0.08)", padding: "2px 8px", borderRadius: 20, flexShrink: 0, marginTop: 2 }}>Обязательно</span>}
                 <div>
-                  <Text strong style={{ fontSize: 12, color: "#0F2A44" }}>{d.title}</Text>
+                  <Text strong style={{ fontSize: 12, color: "#1a2744" }}>{d.title}</Text>
                   <Text style={{ fontSize: 11, color: "#94a3b8", display: "block" }}>{d.reason}</Text>
                 </div>
               </div>
@@ -238,18 +238,31 @@ function AnalysisBlock({ result }: { result: AnalysisResult }) {
 function ShareModal({ url, onClose }: { url: string; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
 
+  const fallbackCopy = (text: string, onDone: () => void) => {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.cssText = "position:fixed;opacity:0;top:0;left:0";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand("copy"); onDone(); } catch { /* ignore */ }
+    document.body.removeChild(ta);
+  };
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    const markCopied = () => { setCopied(true); setTimeout(() => setCopied(false), 2000); };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(markCopied).catch(() => fallbackCopy(url, markCopied));
+    } else {
+      fallbackCopy(url, markCopied);
+    }
   };
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: "#fff", borderRadius: 16, width: 480, boxShadow: "0 24px 64px rgba(0,0,0,0.2)", overflow: "hidden" }}>
         {/* Header */}
-        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "20px 24px" }}>
+        <div style={{ background: "#1a2744", padding: "20px 24px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <Share2 size={18} color="#fff" />
             <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>Поделиться документом</span>
@@ -271,7 +284,7 @@ function ShareModal({ url, onClose }: { url: string; onClose: () => void }) {
             <button
               onClick={handleCopy}
               style={{
-                background: copied ? "#059669" : "#0F2A44",
+                background: copied ? "#059669" : "#1a2744",
                 color: "#fff", border: "none", borderRadius: 8,
                 padding: "10px 16px", cursor: "pointer", fontSize: 13,
                 fontWeight: 600, display: "flex", alignItems: "center", gap: 6,
@@ -282,7 +295,7 @@ function ShareModal({ url, onClose }: { url: string; onClose: () => void }) {
             </button>
           </div>
           <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end" }}>
-            <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+            <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e8eaf0", borderRadius: 8, padding: "8px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
               Закрыть
             </button>
           </div>
@@ -311,7 +324,7 @@ function ClauseExplainModal({ onClose }: { onClose: () => void }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: "#fff", borderRadius: 16, width: 580, maxHeight: "85vh", overflowY: "auto", boxShadow: "0 24px 64px rgba(0,0,0,0.2)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {/* Header */}
-        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "20px 24px", flexShrink: 0 }}>
+        <div style={{ background: "#1a2744", padding: "20px 24px", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <BrainCircuit size={18} color="#fff" />
             <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>AI Объяснение клаузы</span>
@@ -364,10 +377,10 @@ function ClauseExplainModal({ onClose }: { onClose: () => void }) {
               )}
 
               {result.recommendations.length > 0 && (
-                <div style={{ background: "rgba(15,42,68,0.04)", borderRadius: 12, padding: "16px 18px", border: "1px solid rgba(15,42,68,0.1)" }}>
+                <div style={{ background: "rgba(26,39,68,0.04)", borderRadius: 12, padding: "16px 18px", border: "1px solid rgba(26,39,68,0.1)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <Lightbulb size={14} color="#0F2A44" />
-                    <span style={{ fontSize: 12, fontWeight: 700, color: "#0F2A44" }}>Рекомендации</span>
+                    <Lightbulb size={14} color="#1a2744" />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#1a2744" }}>Рекомендации</span>
                   </div>
                   {result.recommendations.map((r, i) => (
                     <div key={i} style={{ fontSize: 12, color: "#374151", marginBottom: 4 }}>• {r}</div>
@@ -378,11 +391,11 @@ function ClauseExplainModal({ onClose }: { onClose: () => void }) {
           )}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "9px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+            <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e8eaf0", borderRadius: 8, padding: "9px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
               Закрыть
             </button>
             <button onClick={handleExplain} disabled={isLoading || !clause.trim()}
-              style={{ display: "flex", alignItems: "center", gap: 6, background: isLoading || !clause.trim() ? "#94a3b8" : "#0F2A44", color: "#fff", border: "none", borderRadius: 8, padding: "9px 20px", cursor: isLoading || !clause.trim() ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 700 }}>
+              style={{ display: "flex", alignItems: "center", gap: 6, background: isLoading || !clause.trim() ? "#94a3b8" : "#1a2744", color: "#fff", border: "none", borderRadius: 8, padding: "9px 20px", cursor: isLoading || !clause.trim() ? "not-allowed" : "pointer", fontSize: 13, fontWeight: 700 }}>
               <BrainCircuit size={14} />{isLoading ? "Анализ..." : "Объяснить"}
             </button>
           </div>
@@ -393,15 +406,11 @@ function ClauseExplainModal({ onClose }: { onClose: () => void }) {
 }
 
 // ─── Document Explain modal ───────────────────────────────────
-function DocumentExplainModal({ documentId, onClose }: { documentId: number; onClose: () => void }) {
-  const [trigger, { data, isFetching }] = useLazyExplainDocumentQuery();
-
-  useEffect(() => { trigger(documentId); }, [documentId, trigger]);
-
-  const Section = ({ icon, title, color, bg, border, text }: {
-    icon: React.ReactNode; title: string; color: string;
-    bg: string; border: string; text: string;
-  }) => (
+function ExplainSection({ icon, title, color, bg, border, text }: {
+  icon: React.ReactNode; title: string; color: string;
+  bg: string; border: string; text: string;
+}) {
+  return (
     <div style={{ background: bg, borderRadius: 12, padding: "16px 18px", border: `1px solid ${border}` }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
         {icon}
@@ -410,11 +419,17 @@ function DocumentExplainModal({ documentId, onClose }: { documentId: number; onC
       <p style={{ fontSize: 13, color, lineHeight: 1.7, margin: 0, whiteSpace: "pre-line" }}>{text}</p>
     </div>
   );
+}
+
+function DocumentExplainModal({ documentId, onClose }: { documentId: number; onClose: () => void }) {
+  const [trigger, { data, isFetching }] = useLazyExplainDocumentQuery();
+
+  useEffect(() => { trigger(documentId); }, [documentId, trigger]);
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: "#fff", borderRadius: 16, width: 600, maxHeight: "85vh", display: "flex", flexDirection: "column", boxShadow: "0 24px 64px rgba(0,0,0,0.2)", overflow: "hidden" }}>
-        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", padding: "20px 24px", flexShrink: 0 }}>
+        <div style={{ background: "#1a2744", padding: "20px 24px", flexShrink: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <BrainCircuit size={18} color="#fff" />
             <span style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>Понять документ</span>
@@ -432,35 +447,35 @@ function DocumentExplainModal({ documentId, onClose }: { documentId: number; onC
           )}
           {data && !isFetching && (
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <Section
+              <ExplainSection
                 icon={<BrainCircuit size={14} color="#1677ff" />}
                 title="Что это за документ" color="#1e3a8a"
                 bg="rgba(22,119,255,0.05)" border="rgba(22,119,255,0.15)"
                 text={data.summary}
               />
-              <Section
+              <ExplainSection
                 icon={<FileCheck2 size={14} color="#059669" />}
                 title="Обязательства и права" color="#065f46"
                 bg="rgba(5,150,105,0.05)" border="rgba(5,150,105,0.15)"
                 text={data.obligations}
               />
-              <Section
+              <ExplainSection
                 icon={<ShieldAlert size={14} color="#f59e0b" />}
                 title="На что обратить внимание" color="#92400e"
                 bg="rgba(245,158,11,0.05)" border="rgba(245,158,11,0.2)"
                 text={data.warnings}
               />
-              <Section
-                icon={<Lightbulb size={14} color="#0F2A44" />}
+              <ExplainSection
+                icon={<Lightbulb size={14} color="#1a2744" />}
                 title="Следующие шаги" color="#374151"
-                bg="rgba(15,42,68,0.04)" border="rgba(15,42,68,0.1)"
+                bg="rgba(26,39,68,0.04)" border="rgba(26,39,68,0.1)"
                 text={data.nextSteps}
               />
             </div>
           )}
         </div>
         <div style={{ padding: "16px 24px", borderTop: "1px solid #f1f5f9", display: "flex", justifyContent: "flex-end", flexShrink: 0 }}>
-          <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e5e7eb", borderRadius: 8, padding: "8px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
+          <button onClick={onClose} style={{ background: "transparent", border: "1px solid #e8eaf0", borderRadius: 8, padding: "8px 20px", cursor: "pointer", color: "#6b7280", fontSize: 13 }}>
             Закрыть
           </button>
         </div>
@@ -478,7 +493,7 @@ function VersionsPanel({ versions, isLoading }: { versions: DocumentVersion[]; i
       {versions.map((v) => (
         <div key={v.version} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderRadius: 8, background: "#f8fafc", border: "1px solid #f1f5f9" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#0F2A44", background: "rgba(15,42,68,0.08)", padding: "2px 8px", borderRadius: 20 }}>v{v.version}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#1a2744", background: "rgba(26,39,68,0.08)", padding: "2px 8px", borderRadius: 20 }}>v{v.version}</span>
             <Text style={{ fontSize: 12, color: "#64748b" }}>{new Date(v.createdDate).toLocaleString("ru-KZ")}</Text>
           </div>
         </div>
@@ -528,17 +543,36 @@ export default function DocumentDetailPanel({ documentId }: Props) {
 
   useEffect(() => {
     if (doc) {
-      const fieldMap: Record<string, string> = {};
-      doc.fieldValues?.forEach(f => { fieldMap[f.fieldKey] = f.fieldValue; });
+      const fieldMap: Record<string, unknown> = {};
+      doc.fieldValues?.forEach(f => {
+        const field = templateFields.find(tf => tf.fieldKey === f.fieldKey);
+        if (field?.fieldType === "DATE" && f.fieldValue) {
+          fieldMap[f.fieldKey] = dayjs(f.fieldValue);
+        } else {
+          fieldMap[f.fieldKey] = f.fieldValue;
+        }
+      });
       form.setFieldsValue({ title: doc.title, ...fieldMap });
     }
   }, [doc, form]);
+
+  const extractFieldValues = (values: Record<string, unknown>): Record<string, string> => {
+    const result: Record<string, string> = {};
+    for (const [key, val] of Object.entries(values)) {
+      if (dayjs.isDayjs(val)) {
+        result[key] = val.format("YYYY-MM-DD");
+      } else if (val !== undefined && val !== null) {
+        result[key] = String(val);
+      }
+    }
+    return result;
+  };
 
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
       const { title, ...rest } = values;
-      await updateDocument({ id: documentId, title, fieldValues: rest }).unwrap();
+      await updateDocument({ id: documentId, title, fieldValues: extractFieldValues(rest) }).unwrap();
       message.success("Документ сохранён");
     } catch { message.error("Ошибка при сохранении"); }
   };
@@ -547,7 +581,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
     try {
       const values = await form.validateFields();
       const { title, ...rest } = values;
-      await updateDocument({ id: documentId, title, fieldValues: rest }).unwrap();
+      await updateDocument({ id: documentId, title, fieldValues: extractFieldValues(rest) }).unwrap();
       const result = await validateDocument(documentId).unwrap();
       setAnalysisResult(result);
       if (result.valid) message.success("Документ прошёл валидацию");
@@ -559,7 +593,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
     try {
       const values = await form.validateFields();
       const { title, ...rest } = values;
-      await updateDocument({ id: documentId, title, fieldValues: rest }).unwrap();
+      await updateDocument({ id: documentId, title, fieldValues: extractFieldValues(rest) }).unwrap();
       const response = await completeDocument(documentId).unwrap();
       setAnalysisResult(response.result);
       message.success("Документ завершён, PDF создан");
@@ -586,7 +620,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   const handleShare = async () => {
     try {
       const result = await shareDocument(documentId).unwrap();
-      setShareUrl(result.shareUrl);
+      const url = `${window.location.origin}/api/public/share/${result.shareToken}`;
+      setShareUrl(url);
     } catch { message.error("Не удалось создать ссылку для шаринга"); }
   };
 
@@ -607,7 +642,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   if (isLoading) {
     return (
       <div style={{ overflowX: "hidden" }}>
-        <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", height: 140 }} />
+        <div style={{ background: "#1a2744", height: 140 }} />
         <div style={{ padding: "32px" }}>
           <Spin size="large" style={{ display: "block", margin: "80px auto" }} />
         </div>
@@ -629,8 +664,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
       {showClauseModal && <ClauseExplainModal onClose={() => setShowClauseModal(false)} />}
 
       {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+      <div style={{ background: "#1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ padding: isMobile ? "20px 16px 40px" : "28px 40px 48px", position: "relative", zIndex: 1 }}>
           {/* Back + actions row */}
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
@@ -687,7 +721,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
         {/* ── Stat pills ── */}
         <div style={{ display: "flex", gap: 16, marginTop: -20, marginBottom: 24, position: "relative", zIndex: 2, flexWrap: "wrap" }}>
           {[
-            { icon: <FilePen size={16} />,       label: "Полей",         value: templateFields.length,                                                    color: "#0F2A44" },
+            { icon: <FilePen size={16} />,       label: "Полей",         value: templateFields.length,                                                    color: "#1a2744" },
             { icon: <AlertTriangle size={16} />, label: "Незаполненных", value: doc.missingRequiredFields?.length ?? 0,                                    color: doc.missingRequiredFields?.length ? "#f59e0b" : "#059669" },
             { icon: <Clock size={16} />,         label: "Обновлён",      value: doc.updatedDate ? new Date(doc.updatedDate).toLocaleDateString("ru-KZ") : "—", color: "#64748b" },
           ].map(item => (
@@ -706,8 +740,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
           {/* Left: Form */}
           <div style={{ background: "#fff", borderRadius: 16, padding: "28px 32px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(15,42,68,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <FilePen size={15} color="#0F2A44" />
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(26,39,68,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <FilePen size={15} color="#1a2744" />
               </div>
               <Text strong style={{ fontSize: 15, color: "#0b1c30", fontFamily: "Manrope, sans-serif" }}>Поля документа</Text>
               {!isDraft && (
@@ -746,12 +780,34 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                             </span>
                           }
                         >
-                          <Input
-                            disabled={!isDraft}
-                            type={field.fieldType === "NUMBER" ? "number" : "text"}
-                            placeholder={field.fieldType === "DATE" ? "ГГГГ-ММ-ДД" : undefined}
-                            style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
-                          />
+                          {field.fieldType === "DATE" ? (
+                            <DatePicker
+                              disabled={!isDraft}
+                              format="YYYY-MM-DD"
+                              style={{ width: "100%", borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                            />
+                          ) : (field.fieldKey.toLowerCase().includes("iin") || field.label?.toLowerCase().includes("иин")) ? (
+                            <Input
+                              disabled={!isDraft}
+                              maxLength={12}
+                              onKeyPress={e => { if (!/[0-9]/.test(e.key)) e.preventDefault(); }}
+                              placeholder="12 цифр"
+                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                            />
+                          ) : (field.fieldKey.toLowerCase().includes("bin") || field.label?.toLowerCase().includes("бин")) ? (
+                            <Input
+                              disabled={!isDraft}
+                              maxLength={16}
+                              placeholder="До 16 символов"
+                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                            />
+                          ) : (
+                            <Input
+                              disabled={!isDraft}
+                              type={field.fieldType === "NUMBER" ? "number" : "text"}
+                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                            />
+                          )}
                         </Form.Item>
                       );
                     })}
@@ -775,7 +831,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
               {isDraft && (
                 <div style={{ display: "flex", gap: 10, marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9", flexWrap: "wrap" }}>
                   <button onClick={handleSave} disabled={isUpdating}
-                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e2e8f0", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#0F2A44", fontSize: 13, fontWeight: 600, height: 40, opacity: isUpdating ? 0.6 : 1 }}>
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e2e8f0", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#1a2744", fontSize: 13, fontWeight: 600, height: 40, opacity: isUpdating ? 0.6 : 1 }}>
                     <Save size={14} />{isUpdating ? "Сохранение..." : "Сохранить"}
                   </button>
                   <button onClick={handleValidate} disabled={isValidating}
@@ -783,7 +839,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                     <ShieldCheck size={14} />{isValidating ? "Проверка..." : "Валидировать"}
                   </button>
                   <button onClick={handleComplete} disabled={isCompleting}
-                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#0F2A44", border: "1px solid #0F2A44", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 700, height: 40, opacity: isCompleting ? 0.6 : 1 }}>
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#1a2744", border: "1px solid #1a2744", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 700, height: 40, opacity: isCompleting ? 0.6 : 1 }}>
                     <Zap size={14} />{isCompleting ? "Анализ..." : "Завершить"}
                   </button>
                 </div>
@@ -792,11 +848,11 @@ export default function DocumentDetailPanel({ documentId }: Props) {
               {isCompleted && (
                 <div style={{ display: "flex", gap: 10, marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9", flexWrap: "wrap" }}>
                   <button onClick={handleDownload}
-                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#0F2A44", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, height: 40 }}>
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#1a2744", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, height: 40 }}>
                     <Download size={14} />Скачать PDF
                   </button>
                   <button onClick={handleShare} disabled={isSharing}
-                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e2e8f0", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#0F2A44", fontSize: 13, fontWeight: 600, height: 40, opacity: isSharing ? 0.6 : 1 }}>
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "1px solid #e2e8f0", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#1a2744", fontSize: 13, fontWeight: 600, height: 40, opacity: isSharing ? 0.6 : 1 }}>
                     <Share2 size={14} />{isSharing ? "Создание..." : "Поделиться"}
                   </button>
                   <button onClick={handleArchive} disabled={isArchiving}
@@ -809,7 +865,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
               {isArchived && (
                 <div style={{ display: "flex", gap: 10, marginTop: 24, paddingTop: 20, borderTop: "1px solid #f1f5f9" }}>
                   <button onClick={handleDownload}
-                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#0F2A44", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, height: 40 }}>
+                    style={{ display: "flex", alignItems: "center", gap: 6, background: "#1a2744", border: "none", borderRadius: 10, padding: "9px 18px", cursor: "pointer", color: "#fff", fontSize: 13, fontWeight: 600, height: 40 }}>
                     <Download size={14} />Скачать PDF
                   </button>
                   <button onClick={handleRestore} disabled={isRestoring}
@@ -827,8 +883,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
               {analysisResult && (
                 <div style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                    <Zap size={16} color="#0F2A44" />
-                    <Text strong style={{ color: "#0F2A44", fontSize: 14 }}>Результат анализа</Text>
+                    <Zap size={16} color="#1a2744" />
+                    <Text strong style={{ color: "#1a2744", fontSize: 14 }}>Результат анализа</Text>
                   </div>
                   <AnalysisBlock result={analysisResult} />
                 </div>
@@ -836,8 +892,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
               {showSuggestions && (
                 <div style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                    <Lightbulb size={16} color="#0F2A44" />
-                    <Text strong style={{ color: "#0F2A44", fontSize: 14 }}>Предложения AI</Text>
+                    <Lightbulb size={16} color="#1a2744" />
+                    <Text strong style={{ color: "#1a2744", fontSize: 14 }}>Предложения AI</Text>
                   </div>
                   {isFetchingSuggestions ? <div style={{ textAlign: "center", padding: "32px 0" }}><Spin /></div>
                     : suggestions ? <AnalysisBlock result={suggestions} /> : null}
@@ -846,8 +902,8 @@ export default function DocumentDetailPanel({ documentId }: Props) {
               {showVersions && (
                 <div style={{ background: "#fff", borderRadius: 16, padding: "20px 24px", boxShadow: "0 8px 32px rgba(11,28,48,0.04)", border: "1px solid rgba(197,198,210,0.15)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
-                    <History size={16} color="#0F2A44" />
-                    <Text strong style={{ color: "#0F2A44", fontSize: 14 }}>История версий</Text>
+                    <History size={16} color="#1a2744" />
+                    <Text strong style={{ color: "#1a2744", fontSize: 14 }}>История версий</Text>
                   </div>
                   <VersionsPanel versions={versions} isLoading={versionsLoading} />
                 </div>

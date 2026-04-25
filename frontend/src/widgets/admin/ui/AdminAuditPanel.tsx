@@ -50,8 +50,8 @@ function ActionPill({ action }: { action: string }) {
 // ─── Entity type pill ─────────────────────────────────────────
 function EntityPill({ type }: { type: string }) {
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 20, background: "rgba(15,42,68,0.06)", border: "1px solid rgba(15,42,68,0.12)" }}>
-      <span style={{ fontSize: 11, fontWeight: 600, color: "#0F2A44", letterSpacing: "0.04em" }}>{type || "—"}</span>
+    <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 20, background: "rgba(26,39,68,0.06)", border: "1px solid rgba(26,39,68,0.12)" }}>
+      <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2744", letterSpacing: "0.04em" }}>{type || "—"}</span>
     </div>
   );
 }
@@ -63,7 +63,7 @@ function IconBtn({ icon, tooltip, onClick }: { icon: React.ReactNode; tooltip: s
       <button
         onClick={onClick}
         style={{ width: 32, height: 32, borderRadius: 8, border: "none", background: "transparent", cursor: "pointer", color: "#64748b", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.15s, color 0.15s" }}
-        onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#0F2A44"; }}
+        onMouseEnter={(e) => { e.currentTarget.style.background = "#f1f5f9"; e.currentTarget.style.color = "#1a2744"; }}
         onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#64748b"; }}
       >
         {icon}
@@ -164,36 +164,20 @@ export default function AdminAuditPanel() {
 
   return (
     <div style={{ overflowX: "hidden" }}>
-      {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: isMobile ? "24px 16px 40px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", flexDirection: isMobile ? "column" : ("row" as React.CSSProperties["flexDirection"]), alignItems: isMobile ? "flex-start" : "flex-end", position: "relative", zIndex: 1 }}>
-          <div>
-            <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
-              Аудит логи
-            </h1>
-            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
-              История всех действий пользователей в системе
-            </p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ padding: "12px 20px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{data?.totalElements ?? "—"}</div>
-            </div>
-            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
-            <div style={{ padding: "12px 20px", textAlign: "right" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Страница</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#a5f3fc", fontFamily: "Manrope, sans-serif" }}>{page}</div>
-            </div>
-          </div>
-        </div>
+      {/* ── Hero ── */}
+      <div style={{ background: "#1a2744", padding: isMobile ? "24px 16px 40px" : "40px 40px 56px" }}>
+        <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+          Аудит логи
+        </h1>
+        <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
+          История всех действий пользователей в системе
+        </p>
       </div>
 
       <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: isMobile ? 12 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
-          <StatCard label="Всего записей"       value={data?.totalElements} color="#0F2A44" icon={<ScrollText size={26} />} loading={isLoading} />
+          <StatCard label="Всего записей"       value={data?.totalElements} color="#1a2744" icon={<ScrollText size={26} />} loading={isLoading} />
           <StatCard label="На странице"         value={filtered.length}     color="#1677ff" icon={<FileSearch size={26} />} />
           <StatCard label="Уникальных польз."   value={uniqueUsers}         color="#7c3aed" icon={<Users size={26} />} />
         </div>
@@ -309,7 +293,7 @@ export default function AdminAuditPanel() {
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff4ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ScrollText size={15} color="#0F2A44" />
+              <ScrollText size={15} color="#1a2744" />
             </div>
             <span style={{ fontWeight: 700, color: "#0b1c30" }}>Запись #{detailDrawer.record?.id}</span>
           </div>
@@ -334,7 +318,7 @@ export default function AdminAuditPanel() {
               <Text style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, display: "block", marginBottom: 12 }}>Пользователь</Text>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, padding: "12px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid #e2e8f0" }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: "#eff4ff", border: "1px solid #dce9ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Text style={{ fontWeight: 800, color: "#0F2A44", fontSize: 14 }}>
+                  <Text style={{ fontWeight: 800, color: "#1a2744", fontSize: 14 }}>
                     {r.userEmail?.[0]?.toUpperCase() ?? "?"}
                   </Text>
                 </div>

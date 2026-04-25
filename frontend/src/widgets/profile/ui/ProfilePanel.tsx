@@ -74,7 +74,7 @@ export default function ProfilePanel() {
   if (!profile) return null;
 
   const roleCfg = ROLE_CONFIG[profile.role] ?? ROLE_CONFIG.USER;
-  const avatarColors = ["#0F2A44", "#1d4ed8", "#7c3aed", "#b45309", "#0369a1"];
+  const avatarColors = ["#1a2744", "#1d4ed8", "#7c3aed", "#b45309", "#0369a1"];
   const avatarBg = avatarColors[profile.id % avatarColors.length];
 
   const ACCESS_ITEMS: Record<string, { label: string; desc: string }[]> = {
@@ -98,7 +98,7 @@ export default function ProfilePanel() {
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: isMobile ? "0 16px" : 0 }}>
       {/* ── Page header ── */}
       <div style={{ marginBottom: isMobile ? 20 : 32 }}>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: "#0F2A44", margin: "0 0 6px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: "#1a2744", margin: "0 0 6px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
           Настройки профиля
         </h1>
         <p style={{ color: "#64748b", fontSize: 14, margin: 0 }}>
@@ -145,7 +145,7 @@ export default function ProfilePanel() {
               <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>Редактируемые поля: ФИО, телефон и пол</div>
             </div>
             {!editing ? (
-              <Button icon={<Pencil size={14} />} onClick={startEdit} style={{ borderRadius: 10, fontWeight: 600, height: 38, paddingLeft: 16, paddingRight: 16, borderColor: "#e2e8f0", color: "#0F2A44" }}>
+              <Button icon={<Pencil size={14} />} onClick={startEdit} style={{ borderRadius: 10, fontWeight: 600, height: 38, paddingLeft: 16, paddingRight: 16, borderColor: "#e2e8f0", color: "#1a2744" }}>
                 Редактировать
               </Button>
             ) : (
@@ -153,7 +153,7 @@ export default function ProfilePanel() {
                 <Button icon={<X size={14} />} onClick={cancelEdit} style={{ borderRadius: 10, height: 38 }}>
                   Отмена
                 </Button>
-                <Button icon={<Save size={14} />} loading={isSaving} onClick={handleSave} style={{ borderRadius: 10, height: 38, background: "#0F2A44", borderColor: "#0F2A44", color: "#fff", fontWeight: 600 }}>
+                <Button icon={<Save size={14} />} loading={isSaving} onClick={handleSave} style={{ borderRadius: 10, height: 38, background: "#1a2744", borderColor: "#1a2744", color: "#fff", fontWeight: 600 }}>
                   Сохранить
                 </Button>
               </div>

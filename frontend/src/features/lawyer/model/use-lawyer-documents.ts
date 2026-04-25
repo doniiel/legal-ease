@@ -26,7 +26,7 @@ export function useLawyerDocuments() {
   const allDocs = allData?.content ?? [];
   const draftCount = allDocs.filter((d) => d.status === "DRAFT").length;
   const completedCount = allDocs.filter((d) => d.status === "COMPLETED").length;
-  const processingCount = allDocs.filter((d) => d.status === "PROCESSING").length;
+  const processingCount = allDocs.filter((d) => d.status === "VALIDATED").length;
 
   const filtered = (data?.content ?? []).filter((d) => {
     const q = search.toLowerCase();

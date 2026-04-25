@@ -12,7 +12,7 @@
   --popover-foreground: #2E2E2E;
   
   /* Primary - Тёмно-синий (navy) */
-  --primary: #0F2A44;
+  --primary: #1a2744;
   --primary-foreground: #FFFFFF;
   
   /* Secondary */
@@ -51,7 +51,7 @@
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: #4DA3FF;
-  --chart-1: #0F2A44;
+  --chart-1: #1a2744;
   --chart-2: #4DA3FF;
   --chart-3: #2FA36B;
   --chart-4: #F59E0B;
@@ -59,7 +59,7 @@
   --radius: 0.625rem;
   --sidebar: #FFFFFF;
   --sidebar-foreground: #2E2E2E;
-  --sidebar-primary: #0F2A44;
+  --sidebar-primary: #1a2744;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #F7F9FC;
   --sidebar-accent-foreground: #2E2E2E;

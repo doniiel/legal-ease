@@ -4,42 +4,45 @@ import type { ReactNode } from "react";
 interface Props {
   label: string;
   value: number | undefined;
-  color: string;
+  color?: string;
   icon: ReactNode;
   loading?: boolean;
 }
 
-export default function StatCard({ label, value, color, icon, loading }: Props) {
+export default function StatCard({ label, value, icon, loading }: Props) {
   return (
     <div
       style={{
         background: "#fff",
-        borderRadius: 12,
-        padding: "24px",
-        flex: 1,
-        borderLeft: `4px solid ${color}`,
-        boxShadow: "0 8px 32px rgba(11,28,48,0.04)",
-        height: 120,
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
+        borderRadius: 14,
+        padding: "20px 22px 22px",
+        border: "1px solid #e8eaf0",
+        transition: "box-shadow 0.15s, transform 0.15s",
+        cursor: "default",
+      }}
+      onMouseEnter={e => {
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.boxShadow = "0 6px 24px rgba(26,39,68,0.09)";
+        el.style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={e => {
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.boxShadow = "none";
+        el.style.transform = "translateY(0)";
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <span
-          style={{
-            fontSize: 11, fontWeight: 700, textTransform: "uppercase",
-            letterSpacing: "0.08em", color: "#7790bd",
-          }}
-        >
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a92a6" }}>
           {label}
         </span>
-        <span style={{ color: `${color}25`, display: "flex" }}>{icon}</span>
+        <div style={{ width: 32, height: 32, borderRadius: 8, background: "#f0f2f7", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#6b7490" }}>
+          {icon}
+        </div>
       </div>
       {loading ? (
         <Spin size="small" />
       ) : (
-        <div style={{ fontSize: 30, fontWeight: 800, color, lineHeight: 1, fontFamily: "Manrope, sans-serif" }}>
+        <div style={{ fontSize: 36, fontWeight: 700, color: "#1a2744", letterSpacing: "-1.5px", lineHeight: 1 }}>
           {value ?? 0}
         </div>
       )}

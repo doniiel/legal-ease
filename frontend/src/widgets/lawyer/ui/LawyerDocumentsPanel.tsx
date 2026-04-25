@@ -20,7 +20,7 @@ const { TextArea } = Input;
 function StatusPill({ status }: { status: string }) {
   const cfg =
     status === "COMPLETED"  ? { color: "#059669", bg: "rgba(5,150,105,0.08)",   border: "rgba(5,150,105,0.2)",   dot: "#059669", label: "Завершён"   } :
-    status === "PROCESSING" ? { color: "#f59e0b", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.2)",  dot: "#f59e0b", label: "В работе"   } :
+    status === "VALIDATED" ? { color: "#f59e0b", bg: "rgba(245,158,11,0.08)",  border: "rgba(245,158,11,0.2)",  dot: "#f59e0b", label: "Проверен"   } :
                               { color: "#94a3b8", bg: "rgba(148,163,184,0.08)", border: "rgba(148,163,184,0.2)", dot: "#94a3b8", label: "Черновик"   };
   return (
     <div style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, background: cfg.bg, border: `1px solid ${cfg.border}` }}>
@@ -79,8 +79,8 @@ export default function LawyerDocumentsPanel() {
       key: "categoryName",
       width: 160,
       render: (name: string) => (
-        <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 20, background: "rgba(15,42,68,0.06)", border: "1px solid rgba(15,42,68,0.12)" }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#0F2A44" }}>{name || "—"}</span>
+        <div style={{ display: "inline-flex", alignItems: "center", padding: "3px 10px", borderRadius: 20, background: "rgba(26,39,68,0.06)", border: "1px solid rgba(26,39,68,0.12)" }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#1a2744" }}>{name || "—"}</span>
         </div>
       ),
     },
@@ -116,8 +116,7 @@ export default function LawyerDocumentsPanel() {
   return (
     <div style={{ overflowX: "hidden" }}>
       {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
+      <div style={{ background: "#1a2744", position: "relative", overflow: "hidden" }}>
         <div style={{ padding: isMobile ? "24px 16px 48px" : "40px 40px 56px", display: "flex", flexDirection: isMobile ? "column" as React.CSSProperties["flexDirection"] : "row" as React.CSSProperties["flexDirection"], justifyContent: "space-between", alignItems: "flex-end", gap: isMobile ? 16 : undefined, position: "relative", zIndex: 1 }}>
           <div>
             <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>Документы клиентов</h1>
@@ -140,8 +139,8 @@ export default function LawyerDocumentsPanel() {
       <div style={{ padding: isMobile ? "0 12px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: isMobile ? "grid" : "flex", gridTemplateColumns: isMobile ? "repeat(2,1fr)" : undefined, gap: 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
-          <StatCard label="Всего документов" value={data?.totalElements ?? 0} color="#0F2A44" icon={<FileText size={26} />} loading={isLoading} />
-          <StatCard label="В работе"          value={processingCount}          color="#f59e0b" icon={<Clock size={26} />} />
+          <StatCard label="Всего документов" value={data?.totalElements ?? 0} color="#1a2744" icon={<FileText size={26} />} loading={isLoading} />
+          <StatCard label="Проверен"          value={processingCount}          color="#f59e0b" icon={<Clock size={26} />} />
           <StatCard label="Завершённые"       value={completedCount}           color="#059669" icon={<CheckCircle2 size={26} />} />
           <StatCard label="Черновики"         value={draftCount}               color="#94a3b8" icon={<AlertCircle size={26} />} />
         </div>
@@ -159,7 +158,7 @@ export default function LawyerDocumentsPanel() {
               <Select allowClear placeholder="Все статусы" value={statusFilter} onChange={setStatusFilter} style={{ width: "100%" }}
                 options={[
                   { value: "DRAFT",      label: "Черновик" },
-                  { value: "PROCESSING", label: "В работе" },
+                  { value: "VALIDATED", label: "Проверен" },
                   { value: "COMPLETED",  label: "Завершён" },
                 ]} />
             </div>
@@ -190,7 +189,7 @@ export default function LawyerDocumentsPanel() {
       {reviewModal.open && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div style={{ background: "#fff", borderRadius: 16, width: 500, overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.18)" }}>
-            <div style={{ background: "linear-gradient(135deg, #0F2A44, #1a4070)", padding: "20px 28px 16px" }}>
+            <div style={{ background: "#1a2744", padding: "20px 28px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <MessageSquare size={18} color="#fff" />
@@ -210,14 +209,14 @@ export default function LawyerDocumentsPanel() {
                     { value: "NEEDS_REVISION", label: <span style={{ display: "flex", alignItems: "center", gap: 6 }}><RefreshCw size={14} color="#f59e0b" />Требует доработки</span> },
                   ]} />
                 </Form.Item>
-                <Form.Item label={<Text style={{ fontWeight: 600 }}>Комментарий</Text>} name="comment" rules={[{ required: true, message: "Добавьте комментарий" }, { min: 10, message: "Минимум 10 символов" }]}>
+                <Form.Item label={<Text style={{ fontWeight: 600 }}>Комментарий</Text>} name="comment" rules={[{ required: true, message: "Добавьте комментарий" }]}>
                   <TextArea rows={4} placeholder="Опишите ваши замечания или рекомендации..." showCount maxLength={1000} />
                 </Form.Item>
               </Form>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
                 <Button onClick={closeReview}>Отмена</Button>
                 <Button type="primary" onClick={handleSubmitReview} loading={isSubmitting}
-                  style={{ background: "#0F2A44", borderColor: "#0F2A44" }}>
+                  style={{ background: "#1a2744", borderColor: "#1a2744" }}>
                   Отправить ревью
                 </Button>
               </div>
@@ -236,7 +235,7 @@ export default function LawyerDocumentsPanel() {
       >
         {detailDrawer.record && (
           <>
-            <div style={{ background: "linear-gradient(135deg, #0F2A44, #1a4070)", padding: "24px 28px" }}>
+            <div style={{ background: "#1a2744", padding: "24px 28px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                 <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <FileText size={20} color="#fff" />
@@ -297,7 +296,7 @@ export default function LawyerDocumentsPanel() {
 
               <Divider style={{ margin: "20px 0" }} />
               <Button icon={<MessageSquare size={14} />} onClick={() => { closeDetail(); openReview(detailDrawer.record!.id); }}
-                style={{ width: "100%", borderRadius: 10, borderColor: "#0F2A44", color: "#0F2A44", fontWeight: 600, height: 40 }}>
+                style={{ width: "100%", borderRadius: 10, borderColor: "#1a2744", color: "#1a2744", fontWeight: 600, height: 40 }}>
                 Добавить ревью
               </Button>
             </div>

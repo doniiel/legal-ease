@@ -1,4 +1,3 @@
-import { Spin } from "antd";
 import { useIsMobile } from "../../../shared/hooks/use-is-mobile";
 import {
   Users,
@@ -19,87 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useGetSystemMetricsQuery } from "../../../features/admin/api/admin-metrics-api";
 import { useGetAuditLogsQuery, type AuditLog } from "../../../features/admin/api/admin-audit-api";
 import { ROUTES } from "../../../app/router/router";
-
-// ─── Stat card (left-border style as in mockup) ───────────────
-function StatCard({
-  label,
-  value,
-  color,
-  icon,
-  note,
-  onClick,
-  loading,
-}: {
-  label: string;
-  value: number | undefined;
-  color: string;
-  icon: React.ReactNode;
-  note?: string;
-  onClick?: () => void;
-  loading?: boolean;
-}) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        background: "#fff",
-        borderRadius: 12,
-        padding: "24px",
-        flex: 1,
-        borderLeft: `4px solid ${color}`,
-        boxShadow: "0 8px 32px rgba(11,28,48,0.04)",
-        height: 144,
-        cursor: onClick ? "pointer" : "default",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        transition: "box-shadow 0.2s",
-      }}
-      onMouseEnter={(e) => {
-        if (onClick) (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 24px rgba(11,28,48,0.1)";
-      }}
-      onMouseLeave={(e) => {
-        if (onClick) (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 32px rgba(11,28,48,0.04)";
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <span
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: "#7790bd",
-          }}
-        >
-          {label}
-        </span>
-        <span style={{ color: `${color}25`, display: "flex" }}>{icon}</span>
-      </div>
-      {loading ? (
-        <Spin size="small" />
-      ) : (
-        <div
-          style={{
-            fontSize: 32,
-            fontWeight: 800,
-            color,
-            lineHeight: 1,
-            fontFamily: "Manrope, sans-serif",
-            display: "flex",
-            alignItems: "baseline",
-            gap: 8,
-          }}
-        >
-          {value ?? 0}
-          {note && (
-            <span style={{ fontSize: 12, fontWeight: 500, color: "#94a3b8" }}>{note}</span>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+import SharedStatCard from "../../../shared/ui/StatCard";
 
 // ─── Quick access bento card (matching mockup) ────────────────
 function QuickCard({
@@ -131,7 +50,7 @@ function QuickCard({
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLDivElement;
         el.style.background = "#dce9ff";
-        el.style.borderBottomColor = "#0F2A44";
+        el.style.borderBottomColor = "#1a2744";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLDivElement;
@@ -161,7 +80,7 @@ function QuickCard({
         style={{
           fontSize: 18,
           fontWeight: 700,
-          color: "#0F2A44",
+          color: "#1a2744",
           marginBottom: 12,
           fontFamily: "Manrope, sans-serif",
         }}
@@ -190,7 +109,7 @@ function QuickCard({
           alignItems: "center",
           justifyContent: "space-between",
           width: "100%",
-          background: "#0F2A44",
+          background: "#1a2744",
           color: "#fff",
           padding: "12px 20px",
           borderRadius: 8,
@@ -269,68 +188,16 @@ export default function AdminDashboardPanel() {
   const { data: auditData } = useGetAuditLogsQuery({ page: 0, size: 5, sort: "createdDate,DESC" });
   const recentLogs = auditData?.content ?? [];
 
-  const now = new Date();
-  const lastUpdated = `Сегодня, ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-
   return (
     <div>
-      {/* ── Editorial Hero Section ── */}
-      <section
-        style={{
-          position: "relative",
-          display: "flex",
-          alignItems: "flex-end",
-          padding: "40px 40px 48px",
-          overflow: "hidden",
-        }}
-      >
-        {/* Gradient background */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)",
-          }}
-        />
-
-        {/* Content */}
-        <div style={{ position: "relative", zIndex: 1, width: "100%", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <div>
-            <h1
-              style={{
-                fontSize: 40,
-                fontWeight: 800,
-                color: "#fff",
-                margin: "0 0 8px",
-                fontFamily: "Manrope, sans-serif",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Дашборд
-            </h1>
-            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0, maxWidth: 480 }}>
-              Обзор ключевых показателей юридической системы LegalEase. Добро пожаловать в центр управления.
-            </p>
-          </div>
-
-          <div
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              backdropFilter: "blur(8px)",
-              padding: "10px 20px",
-              borderRadius: 10,
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#fff",
-              fontSize: 13,
-              textAlign: "right",
-            }}
-          >
-            <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", opacity: 0.6, fontWeight: 700, marginBottom: 4 }}>
-              Последнее обновление
-            </div>
-            <div style={{ fontFamily: "monospace" }}>{lastUpdated}</div>
-          </div>
-        </div>
+      {/* ── Hero ── */}
+      <section style={{ background: "#1a2744", padding: "40px 40px 48px" }}>
+        <h1 style={{ fontSize: 40, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+          Дашборд
+        </h1>
+        <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0, maxWidth: 480 }}>
+          Обзор ключевых показателей юридической системы LegalEase. Добро пожаловать в центр управления.
+        </p>
       </section>
 
       {/* ── Stats + Rest of content ── */}
@@ -338,37 +205,17 @@ export default function AdminDashboardPanel() {
 
         {/* Row 1: 4 main stats */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 12 : 24, marginBottom: isMobile ? 12 : 24 }}>
-          <StatCard label="Всего пользователей" value={metrics?.totalUsers} color="#0F2A44" icon={<Users size={28} />} loading={isLoading} />
-          <StatCard label="Юристов" value={metrics?.totalLawyers} color="#1677ff" icon={<Scale size={28} />} loading={isLoading} />
-          <StatCard label="Документов" value={metrics?.totalDocuments} color="#7c3aed" icon={<FileText size={28} />} loading={isLoading} />
-          <StatCard label="Шаблонов" value={metrics?.totalTemplates} color="#059669" icon={<FileCode size={28} />} loading={isLoading} />
+          <SharedStatCard label="Всего пользователей" value={metrics?.totalUsers} icon={<Users size={22} />} loading={isLoading} />
+          <SharedStatCard label="Юристов" value={metrics?.totalLawyers} icon={<Scale size={22} />} loading={isLoading} />
+          <SharedStatCard label="Документов" value={metrics?.totalDocuments} icon={<FileText size={22} />} loading={isLoading} />
+          <SharedStatCard label="Шаблонов" value={metrics?.totalTemplates} icon={<FileCode size={22} />} loading={isLoading} />
         </div>
 
         {/* Row 2: 3 action stats */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(1, 1fr)" : "repeat(3, 1fr)", gap: isMobile ? 12 : 24, marginBottom: isMobile ? 24 : 40 }}>
-          <StatCard
-            label="Ожидают заявки"
-            value={metrics?.pendingLawyerApplications}
-            color="#f59e0b"
-            icon={<ClipboardList size={28} />}
-            loading={isLoading}
-            onClick={() => navigate(ROUTES.ADMIN_APPLICATIONS)}
-          />
-          <StatCard
-            label="Документов за месяц"
-            value={metrics?.documentsThisMonth}
-            color="#ef4444"
-            icon={<TrendingUp size={28} />}
-            note="в этом месяце"
-            loading={isLoading}
-          />
-          <StatCard
-            label="Активных пользователей"
-            value={metrics?.activeUsers}
-            color="#059669"
-            icon={<Activity size={28} />}
-            loading={isLoading}
-          />
+          <SharedStatCard label="Ожидают заявки" value={metrics?.pendingLawyerApplications} icon={<ClipboardList size={22} />} loading={isLoading} />
+          <SharedStatCard label="Документов за месяц" value={metrics?.documentsThisMonth} icon={<TrendingUp size={22} />} loading={isLoading} />
+          <SharedStatCard label="Активных пользователей" value={metrics?.activeUsers} icon={<Activity size={22} />} loading={isLoading} />
         </div>
 
         {/* Quick Access Bento */}
@@ -376,19 +223,19 @@ export default function AdminDashboardPanel() {
           <QuickCard
             title="Управление заявками"
             desc="Просмотр и модерация новых запросов от пользователей. Требует внимания."
-            icon={<ClipboardList size={28} color="#0F2A44" />}
+            icon={<ClipboardList size={28} color="#1a2744" />}
             route={ROUTES.ADMIN_APPLICATIONS}
           />
           <QuickCard
             title="Пользователи"
             desc="Администрирование профилей, ролей и прав доступа для юристов и клиентов системы."
-            icon={<Users size={28} color="#0F2A44" />}
+            icon={<Users size={28} color="#1a2744" />}
             route={ROUTES.ADMIN_USERS}
           />
           <QuickCard
             title="Категории"
             desc="Настройка структуры разделов права и классификация юридических документов."
-            icon={<FileCode size={28} color="#0F2A44" />}
+            icon={<FileCode size={28} color="#1a2744" />}
             route={ROUTES.ADMIN_CATEGORIES}
           />
         </div>
@@ -400,7 +247,7 @@ export default function AdminDashboardPanel() {
               style={{
                 fontSize: 24,
                 fontWeight: 700,
-                color: "#0F2A44",
+                color: "#1a2744",
                 margin: 0,
                 fontFamily: "Manrope, sans-serif",
                 letterSpacing: "-0.01em",
@@ -413,7 +260,7 @@ export default function AdminDashboardPanel() {
               style={{
                 background: "none",
                 border: "none",
-                color: "#0F2A44",
+                color: "#1a2744",
                 fontWeight: 700,
                 fontSize: 13,
                 cursor: "pointer",

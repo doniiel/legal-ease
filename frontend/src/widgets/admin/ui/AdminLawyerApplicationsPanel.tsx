@@ -89,7 +89,7 @@ function DeleteModal({
 function getInitials(fio: string) {
   return fio.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 }
-const AVATAR_COLORS = ["#0F2A44", "#1d4ed8", "#7c3aed", "#b45309", "#0369a1"];
+const AVATAR_COLORS = ["#1a2744", "#1d4ed8", "#7c3aed", "#b45309", "#0369a1"];
 const fmtDate = (v: string) => new Date(v).toLocaleDateString("ru-KZ", { day: "2-digit", month: "short", year: "numeric" });
 
 // ─── Main panel ───────────────────────────────────────────────
@@ -166,7 +166,7 @@ export default function AdminLawyerApplicationsPanel() {
         const loading = loadingIds.includes(record.id);
         return (
           <Space size={2}>
-            <IconBtn icon={<Eye size={15} />}       tooltip="Просмотр"  hoverBg="#f1f5f9" hoverColor="#0F2A44" onClick={() => setDetailDrawer({ open: true, record })} />
+            <IconBtn icon={<Eye size={15} />}       tooltip="Просмотр"  hoverBg="#f1f5f9" hoverColor="#1a2744" onClick={() => setDetailDrawer({ open: true, record })} />
             {record.status === "PENDING" && <>
               <IconBtn icon={loading ? <span style={{ fontSize: 11 }}>…</span> : <UserCheck size={15} />} tooltip="Одобрить"   hoverBg="#f0fdf4" hoverColor="#059669"
                 onClick={() => handleApprove(record.id)} disabled={loading} />
@@ -183,36 +183,20 @@ export default function AdminLawyerApplicationsPanel() {
 
   return (
     <div style={{ overflowX: "hidden" }}>
-      {/* ── Full-bleed hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0F2A44 0%, #1a4070 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "50%", height: "100%", background: "linear-gradient(to left, rgba(173,199,247,0.07), transparent)", pointerEvents: "none" }} />
-        <div style={{ padding: isMobile ? "24px 16px 40px" : "40px 40px 56px", display: "flex", justifyContent: "space-between", flexDirection: isMobile ? "column" : ("row" as React.CSSProperties["flexDirection"]), alignItems: isMobile ? "flex-start" : "flex-end", position: "relative", zIndex: 1 }}>
-          <div>
-            <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
-              Заявки на статус адвоката
-            </h1>
-            <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
-              Рассмотрение, одобрение и отклонение заявок пользователей
-            </p>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", background: "rgba(255,255,255,0.05)", backdropFilter: "blur(12px)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.1)" }}>
-            <div style={{ padding: "12px 20px" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Всего</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#fff", fontFamily: "Manrope, sans-serif" }}>{stats.total}</div>
-            </div>
-            <div style={{ width: 1, height: 40, background: "rgba(255,255,255,0.1)" }} />
-            <div style={{ padding: "12px 20px", textAlign: "right" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7790bd", marginBottom: 4 }}>Ожидают</div>
-              <div style={{ fontSize: 22, fontWeight: 800, color: "#f59e0b", fontFamily: "Manrope, sans-serif" }}>{stats.pending}</div>
-            </div>
-          </div>
-        </div>
+      {/* ── Hero ── */}
+      <div style={{ background: "#1a2744", padding: isMobile ? "24px 16px 40px" : "40px 40px 56px" }}>
+        <h1 style={{ fontSize: 36, fontWeight: 800, color: "#fff", margin: "0 0 8px", fontFamily: "Manrope, sans-serif", letterSpacing: "-0.02em" }}>
+          Заявки на статус адвоката
+        </h1>
+        <p style={{ color: "rgba(186,213,255,0.75)", fontSize: 14, margin: 0 }}>
+          Рассмотрение, одобрение и отклонение заявок пользователей
+        </p>
       </div>
 
       <div style={{ padding: isMobile ? "0 16px 24px" : "0 32px 32px" }}>
         {/* ── Stat cards ── */}
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ? 12 : 20, marginTop: -28, marginBottom: 28, position: "relative", zIndex: 2 }}>
-          <StatCard label="Всего заявок"       value={stats.total}    color="#0F2A44" icon={<Users size={26} />} />
+          <StatCard label="Всего заявок"       value={stats.total}    color="#1a2744" icon={<Users size={26} />} />
           <StatCard label="На рассмотрении"    value={stats.pending}  color="#1d4ed8" icon={<Clock size={26} />} />
           <StatCard label="Одобрено"           value={stats.approved} color="#059669" icon={<ShieldCheck size={26} />} />
           <StatCard label="Отклонено"          value={stats.rejected} color="#ef4444" icon={<ShieldX size={26} />} />
@@ -297,7 +281,7 @@ export default function AdminLawyerApplicationsPanel() {
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff4ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <SlidersHorizontal size={16} color="#0F2A44" />
+              <SlidersHorizontal size={16} color="#1a2744" />
             </div>
             <span style={{ fontWeight: 700, color: "#0b1c30" }}>Расширенные фильтры</span>
           </div>
@@ -312,7 +296,7 @@ export default function AdminLawyerApplicationsPanel() {
             </Button>
             <Space>
               <Button style={{ borderRadius: 8 }} onClick={() => setFilterModalOpen(false)}>Отмена</Button>
-              <Button style={{ borderRadius: 8, background: "#0F2A44", borderColor: "#0F2A44", color: "#fff", fontWeight: 600 }} onClick={applyFilters}>
+              <Button style={{ borderRadius: 8, background: "#1a2744", borderColor: "#1a2744", color: "#fff", fontWeight: 600 }} onClick={applyFilters}>
                 Применить
               </Button>
             </Space>
@@ -392,7 +376,7 @@ export default function AdminLawyerApplicationsPanel() {
         title={
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: "#eff4ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Eye size={15} color="#0F2A44" />
+              <Eye size={15} color="#1a2744" />
             </div>
             <span style={{ fontWeight: 700, color: "#0b1c30" }}>Заявка #{detailDrawer.record?.id}</span>
           </div>
