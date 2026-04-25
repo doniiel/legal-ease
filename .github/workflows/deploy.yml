@@ -187,10 +187,15 @@ jobs:
 
           cp /opt/legalease/legal-ease/.env .env
           DB_USER=$(grep '^POSTGRES_USER=' .env | cut -d'=' -f2-)
+          DB_PASS=$(grep '^POSTGRES_PASSWORD=' .env | cut -d'=' -f2-)
 
           # Data services: start if stopped, never recreate
           docker compose -p legalease -f docker-compose.prod.yml up -d --no-recreate postgres minio
           until docker exec legalease-postgres pg_isready -U "${DB_USER:-postgres}"; do sleep 2; done
+
+          # Sync DB password to match .env (peer auth — no password required)
+          docker exec -u postgres legalease-postgres psql -U "${DB_USER:-postgres}" \
+            -c "ALTER USER \"${DB_USER:-postgres}\" WITH PASSWORD '${DB_PASS}';"
 
           # App services: always pull fresh images and recreate
           docker compose -p legalease -f docker-compose.prod.yml up -d --force-recreate --remove-orphans backend frontend nginx
