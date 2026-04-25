@@ -187,18 +187,14 @@ jobs:
 
           cp /opt/legalease/legal-ease/.env .env
 
-          # Extract only what's needed from .env (avoids sourcing the whole file)
-          DB_USER=$(grep '^POSTGRES_USER=' .env | cut -d'=' -f2)
-          DB_PASS=$(grep '^POSTGRES_PASSWORD=' .env | cut -d'=' -f2)
+          DB_USER=$(grep '^POSTGRES_USER=' .env | cut -d'=' -f2-)
 
-          docker rm -f legalease-nginx legalease-frontend legalease-backend legalease-minio legalease-postgres 2>/dev/null || true
+          # Remove only app containers — never touch postgres/minio
+          docker rm -f legalease-nginx legalease-frontend legalease-backend || true
 
-          docker compose -p legalease -f docker-compose.prod.yml up -d postgres minio
+          # --no-recreate: keep postgres/minio running as-is, start them only if stopped
+          docker compose -p legalease -f docker-compose.prod.yml up -d --no-recreate postgres minio
           until docker exec legalease-postgres pg_isready -U "${DB_USER:-postgres}"; do sleep 2; done
-
-          # Sync DB password to match .env — safe to run every deploy
-          docker exec -u postgres legalease-postgres psql -U "${DB_USER:-postgres}" \
-            -c "ALTER USER \"${DB_USER:-postgres}\" WITH PASSWORD '${DB_PASS}';"
 
           docker compose -p legalease -f docker-compose.prod.yml up -d --remove-orphans
           docker image prune -f
