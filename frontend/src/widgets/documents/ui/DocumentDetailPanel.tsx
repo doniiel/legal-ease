@@ -779,6 +779,9 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                               {isMissing && <Tooltip title="Обязательное поле не заполнено"><AlertTriangle size={12} color="#f59e0b" /></Tooltip>}
                             </span>
                           }
+                          {...(field.fieldType === "DATE" ? {
+                            getValueProps: (v) => ({ value: v ? (dayjs.isDayjs(v) ? v : dayjs(v)) : undefined }),
+                          } : {})}
                         >
                           {field.fieldType === "DATE" ? (
                             <DatePicker
