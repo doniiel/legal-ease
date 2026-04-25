@@ -52,7 +52,7 @@ export const PAGES = [
   { path: `${ROUTES.DOCUMENTS}/:id`, element: auth(<DocumentDetail />) },
   { path: ROUTES.PROFILE,   element: auth(<Profile />) },
   { path: ROUTES.SETTINGS,  element: auth(<Settings />) },
-  { path: ROUTES.MATCHING,  element: auth(<Matching />) },
+  { path: ROUTES.MATCHING,  element: auth(<Matching />, ["USER", "ADMIN"]) },
 
   // ── USER only ──
   { path: ROUTES.LAWYER_APPLICATION, element: auth(<LawyerApplication />, ["USER"]) },
