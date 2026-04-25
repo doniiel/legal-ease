@@ -127,7 +127,7 @@ export interface PresignedUrlResponse {
 }
 
 export interface DocumentShareResponse {
-  shareToken: string;
+  token: string;
   shareUrl: string;
   expiresAt: string;
 }

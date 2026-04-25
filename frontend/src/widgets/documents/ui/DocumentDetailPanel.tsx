@@ -620,7 +620,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
   const handleShare = async () => {
     try {
       const result = await shareDocument(documentId).unwrap();
-      const url = `${window.location.origin}/api/public/share/${result.shareToken}`;
+      const url = `${window.location.origin}/api/public/share/${result.token}`;
       setShareUrl(url);
     } catch { message.error("Не удалось создать ссылку для шаринга"); }
   };
