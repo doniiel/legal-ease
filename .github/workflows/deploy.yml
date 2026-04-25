@@ -179,13 +179,13 @@ jobs:
           docker pull ${{ env.IMAGE_FRONTEND }}:latest
 
       - name: Deploy with docker compose
-        working-directory: /opt/legalease/legal-ease
         run: |
           set -e
 
           export BACKEND_IMAGE=${{ env.IMAGE_BACKEND }}:latest
           export FRONTEND_IMAGE=${{ env.IMAGE_FRONTEND }}:latest
 
+          cp /opt/legalease/legal-ease/.env .env
           DB_USER=$(grep '^POSTGRES_USER=' .env | cut -d'=' -f2-)
 
           # Data services: start if stopped, never recreate
