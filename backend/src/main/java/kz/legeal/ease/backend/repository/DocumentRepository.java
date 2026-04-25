@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface DocumentRepository extends JpaRepository<Document, Long> {
@@ -45,4 +46,7 @@ public interface DocumentRepository extends JpaRepository<Document, Long> {
     long countByStatus(DocumentStatus status);
 
     long countByDeleted(boolean deleted);
+
+    @Query("SELECT COUNT(d) FROM Document d WHERE d.deleted = false AND d.createdDate >= :start AND d.createdDate < :end")
+    long countCreatedBetween(LocalDateTime start, LocalDateTime end);
 }

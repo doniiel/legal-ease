@@ -21,4 +21,6 @@ public interface LawyerApplicationRepository extends JpaRepository<LawyerApplica
     Optional<LawyerApplication> findTopByUserOrderByCreatedDateDesc(User user);
 
     Optional<LawyerApplication> findTopByUserAndStatusInOrderByCreatedDateDesc(User user, List<Status> statuses);
+
+    long countByStatus(Status status);
 }
