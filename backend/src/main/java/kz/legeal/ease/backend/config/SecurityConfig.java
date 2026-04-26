@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/open-api/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         // ── All other requests require a valid JWT ──────────────────
                         .anyRequest().authenticated()
                 )

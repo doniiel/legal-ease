@@ -194,8 +194,10 @@ jobs:
           until docker exec legalease-postgres pg_isready -U "${DB_USER:-postgres}"; do sleep 2; done
 
           # Sync DB password to match .env (peer auth — no password required)
-          docker exec -u postgres legalease-postgres psql -U "${DB_USER:-postgres}" \
-            -c "ALTER USER \"${DB_USER:-postgres}\" WITH PASSWORD '${DB_PASS}';"
+          docker exec -u postgres legalease-postgres psql -U "${DB_USER:-postgres}" -c "
+            SET password_encryption = 'scram-sha-256';
+            ALTER USER \"${DB_USER:-postgres}\" WITH PASSWORD '${DB_PASS}';
+          "
 
           # App services: always pull fresh images and recreate
           docker compose -p legalease -f docker-compose.prod.yml up -d --force-recreate --remove-orphans backend frontend nginx
