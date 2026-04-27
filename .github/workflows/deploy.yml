@@ -193,14 +193,21 @@ jobs:
           docker compose -p legalease -f docker-compose.prod.yml up -d --no-recreate postgres minio
           until docker exec legalease-postgres pg_isready -U "${DB_USER:-postgres}"; do sleep 2; done
 
-          # Sync DB password to match .env (peer auth — no password required)
+          # Ensure pg_hba.conf uses md5 (avoids scram-sha-256/md5 hash mismatch)
+          docker exec legalease-postgres bash -c \
+            "sed -i 's/scram-sha-256/md5/g' /var/lib/postgresql/data/pgdata/pg_hba.conf"
+
+          # Sync DB password to match .env in md5 format (peer auth — no password required)
           docker exec -u postgres legalease-postgres psql -U "${DB_USER:-postgres}" -c "
-            SET password_encryption = 'scram-sha-256';
+            SET password_encryption = 'md5';
             ALTER USER \"${DB_USER:-postgres}\" WITH PASSWORD '${DB_PASS}';
           "
 
-          # App services: always pull fresh images and recreate
-          docker compose -p legalease -f docker-compose.prod.yml up -d --force-recreate --remove-orphans backend frontend nginx
+          # Reload postgres config without restart
+          docker exec legalease-postgres psql -U "${DB_USER:-postgres}" -c "SELECT pg_reload_conf();"
+
+          # App services: always pull fresh images and recreate (--no-deps = never touch postgres/minio)
+          docker compose -p legalease -f docker-compose.prod.yml up -d --force-recreate --no-deps backend frontend nginx
 
           docker image prune -f
 
