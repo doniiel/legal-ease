@@ -71,4 +71,7 @@ export const PAGES = [
   { path: ROUTES.LAWYER_RULE_MANAGER,   element: auth(<LawyerRuleManager />,  ["LAWYER"]) },
   { path: ROUTES.LAWYER_DOCUMENTS,      element: auth(<LawyerDocuments />,    ["LAWYER"]) },
   { path: ROUTES.LAWYER_CLAUSES,        element: auth(<LawyerClauses />,      ["LAWYER"]) },
+
+  // ── 404 fallback ──
+  { path: "*", element: <Navigate to={ROUTES.HOME} replace /> },
 ];
