@@ -764,7 +764,6 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                   </Divider>
                   <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 0 : "0 24px" }}>
                     {templateFields.map(field => {
-                      const isMissing = doc.missingRequiredFields?.includes(field.fieldKey);
                       return (
                         <Form.Item
                           key={field.fieldKey}
@@ -772,11 +771,10 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                           rules={field.required ? [{ required: true, message: `Заполните "${field.label}"` }] : undefined}
                           label={
                             <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: isMissing ? "#f59e0b" : "#94a3b8" }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#94a3b8" }}>
                                 {field.label || field.fieldKey}
                               </span>
                               {field.required && <span style={{ color: "#ef4444", fontSize: 11 }}>*</span>}
-                              {isMissing && <Tooltip title="Обязательное поле не заполнено"><AlertTriangle size={12} color="#f59e0b" /></Tooltip>}
                             </span>
                           }
                           {...(field.fieldType === "DATE" ? {
@@ -787,7 +785,7 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                             <DatePicker
                               disabled={!isDraft}
                               format="YYYY-MM-DD"
-                              style={{ width: "100%", borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                              style={{ width: "100%", borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
                             />
                           ) : (field.fieldKey.toLowerCase().includes("iin") || field.label?.toLowerCase().includes("иин")) ? (
                             <Input
@@ -795,20 +793,20 @@ export default function DocumentDetailPanel({ documentId }: Props) {
                               maxLength={12}
                               onKeyPress={e => { if (!/[0-9]/.test(e.key)) e.preventDefault(); }}
                               placeholder="12 цифр"
-                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
                             />
                           ) : (field.fieldKey.toLowerCase().includes("bin") || field.label?.toLowerCase().includes("бин")) ? (
                             <Input
                               disabled={!isDraft}
                               maxLength={16}
                               placeholder="До 16 символов"
-                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
                             />
                           ) : (
                             <Input
                               disabled={!isDraft}
                               type={field.fieldType === "NUMBER" ? "number" : "text"}
-                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isMissing ? "1px solid #f59e0b" : isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
+                              style={{ borderRadius: 10, height: 40, background: isDraft ? "#fff" : "#f8fafc", border: isDraft ? "1px solid #d1d5db" : "1px solid #f1f5f9" }}
                             />
                           )}
                         </Form.Item>
